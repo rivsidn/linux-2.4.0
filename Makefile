@@ -41,6 +41,7 @@ MODFLAGS	= -DMODULE
 CFLAGS_KERNEL	=
 PERL		= perl
 
+# 导出变量到子makefile中
 export	VERSION PATCHLEVEL SUBLEVEL EXTRAVERSION KERNELRELEASE ARCH \
 	CONFIG_SHELL TOPDIR HPATH HOSTCC HOSTCFLAGS CROSS_COMPILE AS LD CC \
 	CPP AR NM STRIP OBJCOPY OBJDUMP MAKE MAKEFILES GENKSYMS MODFLAGS PERL
@@ -50,6 +51,8 @@ all:	do-it-all
 #
 # Make "config" the default target if there is no configuration file or
 # "depend" the target if there is no top-level dependency information.
+# 
+# 当.config 或 .depend 不存在时，先创建，然后在以Version，vmlinux为目标
 #
 
 ifeq (.config,$(wildcard .config))
@@ -244,6 +247,7 @@ Version: dummy
 boot: vmlinux
 	@$(MAKE) CFLAGS="$(CFLAGS) $(CFLAGS_KERNEL)" -C arch/$(ARCH)/boot
 
+# 生成vmlinux文件
 vmlinux: $(CONFIGURATION) init/main.o init/version.o linuxsubdirs
 	$(LD) $(LINKFLAGS) $(HEAD) init/main.o init/version.o \
 		--start-group \
@@ -273,6 +277,7 @@ menuconfig: include/linux/version.h symlinks
 	$(MAKE) -C scripts/lxdialog all
 	$(CONFIG_SHELL) scripts/Menuconfig arch/$(ARCH)/config.in
 
+# 创建配置文件
 config: symlinks
 	$(CONFIG_SHELL) scripts/Configure arch/$(ARCH)/config.in
 
