@@ -59,7 +59,7 @@ _start:
 #if 0 /* hook for debugger, harmless unless BIOS is fussy (old HP) */
 	int	$0x3
 #endif
-
+	# 将自身移动到INITSEG 位置，跳转到go 执行
 	movw	$BOOTSEG, %ax
 	movw	%ax, %ds
 	movw	$INITSEG, %ax
@@ -85,6 +85,7 @@ go:	movw	$0x4000-12, %di		# 0x4000 is an arbitrary value >=
 	movw	%ax, %ds		# ax and es already contain INITSEG
 	movw	%ax, %ss
 	movw	%di, %sp		# put stack at INITSEG:0x4000-12.
+					# 设置栈指针为 INITSEG:0X4000-12.
 
 # Many BIOS's default disk parameter tables will not recognize
 # multi-sector reads beyond the maximum sector number specified
@@ -112,7 +113,7 @@ go:	movw	$0x4000-12, %di		# 0x4000 is an arbitrary value >=
 	popw	%di
 	popw	%ds
 	movb	$36, 0x4(%di)		# patch sector count
-	movw	%di, %fs:(%bx)
+	movw	%di, %fs:(%bx)		# 将es:di 存到fs:bx 中
 	movw	%es, %fs:2(%bx)
 
 # Load the setup-sectors directly after the bootblock.
@@ -146,6 +147,7 @@ ok_load_setup:
 # can be read, 15 if sector 15 can be read.  Otherwise guess 9.
 
 	movw	$disksizes, %si		# table of sizes to try
+# TODO: next...
 probe_loop:
 	lodsb
 	cbtw				# extend to word

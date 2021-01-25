@@ -36,6 +36,7 @@ head.o: head.S
 misc.o: misc.c
 	$(CC) $(CFLAGS) -c misc.c
 
+# 此处用到了最上层的vmlinux
 piggy.o:	$(SYSTEM)
 	tmppiggy=_tmp_$$$$piggy; \
 	rm -f $$tmppiggy $$tmppiggy.gz $$tmppiggy.lnk; \

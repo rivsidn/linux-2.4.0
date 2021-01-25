@@ -16,6 +16,8 @@ zImage: $(CONFIGURE) bootsect setup compressed/vmlinux tools/build
 	$(OBJCOPY) compressed/vmlinux compressed/vmlinux.out
 	tools/build bootsect setup compressed/vmlinux.out $(ROOT_DEV) > zImage
 
+# 通过build 程序生成bzImage，bzImage 此处的 b 是big的意思
+# TODO: $(CONFIGURE) 什么地方定义的？
 bzImage: $(CONFIGURE) bbootsect bsetup compressed/bvmlinux tools/build
 	$(OBJCOPY) compressed/bvmlinux compressed/bvmlinux.out
 	tools/build -b bbootsect bsetup compressed/bvmlinux.out $(ROOT_DEV) > bzImage
@@ -26,6 +28,7 @@ compressed/vmlinux: $(TOPDIR)/vmlinux
 compressed/bvmlinux: $(TOPDIR)/vmlinux
 	@$(MAKE) -C compressed bvmlinux
 
+# boot 镜像写到 /dev/fd0
 zdisk: $(BOOTIMAGE)
 	dd bs=8192 if=$(BOOTIMAGE) of=/dev/fd0
 
@@ -36,6 +39,7 @@ zlilo: $(CONFIGURE) $(BOOTIMAGE)
 	cp $(TOPDIR)/System.map $(INSTALL_PATH)/
 	if [ -x /sbin/lilo ]; then /sbin/lilo; else /etc/lilo/install; fi
 
+# TODO: 此处的$(INSTALL_PATH) 为什么要加引号
 install: $(CONFIGURE) $(BOOTIMAGE)
 	sh -x ./install.sh $(KERNELRELEASE) $(BOOTIMAGE) $(TOPDIR)/System.map "$(INSTALL_PATH)"
 
@@ -48,6 +52,7 @@ bootsect: bootsect.o
 bootsect.o: bootsect.s
 	$(AS) -o $@ $<
 
+# CPP = gcc -E
 bootsect.s: bootsect.S Makefile $(BOOT_INCL)
 	$(CPP) $(CPPFLAGS) -traditional $(SVGA_MODE) $(RAMDISK) $< -o $@
 

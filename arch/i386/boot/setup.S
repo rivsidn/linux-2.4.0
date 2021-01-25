@@ -5,6 +5,9 @@
  * and putting them into the appropriate places in system memory.
  * both setup.s and system has been loaded by the bootblock.
  *
+ * setup.s 通过BIOS获取系统参数，并将他们放到内存中的恰当位置，setup.s
+ * 和system 都已经通过bootblock 加载到内存中了.
+ *
  * This code asks the bios for memory/disk/other parameters, and
  * puts them in a "safe" place: 0x90000-0x901FF, ie where the
  * boot-block used to be. It is then up to the protected mode
@@ -744,6 +747,10 @@ default_switch:
 # bootsect loader _and_ have a bzImage to load.
 # Because there is no place left in the 512 bytes of the boot sector,
 # we must emigrate to code space here.
+#
+# TODO: 除了bootsec loader还有什么？
+# 当我们用bootsec 加载 bzImage 时候会调用该程序.
+# 由于512字节的boot段当前没有剩余空间了，所以我们将这部分代码移到此处.
 bootsect_helper:
 	cmpw	$0, %cs:bootsect_es
 	jnz	bootsect_second
