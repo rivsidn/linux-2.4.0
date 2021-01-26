@@ -290,7 +290,7 @@ loader_ok:
 # returns 0-64m
 # 尝试三种不同的内存探测机制.
 # 首先尝试 e820h 整合成一个内存映射表，然后尝试e801h，返回一个32字节的地址
-# 大小，最后88h，返回0-64m(???).
+# 大小，最后88h，返回0-64M.
 
 # method E820H:
 # the memory map from hell.  e820h returns memory classified into
@@ -714,7 +714,7 @@ a20_wait:
 flush_instr:
 	xorw	%bx, %bx			# Flag to indicate a boot
 	xorl	%esi, %esi			# Pointer to real-mode code
-	movw	%cs, %si
+	movw	%cs, %si			# 此时cs为SETUPSEG
 	subw	$DELTA_INITSEG, %si
 	shll	$4, %esi			# Convert to 32-bit pointer
 # NOTE: For high loaded big kernels we need a
@@ -755,7 +755,6 @@ default_switch:
 # Because there is no place left in the 512 bytes of the boot sector,
 # we must emigrate to code space here.
 #
-# TODO: 除了bootsec loader还有什么？
 # 当我们用bootsec 加载 bzImage 时候会调用该程序.
 # 由于512字节的boot段当前没有剩余空间了，所以我们将这部分代码移到此处.
 bootsect_helper:

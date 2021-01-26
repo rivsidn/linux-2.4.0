@@ -75,6 +75,8 @@ static void gzip_release(void **);
  */
 static unsigned char *real_mode; /* Pointer to real-mode data */
 
+//TODO: next...
+//下边这个值在 setup.S 中设置，但是没搞明白是怎么设置的？
 #define EXT_MEM_K   (*(unsigned short *)(real_mode + 0x2))
 #ifndef STANDARD_MEMORY_BIOS_CALL
 #define ALT_MEM_K   (*(unsigned long *)(real_mode + 0x1e0))
@@ -97,7 +99,9 @@ static void gzip_release(void **);
  
 static void puts(const char *);
   
+//链接程序ld生成用于表示内核代码末端的变量，可以在System.map符号表中找到.
 extern int end;
+//取end所在物理地址.
 static long free_mem_ptr = (long)&end;
 static long free_mem_end_ptr;
 
@@ -344,6 +348,8 @@ void close_output_buffer_if_we_run_high(struct moveparams *mv)
 
 
 //内核解压
+//参数一: 输出参数
+//参数二: 输入参数，在setup.S 中设置
 int decompress_kernel(struct moveparams *mv, void *rmode)
 {
 	real_mode = rmode;
@@ -359,6 +365,7 @@ int decompress_kernel(struct moveparams *mv, void *rmode)
 	lines = SCREEN_INFO.orig_video_lines;
 	cols = SCREEN_INFO.orig_video_cols;
 
+	//通过free_mem_ptr 可以判断内核加载的位置
 	if (free_mem_ptr < 0x100000) setup_normal_output_buffer();
 	else setup_output_buffer_if_we_run_high(mv);
 

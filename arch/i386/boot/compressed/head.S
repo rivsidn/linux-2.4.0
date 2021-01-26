@@ -62,8 +62,6 @@ startup_32:
 	popfl
 /*
  * Clear BSS
- *
- * TODO: next...
  */
 	xorl %eax,%eax
 	movl $ SYMBOL_NAME(_edata),%edi
@@ -74,8 +72,6 @@ startup_32:
 	stosb
 /*
  * Do the decompression, and jump to the new kernel..
- *
- * 调用内核解压，跳转到新内核位置..
  */
 	subl $16,%esp	# place for structure on the stack
 	movl %esp,%eax

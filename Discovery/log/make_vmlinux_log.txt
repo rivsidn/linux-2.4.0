@@ -1,0 +1,775 @@
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686   -c -o init/main.o init/main.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686  -DUTS_MACHINE='"i386"' -c -o init/version.o init/version.c
+make CFLAGS="-D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686 " -C  kernel
+make[1]: Entering directory `/home/rivsidn/linux/kernel'
+make all_targets
+make[2]: Entering directory `/home/rivsidn/linux/kernel'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -fno-omit-frame-pointer -c -o sched.o sched.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dma.o dma.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o fork.o fork.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o exec_domain.o exec_domain.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o panic.o panic.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o printk.o printk.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o module.o module.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o exit.o exit.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o itimer.o itimer.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o info.o info.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o time.o time.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o softirq.o softirq.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o resource.o resource.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sysctl.o sysctl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o acct.o acct.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o capability.o capability.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ptrace.o ptrace.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o timer.o timer.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o user.o user.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c signal.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c sys.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c kmod.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c context.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o uid16.o uid16.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c ksyms.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c pm.c
+rm -f kernel.o
+ld -m elf_i386  -r -o kernel.o sched.o dma.o fork.o exec_domain.o panic.o printk.o module.o exit.o itimer.o info.o time.o softirq.o resource.o sysctl.o acct.o capability.o ptrace.o timer.o user.o signal.o sys.o kmod.o context.o uid16.o ksyms.o pm.o
+make[2]: Leaving directory `/home/rivsidn/linux/kernel'
+make[1]: Leaving directory `/home/rivsidn/linux/kernel'
+make CFLAGS="-D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686 " -C  drivers
+make[1]: Entering directory `/home/rivsidn/linux/drivers'
+make -C block
+make[2]: Entering directory `/home/rivsidn/linux/drivers/block'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/block'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c ll_rw_blk.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c blkpg.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o genhd.o genhd.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o elevator.o elevator.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o floppy.o floppy.c
+rm -f block.o
+ld -m elf_i386  -r -o block.o ll_rw_blk.o blkpg.o genhd.o elevator.o floppy.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/block'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/block'
+make -C cdrom
+make[2]: Entering directory `/home/rivsidn/linux/drivers/cdrom'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/cdrom'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c cdrom.c
+rm -f driver.o
+ld -m elf_i386  -r -o driver.o cdrom.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/cdrom'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/cdrom'
+make -C char
+make[2]: Entering directory `/home/rivsidn/linux/drivers/char'
+make -C drm
+make[3]: Entering directory `/home/rivsidn/linux/drivers/char/drm'
+make all_targets
+make[4]: Entering directory `/home/rivsidn/linux/drivers/char/drm'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c tdfx_drv.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o tdfx_context.o tdfx_context.c
+ld -m elf_i386 -r -o tdfx.o tdfx_drv.o                tdfx_context.o 
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o init.o init.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o memory.o memory.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o proc.o proc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o auth.o auth.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o context.o context.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o drawable.o drawable.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o bufs.o bufs.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o lists.o lists.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o lock.o lock.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ioctl.o ioctl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o fops.o fops.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o vm.o vm.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dma.o dma.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ctxbitmap.o ctxbitmap.c
+rm -f drmlib.a
+ar  rcs drmlib.a init.o memory.o proc.o auth.o context.o drawable.o bufs.o lists.o lock.o ioctl.o fops.o vm.o dma.o ctxbitmap.o
+rm -f drm.o
+ld -m elf_i386  -r -o drm.o tdfx.o drmlib.a
+make[4]: Leaving directory `/home/rivsidn/linux/drivers/char/drm'
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/char/drm'
+make -C pcmcia
+make[3]: Entering directory `/home/rivsidn/linux/drivers/char/pcmcia'
+make all_targets
+make[4]: Entering directory `/home/rivsidn/linux/drivers/char/pcmcia'
+rm -f pcmcia_char.o
+ar rcs pcmcia_char.o
+make[4]: Leaving directory `/home/rivsidn/linux/drivers/char/pcmcia'
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/char/pcmcia'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/char'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c tty_io.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o n_tty.o n_tty.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o tty_ioctl.o tty_ioctl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o mem.o mem.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o raw.o raw.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c pty.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c misc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c random.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o vt.o vt.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o vc_screen.o vc_screen.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o consolemap.o consolemap.c
+gcc -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -o conmakehash conmakehash.c
+./conmakehash cp437.uni > consolemap_deftbl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o consolemap_deftbl.o consolemap_deftbl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c console.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c selection.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c serial.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c keyboard.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o defkeymap.o defkeymap.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o pc_keyb.o pc_keyb.c
+rm -f char.o
+ld -m elf_i386  -r -o char.o tty_io.o n_tty.o tty_ioctl.o mem.o raw.o pty.o misc.o random.o vt.o vc_screen.o consolemap.o consolemap_deftbl.o console.o selection.o serial.o keyboard.o defkeymap.o pc_keyb.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/char'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/char'
+make -C ide
+make[2]: Entering directory `/home/rivsidn/linux/drivers/ide'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/ide'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c ide.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c ide-features.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o cmd640.o cmd640.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ide-pci.o ide-pci.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o rz1000.o rz1000.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ide-proc.o ide-proc.c
+ld -m elf_i386 -r -o ide-mod.o ide.o ide-features.o  cmd640.o ide-pci.o rz1000.o ide-proc.o
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ide-probe.o ide-probe.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ide-geometry.o ide-geometry.c
+ld -m elf_i386 -r -o ide-probe-mod.o ide-probe.o ide-geometry.o
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ide-disk.o ide-disk.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ide-cd.o ide-cd.c
+rm -f idedriver.o
+ld -m elf_i386  -r -o idedriver.o ide-mod.o ide-probe-mod.o ide-disk.o ide-cd.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/ide'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/ide'
+make -C media
+make[2]: Entering directory `/home/rivsidn/linux/drivers/media'
+make -C radio
+make[3]: Entering directory `/home/rivsidn/linux/drivers/media/radio'
+make all_targets
+make[4]: Entering directory `/home/rivsidn/linux/drivers/media/radio'
+rm -f radio.o
+ar rcs radio.o
+make[4]: Leaving directory `/home/rivsidn/linux/drivers/media/radio'
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/media/radio'
+make -C video
+make[3]: Entering directory `/home/rivsidn/linux/drivers/media/video'
+make all_targets
+make[4]: Entering directory `/home/rivsidn/linux/drivers/media/video'
+rm -f video.o
+ar rcs video.o
+make[4]: Leaving directory `/home/rivsidn/linux/drivers/media/video'
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/media/video'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/media'
+rm -f media.o
+ld -m elf_i386  -r -o media.o video/video.o radio/radio.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/media'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/media'
+make -C misc
+make[2]: Entering directory `/home/rivsidn/linux/drivers/misc'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/misc'
+rm -f misc.o
+ar rcs misc.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/misc'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/misc'
+make -C net
+make[2]: Entering directory `/home/rivsidn/linux/drivers/net'
+make -C pcmcia
+make[3]: Entering directory `/home/rivsidn/linux/drivers/net/pcmcia'
+make all_targets
+make[4]: Entering directory `/home/rivsidn/linux/drivers/net/pcmcia'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o pcnet_cs.o pcnet_cs.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c ray_cs.c
+rm -f pcmcia_net.o
+ld -m elf_i386  -r -o pcmcia_net.o pcnet_cs.o ray_cs.o
+make[4]: Leaving directory `/home/rivsidn/linux/drivers/net/pcmcia'
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/net/pcmcia'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/net'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o eepro100.o eepro100.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o Space.o Space.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o setup.o setup.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o net_init.o net_init.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o loopback.o loopback.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c 8390.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c auto_irq.c
+rm -f net.o
+ld -m elf_i386  -r -o net.o eepro100.o Space.o setup.o net_init.o loopback.o 8390.o auto_irq.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/net'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/net'
+make -C parport
+make[2]: Entering directory `/home/rivsidn/linux/drivers/parport'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/parport'
+rm -f driver.o
+ar rcs driver.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/parport'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/parport'
+make -C pci
+make[2]: Entering directory `/home/rivsidn/linux/drivers/pci'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/pci'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c pci.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o quirks.o quirks.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o compat.o compat.c
+gcc -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -o gen-devlist gen-devlist.c
+./gen-devlist <pci.ids
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o names.o names.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o setup-res.o setup-res.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o proc.o proc.c
+rm -f driver.o
+ld -m elf_i386  -r -o driver.o pci.o quirks.o compat.o names.o setup-res.o proc.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/pci'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/pci'
+make -C pcmcia
+make[2]: Entering directory `/home/rivsidn/linux/drivers/pcmcia'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/pcmcia'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o cistpl.o cistpl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o rsrc_mgr.o rsrc_mgr.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o bulkmem.o bulkmem.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c ds.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c cs.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o cardbus.o cardbus.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c cb_enabler.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c yenta.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c pci_socket.c
+rm -f pcmcia.o
+ld -m elf_i386  -r -o pcmcia.o cistpl.o rsrc_mgr.o bulkmem.o ds.o cs.o cardbus.o cb_enabler.o yenta.o pci_socket.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/pcmcia'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/pcmcia'
+make -C pnp
+make[2]: Entering directory `/home/rivsidn/linux/drivers/pnp'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/pnp'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c isapnp.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o quirks.o quirks.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o isapnp_proc.o isapnp_proc.c
+ld -m elf_i386  -r -o isa-pnp.o isapnp.o quirks.o isapnp_proc.o
+rm -f pnp.o
+ld -m elf_i386  -r -o pnp.o isa-pnp.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/pnp'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/pnp'
+make -C scsi
+make[2]: Entering directory `/home/rivsidn/linux/drivers/scsi'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/scsi'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsi.o scsi.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o hosts.o hosts.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsi_ioctl.o scsi_ioctl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o constants.o constants.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsicam.o scsicam.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsi_proc.o scsi_proc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsi_error.o scsi_error.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsi_obsolete.o scsi_obsolete.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsi_queue.o scsi_queue.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsi_lib.o scsi_lib.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsi_merge.o scsi_merge.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsi_dma.o scsi_dma.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scsi_scan.o scsi_scan.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c scsi_syms.c
+ld -m elf_i386 -r -o scsi_mod.o scsi.o hosts.o scsi_ioctl.o constants.o scsicam.o scsi_proc.o scsi_error.o scsi_obsolete.o scsi_queue.o scsi_lib.o scsi_merge.o scsi_dma.o scsi_scan.o scsi_syms.o
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sym53c8xx.o sym53c8xx.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sd.o sd.c
+ld -m elf_i386 -r -o sd_mod.o sd.o
+rm -f scsidrv.o
+ld -m elf_i386  -r -o scsidrv.o scsi_mod.o sym53c8xx.o sd_mod.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/scsi'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/scsi'
+make -C sound
+make[2]: Entering directory `/home/rivsidn/linux/drivers/sound'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/sound'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c sound_core.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sound_firmware.o sound_firmware.c
+ld -m elf_i386 -r -o soundcore.o sound_core.o sound_firmware.o
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o es1371.o es1371.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c ac97_codec.c
+rm -f sounddrivers.o
+ld -m elf_i386  -r -o sounddrivers.o soundcore.o es1371.o ac97_codec.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/sound'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/sound'
+make -C usb
+make[2]: Entering directory `/home/rivsidn/linux/drivers/usb'
+make -C storage
+make[3]: Entering directory `/home/rivsidn/linux/drivers/usb/storage'
+make all_targets
+make[4]: Entering directory `/home/rivsidn/linux/drivers/usb/storage'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686  -I../../scsi/  -c -o scsiglue.o scsiglue.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686  -I../../scsi/  -c -o protocol.o protocol.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686  -I../../scsi/  -c -o transport.o transport.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686  -I../../scsi/  -c -o usb.o usb.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686  -I../../scsi/  -c -o initializers.o initializers.c
+ld -m elf_i386 -r -o usb-storage.o scsiglue.o protocol.o transport.o usb.o initializers.o 
+rm -f storage.o
+ld -m elf_i386  -r -o storage.o usb-storage.o
+make[4]: Leaving directory `/home/rivsidn/linux/drivers/usb/storage'
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/usb/storage'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/usb'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c usb.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o usb-debug.o usb-debug.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o hub.o hub.c
+ld -m elf_i386 -r -o usbcore.o usb.o usb-debug.o hub.o
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o uhci.o uhci.c
+rm -f usbdrv.o
+ld -m elf_i386  -r -o usbdrv.o usbcore.o uhci.o storage/storage.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/usb'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/usb'
+make -C video
+make[2]: Entering directory `/home/rivsidn/linux/drivers/video'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/drivers/video'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o vgacon.o vgacon.c
+rm -f video.o
+ld -m elf_i386  -r -o video.o vgacon.o
+make[3]: Leaving directory `/home/rivsidn/linux/drivers/video'
+make[2]: Leaving directory `/home/rivsidn/linux/drivers/video'
+make all_targets
+make[2]: Entering directory `/home/rivsidn/linux/drivers'
+make[2]: Nothing to be done for `all_targets'.
+make[2]: Leaving directory `/home/rivsidn/linux/drivers'
+make[1]: Leaving directory `/home/rivsidn/linux/drivers'
+make CFLAGS="-D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686 " -C  mm
+make[1]: Entering directory `/home/rivsidn/linux/mm'
+make all_targets
+make[2]: Entering directory `/home/rivsidn/linux/mm'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o memory.o memory.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o mmap.o mmap.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o filemap.o filemap.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o mprotect.o mprotect.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o mlock.o mlock.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o mremap.o mremap.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o vmalloc.o vmalloc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o slab.o slab.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o bootmem.o bootmem.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o swap.o swap.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o vmscan.o vmscan.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o page_io.o page_io.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o page_alloc.o page_alloc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o swap_state.o swap_state.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o swapfile.o swapfile.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o numa.o numa.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o oom_kill.o oom_kill.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o shmem.o shmem.c
+rm -f mm.o
+ld -m elf_i386  -r -o mm.o memory.o mmap.o filemap.o mprotect.o mlock.o mremap.o vmalloc.o slab.o bootmem.o swap.o vmscan.o page_io.o page_alloc.o swap_state.o swapfile.o numa.o oom_kill.o shmem.o
+make[2]: Leaving directory `/home/rivsidn/linux/mm'
+make[1]: Leaving directory `/home/rivsidn/linux/mm'
+make CFLAGS="-D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686 " -C  fs
+make[1]: Entering directory `/home/rivsidn/linux/fs'
+make -C autofs4
+make[2]: Entering directory `/home/rivsidn/linux/fs/autofs4'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/fs/autofs4'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o init.o init.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o inode.o inode.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o root.o root.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o symlink.o symlink.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o waitq.o waitq.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o expire.o expire.c
+rm -f autofs4.o
+ld -m elf_i386  -r -o autofs4.o init.o inode.o root.o symlink.o waitq.o expire.o
+make[3]: Leaving directory `/home/rivsidn/linux/fs/autofs4'
+make[2]: Leaving directory `/home/rivsidn/linux/fs/autofs4'
+make -C devpts
+make[2]: Entering directory `/home/rivsidn/linux/fs/devpts'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/fs/devpts'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o root.o root.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o inode.o inode.c
+rm -f devpts.o
+ld -m elf_i386  -r -o devpts.o root.o inode.o
+make[3]: Leaving directory `/home/rivsidn/linux/fs/devpts'
+make[2]: Leaving directory `/home/rivsidn/linux/fs/devpts'
+make -C ext2
+make[2]: Entering directory `/home/rivsidn/linux/fs/ext2'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/fs/ext2'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o acl.o acl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o balloc.o balloc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o bitmap.o bitmap.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dir.o dir.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o file.o file.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o fsync.o fsync.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ialloc.o ialloc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o inode.o inode.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ioctl.o ioctl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o namei.o namei.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o super.o super.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o symlink.o symlink.c
+rm -f ext2.o
+ld -m elf_i386  -r -o ext2.o acl.o balloc.o bitmap.o dir.o file.o fsync.o ialloc.o inode.o ioctl.o namei.o super.o symlink.o
+make[3]: Leaving directory `/home/rivsidn/linux/fs/ext2'
+make[2]: Leaving directory `/home/rivsidn/linux/fs/ext2'
+make -C isofs
+make[2]: Entering directory `/home/rivsidn/linux/fs/isofs'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/fs/isofs'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o namei.o namei.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o inode.o inode.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dir.o dir.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o util.o util.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o rock.o rock.c
+rm -f isofs.o
+ld -m elf_i386  -r -o isofs.o namei.o inode.o dir.o util.o rock.o
+make[3]: Leaving directory `/home/rivsidn/linux/fs/isofs'
+make[2]: Leaving directory `/home/rivsidn/linux/fs/isofs'
+make -C lockd
+make[2]: Entering directory `/home/rivsidn/linux/fs/lockd'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/fs/lockd'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o clntlock.o clntlock.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o clntproc.o clntproc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o host.o host.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o svc.o svc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o svclock.o svclock.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o svcshare.o svcshare.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o svcproc.o svcproc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o svcsubs.o svcsubs.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o mon.o mon.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o xdr.o xdr.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c lockd_syms.c
+rm -f lockd.o
+ld -m elf_i386  -r -o lockd.o clntlock.o clntproc.o host.o svc.o svclock.o svcshare.o svcproc.o svcsubs.o mon.o xdr.o lockd_syms.o
+make[3]: Leaving directory `/home/rivsidn/linux/fs/lockd'
+make[2]: Leaving directory `/home/rivsidn/linux/fs/lockd'
+make -C nfs
+make[2]: Entering directory `/home/rivsidn/linux/fs/nfs'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/fs/nfs'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o inode.o inode.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o file.o file.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o read.o read.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o write.o write.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dir.o dir.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o symlink.o symlink.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o proc.o proc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o nfs2xdr.o nfs2xdr.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o flushd.o flushd.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o unlink.o unlink.c
+rm -f nfs.o
+ld -m elf_i386  -r -o nfs.o inode.o file.o read.o write.o dir.o symlink.o proc.o nfs2xdr.o flushd.o unlink.o
+make[3]: Leaving directory `/home/rivsidn/linux/fs/nfs'
+make[2]: Leaving directory `/home/rivsidn/linux/fs/nfs'
+make -C nfsd
+make[2]: Entering directory `/home/rivsidn/linux/fs/nfsd'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/fs/nfsd'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o nfssvc.o nfssvc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o nfsctl.o nfsctl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o nfsproc.o nfsproc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o nfsfh.o nfsfh.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o vfs.o vfs.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o export.o export.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o auth.o auth.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o lockd.o lockd.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o nfscache.o nfscache.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o nfsxdr.o nfsxdr.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o stats.o stats.c
+rm -f nfsd.o
+ld -m elf_i386  -r -o nfsd.o nfssvc.o nfsctl.o nfsproc.o nfsfh.o vfs.o export.o auth.o lockd.o nfscache.o nfsxdr.o stats.o
+make[3]: Leaving directory `/home/rivsidn/linux/fs/nfsd'
+make[2]: Leaving directory `/home/rivsidn/linux/fs/nfsd'
+make -C partitions
+make[2]: Entering directory `/home/rivsidn/linux/fs/partitions'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/fs/partitions'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c check.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o msdos.o msdos.c
+rm -f partitions.o
+ld -m elf_i386  -r -o partitions.o check.o msdos.o
+make[3]: Leaving directory `/home/rivsidn/linux/fs/partitions'
+make[2]: Leaving directory `/home/rivsidn/linux/fs/partitions'
+make -C proc
+make[2]: Entering directory `/home/rivsidn/linux/fs/proc'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/fs/proc'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o inode.o inode.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o root.o root.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o base.o base.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o generic.o generic.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o array.o array.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o kmsg.o kmsg.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o proc_tty.o proc_tty.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o proc_misc.o proc_misc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o kcore.o kcore.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c procfs_syms.c
+rm -f proc.o
+ld -m elf_i386  -r -o proc.o inode.o root.o base.o generic.o array.o kmsg.o proc_tty.o proc_misc.o kcore.o procfs_syms.o
+make[3]: Leaving directory `/home/rivsidn/linux/fs/proc'
+make[2]: Leaving directory `/home/rivsidn/linux/fs/proc'
+make all_targets
+make[2]: Entering directory `/home/rivsidn/linux/fs'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o open.o open.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o read_write.o read_write.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o devices.o devices.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o file_table.o file_table.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o buffer.o buffer.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o super.o super.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o block_dev.o block_dev.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o stat.o stat.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o exec.o exec.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o pipe.o pipe.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o namei.o namei.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o fcntl.o fcntl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ioctl.o ioctl.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o readdir.o readdir.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o select.o select.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o fifo.o fifo.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o locks.o locks.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dcache.o dcache.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o inode.o inode.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o attr.o attr.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o bad_inode.o bad_inode.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o file.o file.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o iobuf.o iobuf.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dnotify.o dnotify.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c filesystems.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o noquot.o noquot.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o binfmt_aout.o binfmt_aout.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o binfmt_misc.o binfmt_misc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o binfmt_script.o binfmt_script.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o binfmt_elf.o binfmt_elf.c
+rm -f fs.o
+ld -m elf_i386  -r -o fs.o open.o read_write.o devices.o file_table.o buffer.o super.o block_dev.o stat.o exec.o pipe.o namei.o fcntl.o ioctl.o readdir.o select.o fifo.o locks.o dcache.o inode.o attr.o bad_inode.o file.o iobuf.o dnotify.o filesystems.o noquot.o binfmt_aout.o binfmt_misc.o binfmt_script.o binfmt_elf.o proc/proc.o partitions/partitions.o ext2/ext2.o isofs/isofs.o nfs/nfs.o nfsd/nfsd.o lockd/lockd.o autofs4/autofs4.o devpts/devpts.o
+make[2]: Leaving directory `/home/rivsidn/linux/fs'
+make[1]: Leaving directory `/home/rivsidn/linux/fs'
+make CFLAGS="-D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686 " -C  net
+make[1]: Entering directory `/home/rivsidn/linux/net'
+make -C 802
+make[2]: Entering directory `/home/rivsidn/linux/net/802'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/net/802'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o p8023.o p8023.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sysctl_net_802.o sysctl_net_802.c
+rm -f 802.o
+ld -m elf_i386  -r -o 802.o p8023.o sysctl_net_802.o
+make[3]: Leaving directory `/home/rivsidn/linux/net/802'
+make[2]: Leaving directory `/home/rivsidn/linux/net/802'
+make -C core
+make[2]: Entering directory `/home/rivsidn/linux/net/core'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/net/core'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sock.o sock.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o skbuff.o skbuff.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o iovec.o iovec.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o datagram.o datagram.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o scm.o scm.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sysctl_net_core.o sysctl_net_core.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dev.o dev.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dev_mcast.o dev_mcast.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dst.o dst.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o neighbour.o neighbour.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o rtnetlink.o rtnetlink.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o utils.o utils.c
+rm -f core.o
+ld -m elf_i386  -r -o core.o sock.o skbuff.o iovec.o datagram.o scm.o sysctl_net_core.o dev.o dev_mcast.o dst.o neighbour.o rtnetlink.o utils.o
+make[3]: Leaving directory `/home/rivsidn/linux/net/core'
+make[2]: Leaving directory `/home/rivsidn/linux/net/core'
+make -C ethernet
+make[2]: Entering directory `/home/rivsidn/linux/net/ethernet'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/net/ethernet'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o eth.o eth.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sysctl_net_ether.o sysctl_net_ether.c
+rm -f ethernet.o
+ld -m elf_i386  -r -o ethernet.o eth.o sysctl_net_ether.o
+make[3]: Leaving directory `/home/rivsidn/linux/net/ethernet'
+make[2]: Leaving directory `/home/rivsidn/linux/net/ethernet'
+make -C ipv4
+make[2]: Entering directory `/home/rivsidn/linux/net/ipv4'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/net/ipv4'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o utils.o utils.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o route.o route.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o inetpeer.o inetpeer.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o proc.o proc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o protocol.o protocol.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ip_input.o ip_input.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ip_fragment.o ip_fragment.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ip_forward.o ip_forward.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ip_options.o ip_options.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ip_output.o ip_output.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ip_sockglue.o ip_sockglue.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o tcp.o tcp.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o tcp_input.o tcp_input.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o tcp_output.o tcp_output.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o tcp_timer.o tcp_timer.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o tcp_ipv4.o tcp_ipv4.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o tcp_minisocks.o tcp_minisocks.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o raw.o raw.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o udp.o udp.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o arp.o arp.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o icmp.o icmp.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o devinet.o devinet.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o af_inet.o af_inet.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o igmp.o igmp.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sysctl_net_ipv4.o sysctl_net_ipv4.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o fib_frontend.o fib_frontend.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o fib_semantics.o fib_semantics.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o fib_hash.o fib_hash.c
+rm -f ipv4.o
+ld -m elf_i386  -r -o ipv4.o utils.o route.o inetpeer.o proc.o protocol.o ip_input.o ip_fragment.o ip_forward.o ip_options.o ip_output.o ip_sockglue.o tcp.o tcp_input.o tcp_output.o tcp_timer.o tcp_ipv4.o tcp_minisocks.o raw.o udp.o arp.o icmp.o devinet.o af_inet.o igmp.o sysctl_net_ipv4.o fib_frontend.o fib_semantics.o fib_hash.o
+make[3]: Leaving directory `/home/rivsidn/linux/net/ipv4'
+make[2]: Leaving directory `/home/rivsidn/linux/net/ipv4'
+make -C packet
+make[2]: Entering directory `/home/rivsidn/linux/net/packet'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/net/packet'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o af_packet.o af_packet.c
+rm -f packet.o
+ld -m elf_i386  -r -o packet.o af_packet.o
+make[3]: Leaving directory `/home/rivsidn/linux/net/packet'
+make[2]: Leaving directory `/home/rivsidn/linux/net/packet'
+make -C sched
+make[2]: Entering directory `/home/rivsidn/linux/net/sched'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/net/sched'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sch_generic.o sch_generic.c
+rm -f sched.o
+ld -m elf_i386  -r -o sched.o sch_generic.o
+make[3]: Leaving directory `/home/rivsidn/linux/net/sched'
+make[2]: Leaving directory `/home/rivsidn/linux/net/sched'
+make -C sunrpc
+make[2]: Entering directory `/home/rivsidn/linux/net/sunrpc'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/net/sunrpc'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o clnt.o clnt.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o xprt.o xprt.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sched.o sched.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o auth.o auth.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o auth_null.o auth_null.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o auth_unix.o auth_unix.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o svc.o svc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o svcsock.o svcsock.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o svcauth.o svcauth.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o pmap_clnt.o pmap_clnt.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o xdr.o xdr.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c sunrpc_syms.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o stats.o stats.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sysctl.o sysctl.c
+rm -f sunrpc.o
+ld -m elf_i386  -r -o sunrpc.o clnt.o xprt.o sched.o auth.o auth_null.o auth_unix.o svc.o svcsock.o svcauth.o pmap_clnt.o xdr.o sunrpc_syms.o stats.o sysctl.o
+make[3]: Leaving directory `/home/rivsidn/linux/net/sunrpc'
+make[2]: Leaving directory `/home/rivsidn/linux/net/sunrpc'
+make -C unix
+make[2]: Entering directory `/home/rivsidn/linux/net/unix'
+make all_targets
+make[3]: Entering directory `/home/rivsidn/linux/net/unix'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o af_unix.o af_unix.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o garbage.o garbage.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sysctl_net_unix.o sysctl_net_unix.c
+rm -f unix.o
+ld -m elf_i386  -r -o unix.o af_unix.o garbage.o sysctl_net_unix.o
+make[3]: Leaving directory `/home/rivsidn/linux/net/unix'
+make[2]: Leaving directory `/home/rivsidn/linux/net/unix'
+make all_targets
+make[2]: Entering directory `/home/rivsidn/linux/net'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o socket.o socket.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c netsyms.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sysctl_net.o sysctl_net.c
+rm -f network.o
+ld -m elf_i386  -r -o network.o socket.o core/core.o ethernet/ethernet.o 802/802.o sched/sched.o ipv4/ipv4.o unix/unix.o packet/packet.o sunrpc/sunrpc.o netsyms.o sysctl_net.o
+make[2]: Leaving directory `/home/rivsidn/linux/net'
+make[1]: Leaving directory `/home/rivsidn/linux/net'
+make CFLAGS="-D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686 " -C  ipc
+make[1]: Entering directory `/home/rivsidn/linux/ipc'
+make all_targets
+make[2]: Entering directory `/home/rivsidn/linux/ipc'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o util.o util.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o msg.o msg.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sem.o sem.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o shm.o shm.c
+rm -f ipc.o
+ld -m elf_i386  -r -o ipc.o util.o msg.o sem.o shm.o
+make[2]: Leaving directory `/home/rivsidn/linux/ipc'
+make[1]: Leaving directory `/home/rivsidn/linux/ipc'
+make CFLAGS="-D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686 " -C  lib
+make[1]: Entering directory `/home/rivsidn/linux/lib'
+make all_targets
+make[2]: Entering directory `/home/rivsidn/linux/lib'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o errno.o errno.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ctype.o ctype.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o string.o string.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o vsprintf.o vsprintf.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o brlock.o brlock.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c cmdline.c
+rm -f lib.a
+ar  rcs lib.a errno.o ctype.o string.o vsprintf.o brlock.o cmdline.o
+make[2]: Leaving directory `/home/rivsidn/linux/lib'
+make[1]: Leaving directory `/home/rivsidn/linux/lib'
+make CFLAGS="-D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686 " -C  arch/i386/kernel
+make[1]: Entering directory `/home/rivsidn/linux/arch/i386/kernel'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o process.o process.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o semaphore.o semaphore.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o signal.o signal.c
+gcc -D__ASSEMBLY__ -D__KERNEL__ -I/home/rivsidn/linux/include -traditional -c entry.S -o entry.o
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o traps.o traps.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o irq.o irq.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o vm86.o vm86.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ptrace.o ptrace.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o i8259.o i8259.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ioport.o ioport.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ldt.o ldt.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o setup.o setup.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o time.o time.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o sys_i386.o sys_i386.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o pci-dma.o pci-dma.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -DEXPORT_SYMTAB -c i386_ksyms.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o i387.o i387.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o bluesmoke.o bluesmoke.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dmi_scan.o dmi_scan.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o pci-i386.o pci-i386.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o pci-pc.o pci-pc.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o pci-irq.o pci-irq.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o smp.o smp.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o smpboot.o smpboot.c
+gcc -D__ASSEMBLY__ -D__KERNEL__ -I/home/rivsidn/linux/include -traditional -c trampoline.S -o trampoline.o
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o apic.o apic.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o io_apic.o io_apic.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o mpparse.o mpparse.c
+rm -f kernel.o
+ld -m elf_i386  -r -o kernel.o process.o semaphore.o signal.o entry.o traps.o irq.o vm86.o ptrace.o i8259.o ioport.o ldt.o setup.o time.o sys_i386.o pci-dma.o i386_ksyms.o i387.o bluesmoke.o dmi_scan.o pci-i386.o pci-pc.o pci-irq.o smp.o smpboot.o trampoline.o apic.o io_apic.o mpparse.o
+gcc -D__ASSEMBLY__ -D__KERNEL__ -I/home/rivsidn/linux/include -traditional -c head.S -o head.o
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o init_task.o init_task.c
+make[1]: Leaving directory `/home/rivsidn/linux/arch/i386/kernel'
+make CFLAGS="-D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686 " -C  arch/i386/mm
+make[1]: Entering directory `/home/rivsidn/linux/arch/i386/mm'
+make all_targets
+make[2]: Entering directory `/home/rivsidn/linux/arch/i386/mm'
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o init.o init.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o fault.o fault.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o ioremap.o ioremap.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o extable.o extable.c
+rm -f mm.o
+ld -m elf_i386  -r -o mm.o init.o fault.o ioremap.o extable.o
+make[2]: Leaving directory `/home/rivsidn/linux/arch/i386/mm'
+make[1]: Leaving directory `/home/rivsidn/linux/arch/i386/mm'
+make CFLAGS="-D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686 " -C  arch/i386/lib
+make[1]: Entering directory `/home/rivsidn/linux/arch/i386/lib'
+make all_targets
+make[2]: Entering directory `/home/rivsidn/linux/arch/i386/lib'
+gcc -D__ASSEMBLY__ -D__KERNEL__ -I/home/rivsidn/linux/include -c checksum.S -o checksum.o
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o old-checksum.o old-checksum.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o delay.o delay.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o usercopy.o usercopy.c
+gcc -D__ASSEMBLY__ -D__KERNEL__ -I/home/rivsidn/linux/include -c getuser.S -o getuser.o
+gcc -D__ASSEMBLY__ -D__KERNEL__ -I/home/rivsidn/linux/include -c putuser.S -o putuser.o
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o iodebug.o iodebug.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o memcpy.o memcpy.c
+gcc -D__KERNEL__ -I/home/rivsidn/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -mpreferred-stack-boundary=2 -march=i686    -c -o dec_and_lock.o dec_and_lock.c
+rm -f lib.a
+ar  rcs lib.a checksum.o old-checksum.o delay.o usercopy.o getuser.o putuser.o iodebug.o memcpy.o dec_and_lock.o
+make[2]: Leaving directory `/home/rivsidn/linux/arch/i386/lib'
+make[1]: Leaving directory `/home/rivsidn/linux/arch/i386/lib'
+ld -m elf_i386 -T /home/rivsidn/linux/arch/i386/vmlinux.lds -e stext arch/i386/kernel/head.o arch/i386/kernel/init_task.o init/main.o init/version.o \
+	--start-group \
+	arch/i386/kernel/kernel.o arch/i386/mm/mm.o kernel/kernel.o mm/mm.o fs/fs.o ipc/ipc.o \
+	drivers/block/block.o drivers/char/char.o drivers/misc/misc.o drivers/net/net.o drivers/media/media.o  drivers/char/drm/drm.o drivers/ide/idedriver.o drivers/scsi/scsidrv.o drivers/cdrom/driver.o drivers/sound/sounddrivers.o drivers/pci/driver.o drivers/pcmcia/pcmcia.o drivers/net/pcmcia/pcmcia_net.o drivers/pnp/pnp.o drivers/video/video.o drivers/usb/usbdrv.o \
+	net/network.o \
+	/home/rivsidn/linux/arch/i386/lib/lib.a /home/rivsidn/linux/lib/lib.a /home/rivsidn/linux/arch/i386/lib/lib.a \
+	--end-group \
+	-o vmlinux
+nm vmlinux | grep -v '\(compiled\)\|\(\.o$\)\|\( [aUw] \)\|\(\.\.ng$\)\|\(LASH[RL]DI\)' | sort > System.map
