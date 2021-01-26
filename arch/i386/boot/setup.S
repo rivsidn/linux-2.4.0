@@ -254,6 +254,7 @@ no_sig:
 no_sig_loop:
 	jmp	no_sig_loop
 
+# 签名是正确的
 good_sig:
 	movw	%cs, %ax			# aka SETUPSEG
 	subw	$DELTA_INITSEG, %ax 		# aka INITSEG
@@ -277,6 +278,7 @@ loader_panic_mess: .string "Wrong loader, giving up..."
 
 loader_ok:
 # Get memory size (extended mem, kB)
+# 获取内存大小(拓展内存，kB)
 
 	xorl	%eax, %eax
 	movl	%eax, (0x1e0)
@@ -286,6 +288,9 @@ loader_ok:
 # e820h, which lets us assemble a memory map, then try e801h,
 # which returns a 32-bit memory size, and finally 88h, which
 # returns 0-64m
+# 尝试三种不同的内存探测机制.
+# 首先尝试 e820h 整合成一个内存映射表，然后尝试e801h，返回一个32字节的地址
+# 大小，最后88h，返回0-64m(???).
 
 # method E820H:
 # the memory map from hell.  e820h returns memory classified into
@@ -539,6 +544,8 @@ rmodeswtch_end:
 
 # Now we move the system to its rightful place ... but we check if we have a
 # big-kernel. In that case we *must* not move it ...
+# 现在我们将system移动到正确的位置... 
+# 但是如果发现我们有一个big-kernel，此时我们不能移动它...
 	testb	$LOADED_HIGH, %cs:loadflags
 	jz	do_move0			# .. then we have a normal low
 						# loaded zImage
@@ -888,16 +895,19 @@ delay:
 	ret
 
 # Descriptor tables
+# 描述符表
 gdt:
 	.word	0, 0, 0, 0			# dummy
 	.word	0, 0, 0, 0			# unused
-
+	
+	# 内核代码段
 	.word	0xFFFF				# 4Gb - (0x100000*0x1000 = 4Gb)
 	.word	0				# base address = 0
 	.word	0x9A00				# code read/exec
 	.word	0x00CF				# granularity = 4096, 386
 						#  (+5th nibble of limit)
 
+	# 内核数据段
 	.word	0xFFFF				# 4Gb - (0x100000*0x1000 = 4Gb)
 	.word	0				# base address = 0
 	.word	0x9200				# data read/write

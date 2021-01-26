@@ -12,10 +12,16 @@
  * the page directory. [According to comments etc elsewhere on a compressed
  * kernel it will end up at 0x1000 + 1Mb I hope so as I assume this. - AC]
  *
+ * 注意！！startup在绝对地址0x00001000处，同时也是页目录存在的位置.
+ * 启动代码会被页目录覆盖.
+ *
  * Page 0 is deliberately kept safe, since System Management Mode code in 
  * laptops may need to access the BIOS data stored there.  This is also
  * useful for future device drivers that either access the BIOS via VM86 
  * mode.
+ *
+ * 故意没用Page0，因为在笔记本中的系统管理模式代码需要访问BIOS数据并将数据存储
+ * 到该位置. 后续设备驱动可能也需要通过VM86模式访问BIOS.
  */
 
 /*
@@ -38,6 +44,7 @@ startup_32:
 	movl %eax,%gs
 
 	lss SYMBOL_NAME(stack_start),%esp
+	# 检查A20 是否使能，如果没使能则一直循环
 	xorl %eax,%eax
 1:	incl %eax		# check that A20 really IS enabled
 	movl %eax,0x000000	# loop forever if it isn't
@@ -48,11 +55,15 @@ startup_32:
  * Initialize eflags.  Some BIOS's leave bits like NT set.  This would
  * confuse the debugger if this code is traced.
  * XXX - best to initialize before switching to protected mode.
+ *
+ * 初始化eflags
  */
 	pushl $0
 	popfl
 /*
  * Clear BSS
+ *
+ * TODO: next...
  */
 	xorl %eax,%eax
 	movl $ SYMBOL_NAME(_edata),%edi

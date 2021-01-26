@@ -283,6 +283,8 @@ static void error(char *x)
 
 #define STACK_SIZE (4096)
 
+//用户程序栈(4*4kB=16kB)
+//system 是以head+vmlinux压缩程序的程序，该栈在head程序执行时调用
 long user_stack [STACK_SIZE];
 
 struct {

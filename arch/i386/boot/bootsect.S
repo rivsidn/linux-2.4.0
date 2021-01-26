@@ -147,9 +147,8 @@ ok_load_setup:
 # can be read, 15 if sector 15 can be read.  Otherwise guess 9.
 
 	movw	$disksizes, %si		# table of sizes to try
-# TODO: next...
 probe_loop:
-	lodsb
+	lodsb				# load DS:SI to AL
 	cbtw				# extend to word
 	movw	%ax, sectors
 	cmpw	$disksizes+4, %si
@@ -180,7 +179,7 @@ got_sectors:
 	movw	%ax, %es		# we want to load system (at 0x10000)
 	call	read_it
 	call	kill_motor
-	call	print_nl
+	call	print_nl		# 打印换行
 
 # After that we check which root-device to use. If the device is
 # defined (!= 0), nothing is done and the given device is used.
@@ -232,6 +231,7 @@ read_it:
 die:	jne	die			# es must be at 64kB boundary
 
 	xorw	%bx, %bx		# bx is starting address within segment
+					# bx 是段内偏移地址
 rp_read:
 #ifdef __BIG_KERNEL__
 	bootsect_kludge = 0x220		# 0x200 (size of bootsector) + 0x20 (offset
