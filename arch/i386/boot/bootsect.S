@@ -109,7 +109,7 @@ go:	movw	$0x4000-12, %di		# 0x4000 is an arbitrary value >=
 	movb	$6, %cl			# copy 12 bytes
 	pushw	%di			# di = 0x4000-12.
 	rep				# don't need cld -> done on line 66
-	movsw
+	movsw				# ds:si => es:di
 	popw	%di
 	popw	%ds
 	movb	$36, 0x4(%di)		# patch sector count
@@ -121,7 +121,7 @@ go:	movw	$0x4000-12, %di		# 0x4000 is an arbitrary value >=
 # Also, cx = 0 from rep movsw above.
 
 load_setup:
-	xorb	%ah, %ah		# reset FDC 
+	xorb	%ah, %ah		# reset FDC(软盘控制器)
 	xorb	%dl, %dl
 	int 	$0x13	
 	xorw	%dx, %dx		# drive 0, head 0
@@ -210,7 +210,7 @@ root_defined:
 # After that (everything loaded), we jump to the setup-routine
 # loaded directly after the bootblock:
 
-	ljmp	$SETUPSEG, $0
+	ljmp	$SETUPSEG, $0		# 跳转到setup程序执行
 
 # This routine loads the system at address 0x10000, making sure
 # no 64kB boundaries are crossed. We try to load it as fast as
@@ -218,8 +218,11 @@ root_defined:
 
 # es = starting address segment (normally 0x1000)
 
+# 正在读取的扇区
 sread:	.word 0				# sectors read of current track
+# 磁头
 head:	.word 0				# current head
+# 磁道
 track:	.word 0				# current track
 
 read_it:
@@ -249,16 +252,15 @@ ok1_read:
 	movw	sectors, %ax
 	subw	sread, %ax
 	movw	%ax, %cx
-	shlw	$9, %cx
-	addw	%bx, %cx
-	jnc	ok2_read
-	
-	je	ok2_read
+	shlw	$9, %cx			# cx中内容乘512
+	addw	%bx, %cx		# 判断是否会超出当前段最大访问长度
+	jnc	ok2_read		# 没进位
+	je	ok2_read		# 有进位但恰好满足条件
 
 	xorw	%ax, %ax
 	subw	%bx, %ax
-	shrw	$9, %ax
-ok2_read:
+	shrw	$9, %ax			# 读取该段能容纳的扇区数
+ok2_read:				# ax是要读取的扇区数
 	call	read_track
 	movw	%ax, %cx
 	addw	sread, %ax
@@ -285,6 +287,8 @@ ok3_read:
 	xorw	%bx, %bx
 	jmp	rp_read
 
+# ax 是要读取的扇区数
+# TODO: next...
 read_track:
 	pusha
 	pusha	

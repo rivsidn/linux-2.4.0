@@ -75,8 +75,7 @@ static void gzip_release(void **);
  */
 static unsigned char *real_mode; /* Pointer to real-mode data */
 
-//TODO: next...
-//下边这个值在 setup.S 中设置，但是没搞明白是怎么设置的？
+//扩展内存大小，setup.S 中设置
 #define EXT_MEM_K   (*(unsigned short *)(real_mode + 0x2))
 #ifndef STANDARD_MEMORY_BIOS_CALL
 #define ALT_MEM_K   (*(unsigned long *)(real_mode + 0x1e0))

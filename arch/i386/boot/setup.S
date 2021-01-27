@@ -288,9 +288,6 @@ loader_ok:
 # e820h, which lets us assemble a memory map, then try e801h,
 # which returns a 32-bit memory size, and finally 88h, which
 # returns 0-64m
-# 尝试三种不同的内存探测机制.
-# 首先尝试 e820h 整合成一个内存映射表，然后尝试e801h，返回一个32字节的地址
-# 大小，最后88h，返回0-64M.
 
 # method E820H:
 # the memory map from hell.  e820h returns memory classified into
@@ -365,6 +362,7 @@ meme801:
 mem88:
 
 #endif
+	# 获取扩展内存大小
 	movb	$0x88, %ah
 	int	$0x15
 	movw	%ax, (2)
@@ -757,6 +755,7 @@ default_switch:
 #
 # 当我们用bootsec 加载 bzImage 时候会调用该程序.
 # 由于512字节的boot段当前没有剩余空间了，所以我们将这部分代码移到此处.
+# es:bx 是起始地址.
 bootsect_helper:
 	cmpw	$0, %cs:bootsect_es
 	jnz	bootsect_second

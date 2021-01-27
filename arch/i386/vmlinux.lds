@@ -1,4 +1,5 @@
-/* ld script to make i386 Linux kernel
+/* 
+ * ld script to make i386 Linux kernel
  * Written by Martin Mares <mj@atrey.karlin.mff.cuni.cz>;
  */
 OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
