@@ -756,6 +756,7 @@ default_switch:
 # 当我们用bootsec 加载 bzImage 时候会调用该程序.
 # 由于512字节的boot段当前没有剩余空间了，所以我们将这部分代码移到此处.
 # es:bx 是起始地址.
+# TODO: next...
 bootsect_helper:
 	cmpw	$0, %cs:bootsect_es
 	jnz	bootsect_second

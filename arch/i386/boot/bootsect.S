@@ -237,6 +237,7 @@ die:	jne	die			# es must be at 64kB boundary
 					# bx 是段内偏移地址
 rp_read:
 #ifdef __BIG_KERNEL__
+# TODO: next...
 	bootsect_kludge = 0x220		# 0x200 (size of bootsector) + 0x20 (offset
 	lcall	bootsect_kludge		# of bootsect_kludge in setup.S)
 #else
@@ -248,6 +249,7 @@ rp_read:
 
 	ret
 
+# 尽量读取一个磁道，如果超出当前段最大访问长度，则仅读取该段能容纳的扇区数
 ok1_read:
 	movw	sectors, %ax
 	subw	sread, %ax
@@ -265,11 +267,11 @@ ok2_read:				# ax是要读取的扇区数
 	movw	%ax, %cx
 	addw	sread, %ax
 	cmpw	sectors, %ax
-	jne	ok3_read
+	jne	ok3_read		# 该磁道没读完，跳转到ok3_read执行
 	
-	movw	$1, %ax
+	movw	$1, %ax			# 磁头:磁道:扇区
 	subw	head, %ax
-	jne	ok4_read
+	jne	ok4_read		# head为 0 则跳转
 	
 	incw	track
 ok4_read:
@@ -279,31 +281,30 @@ ok3_read:
 	movw	%ax, sread
 	shlw	$9, %cx
 	addw	%cx, %bx
-	jnc	rp_read
+	jnc	rp_read			# 没进位继续执行
 	
-	movw	%es, %ax
+	movw	%es, %ax		# 如果存在进位则调整es寄存器之后继续执行
 	addb	$0x10, %ah
 	movw	%ax, %es
 	xorw	%bx, %bx
 	jmp	rp_read
 
 # ax 是要读取的扇区数
-# TODO: next...
 read_track:
 	pusha
 	pusha	
 	movw	$0xe2e, %ax 			# loading... message 2e = .
 	movw	$7, %bx
- 	int	$0x10
+ 	int	$0x10				# 输出...
 	popa		
 	movw	track, %dx
-	movw	sread, %cx
+	movw	sread, %cx			# cl是起始扇区号
 	incw	%cx
-	movb	%dl, %ch
+	movb	%dl, %ch			# ch是track
 	movw	head, %dx
 	movb	%dl, %dh
-	andw	$0x0100, %dx
-	movb	$2, %ah
+	andw	$0x0100, %dx			# 只有两个磁头
+	movb	$2, %ah				# 服务
 	pushw	%dx				# save for error dump
 	pushw	%cx
 	pushw	%bx
@@ -315,6 +316,7 @@ read_track:
 	popa
 	ret
 
+# 输出错误信息重新执行
 bad_rt:
 	pushw	%ax				# save error code
 	call	print_all			# ah = error, al = read

@@ -16,6 +16,10 @@ ZLDFLAGS = -e startup_32
 # ZIMAGE_OFFSET is the load offset of the compression loader
 # BZIMAGE_OFFSET is the load offset of the high loaded compression loader
 #
+# 内容是一样的，只是text段的起始地址不同
+# TODO: next...
+# 这样会有什么影响？
+#
 ZIMAGE_OFFSET = 0x1000
 BZIMAGE_OFFSET = 0x100000
 

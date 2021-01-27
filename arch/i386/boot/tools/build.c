@@ -151,6 +151,9 @@ int main(int argc, char ** argv)
 	fprintf (stderr, "System is %d kB\n", sz/1024);
 	sys_size = (sz + 15) / 16;
 	/* 0x28000*16 = 2.5 MB, conservative estimate for the current maximum */
+	/* 
+	 * 如果当前内核最大值超过一定限度则不能编译make zIamge，只能编译成make bzImage.
+	 */
 	if (sys_size > (is_big_kernel ? 0x28000 : DEF_SYSSIZE))
 		die("System is too big. Try using %smodules.",
 			is_big_kernel ? "" : "bzImage or ");
