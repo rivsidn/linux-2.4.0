@@ -237,12 +237,17 @@ die:	jne	die			# es must be at 64kB boundary
 					# bx 是段内偏移地址
 rp_read:
 #ifdef __BIG_KERNEL__
-# TODO: next...
 	bootsect_kludge = 0x220		# 0x200 (size of bootsector) + 0x20 (offset
 	lcall	bootsect_kludge		# of bootsect_kludge in setup.S)
+					# big kernel时，system在setup.S bootsect_second
+					# 程序处理中，通过调用 int 0x15，将system 移动到
+					# 了 0x100000 处，此处需要跟 Makefile 中设置的text
+					# 偏移量保持一致.
 #else
-	movw	%es, %ax
-	subw	$SYSSEG, %ax
+	movw	%es, %ax		# 非big kernel时 system从0x10000位置开始加载
+	subw	$SYSSEG, %ax		# 后续在setup 中将system 移动到了0x1000 处，
+					# 此处的偏移量需要跟Makefile中设置的text偏移量
+					# 保持一致.
 #endif
 	cmpw	syssize, %ax		# have we loaded all yet?
 	jbe	ok1_read

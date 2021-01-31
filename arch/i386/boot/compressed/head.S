@@ -34,6 +34,7 @@
 
 	.globl startup_32
 	
+# 跳转到此处执行，此时为保护模式
 startup_32:
 	cld
 	cli
@@ -44,7 +45,7 @@ startup_32:
 	movl %eax,%gs
 
 	lss SYMBOL_NAME(stack_start),%esp
-	# 检查A20 是否使能，如果没使能则一直循环
+	# 检查A20 是否使能，如果没使能则陷入死循环
 	xorl %eax,%eax
 1:	incl %eax		# check that A20 really IS enabled
 	movl %eax,0x000000	# loop forever if it isn't
@@ -62,6 +63,7 @@ startup_32:
 	popfl
 /*
  * Clear BSS
+ * 清空_edata=>_end 之间的数据
  */
 	xorl %eax,%eax
 	movl $ SYMBOL_NAME(_edata),%edi
@@ -90,6 +92,8 @@ startup_32:
  * We need to move the move-in-place routine down to 0x1000
  * and then start it with the buffer addresses in registers,
  * which we got from the stack.
+ *
+ * high_loaded 跳转到此处执行
  */
 3:
 	movl $move_routine_start,%esi
@@ -102,6 +106,7 @@ startup_32:
 	rep
 	movsl
 
+	# 获取存储在栈上struct moveparams{} 的数据
 	popl %esi	# discard the address
 	popl %ebx	# real mode pointer
 	popl %esi	# low_buffer_start
@@ -133,5 +138,5 @@ move_routine_start:
 	movsl
 	movl %ebx,%esi	# Restore setup pointer
 	xorl %ebx,%ebx
-	ljmp $(__KERNEL_CS), $0x100000
+	ljmp $(__KERNEL_CS), $0x100000		# 跳转到arch/i386/kernel/head.S 中执行
 move_routine_end:

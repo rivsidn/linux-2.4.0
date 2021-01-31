@@ -16,12 +16,11 @@ ZLDFLAGS = -e startup_32
 # ZIMAGE_OFFSET is the load offset of the compression loader
 # BZIMAGE_OFFSET is the load offset of the high loaded compression loader
 #
-# 内容是一样的，只是text段的起始地址不同
-# TODO: next...
-# 这样会有什么影响？
+# 此处的偏移量表示的是system加载到内存时text起始位置所在的段内偏移地址，
+# 只有移动到了正确的位置，代码才能够正确执行.
 #
-ZIMAGE_OFFSET = 0x1000
-BZIMAGE_OFFSET = 0x100000
+ZIMAGE_OFFSET = 0x1000		# 4KB
+BZIMAGE_OFFSET = 0x100000	# 1MB
 
 ZLINKFLAGS = -Ttext $(ZIMAGE_OFFSET) $(ZLDFLAGS)
 BZLINKFLAGS = -Ttext $(BZIMAGE_OFFSET) $(ZLDFLAGS)

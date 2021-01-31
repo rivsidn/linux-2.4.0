@@ -12,6 +12,11 @@
 #ifndef __E820_HEADER
 #define __E820_HEADER
 
+/* 
+ * setup.S 中通过扫描建立一个内存映射链表.
+ *
+ * TODO: 没找到此处调用int 0x15的具体定义，后续看C 代码是怎么用这部分的.
+ */
 #define E820MAP	0x2d0		/* our map */
 #define E820MAX	32		/* number of entries in E820MAP */
 #define E820NR	0x1e8		/* # entries in E820MAP */

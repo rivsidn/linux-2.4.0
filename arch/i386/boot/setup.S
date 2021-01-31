@@ -68,7 +68,7 @@ begbss:
 .text
 
 start:
-	jmp	trampoline
+	jmp	trampoline		# 跳转指令，占用了2字节
 
 # This is the setup header, and it must start at %cs:2 (old 0x9020:2)
 
@@ -95,11 +95,15 @@ type_of_loader:	.byte	0		# = 0, old one (LILO, Loadlin,
 # flags, unused bits must be zero (RFU) bit within loadflags
 loadflags:
 LOADED_HIGH	= 1			# If set, the kernel is loaded high
+					# 设置了说明内核从高地址加载
 CAN_USE_HEAP	= 0x80			# If set, the loader also has set
 					# heap_end_ptr to tell how much
 					# space behind setup.S can be used for
 					# heap purposes.
 					# Only the loader knows what is free
+					# 设置了则说明加载器设置了heap_end_ptr 指针
+					# 用于表示setup.S 之后又多少内存可用.
+					# 只有加载器知道空闲了多少.
 #ifndef __BIG_KERNEL__
 		.byte	0
 #else
@@ -153,9 +157,10 @@ cmd_line_ptr:	.long 0			# (Header version 0x0202 or later)
 					# low memory 0x10000 or higher.
 
 trampoline:	call	start_of_setup
-		.space	1024
+		.space	1024		# 填充1024字节长度的 0
 # End of setup header #####################################################
 
+# 从boot跳转到setup执行，此时依然处于保护模式
 start_of_setup:
 # Bootlin depends on this being done early
 	movw	$0x01500, %ax
@@ -183,7 +188,7 @@ start_of_setup:
 
 # Routine to print asciiz string at ds:si
 prtstr:
-	lodsb
+	lodsb			# 从ds:si获取一个字节到al中
 	andb	%al, %al
 	jz	fin
 
@@ -193,6 +198,12 @@ prtstr:
 fin:	ret
 
 # Space printing
+# 打印空格
+#
+# 打印两个空格时:
+# 第一个空格通过call prtspc 打印
+# 第二个空格是call 返回之后，继续向下执行打印
+# 总共打印两次
 prtsp2:	call	prtspc		# Print double space
 prtspc:	movb	$0x20, %al	# Print single space (note: fall-thru)
 
@@ -216,6 +227,7 @@ good_sig1:
 	jmp	good_sig
 
 # We now have to find the rest of the setup code/data
+# 没签名可能是因为数据不全导致的
 bad_sig:
 	movw	%cs, %ax			# SETUPSEG
 	subw	$DELTA_INITSEG, %ax		# INITSEG
@@ -234,8 +246,8 @@ bad_sig:
 	movw	%cs, %ax			# aka SETUPSEG
 	movw	%ax, %es
 	movw	$SYSSEG, %ax
-	movw	%ax, %ds
-	rep
+	movw	%ax, %ds			# ds:si=>es:di
+	rep					# 从system段读取setup段的剩余部分
 	movsw
 	movw	%cs, %ax			# aka SETUPSEG
 	movw	%ax, %ds
@@ -247,6 +259,7 @@ bad_sig:
 
 	jmp	good_sig
 
+# 加载了数据之后还是没能找到签名，打印出错信息，陷入死循环
 no_sig:
 	lea	no_sig_mess, %si
 	call	prtstr
@@ -262,6 +275,7 @@ good_sig:
 # Check if an old loader tries to load a big-kernel
 	testb	$LOADED_HIGH, %cs:loadflags	# Do we have a big kernel?
 	jz	loader_ok			# No, no danger for old loaders.
+						# 非big kernel时老加载器是没问题的
 
 	cmpb	$0, %cs:type_of_loader 		# Do we have a loader that
 						# can deal with us?
@@ -281,7 +295,7 @@ loader_ok:
 # 获取内存大小(拓展内存，kB)
 
 	xorl	%eax, %eax
-	movl	%eax, (0x1e0)
+	movl	%eax, (0x1e0)			# ALT_MEM_K
 #ifndef STANDARD_MEMORY_BIOS_CALL
 	movb	%al, (E820NR)
 # Try three different memory detection schemes.  First, try
@@ -296,7 +310,7 @@ loader_ok:
 # of the first 32 memory areas, which we return at [E820MAP].
 # This is documented at http://www.teleport.com/~acpi/acpihtml/topic245.htm
 
-#define SMAP  0x534d4150
+#define SMAP  0x534d4150			# 'SMAP'的ascii形式
 
 meme820:
 	xorl	%ebx, %ebx			# continuation counter
@@ -361,11 +375,12 @@ meme801:
 # 64mb, depending on the bios) in ax.
 mem88:
 
-#endif
+#endif	/* !STANDARD_MEMORY_BIOS_CALL */
+
 	# 获取扩展内存大小
 	movb	$0x88, %ah
 	int	$0x15
-	movw	%ax, (2)
+	movw	%ax, (2)			# EXT_MEM_K
 
 # Set the keyboard repeat rate to the max
 	movw	$0x0305, %ax
@@ -385,7 +400,7 @@ mem88:
 	subw	$DELTA_INITSEG, %ax		# aka INITSEG
 	pushw	%ax
 	movw	%ax, %es
-	movw	$0x0080, %di
+	movw	$0x0080, %di			# 在INITSEG段0x0080处存放hd0的信息
 	movw	$0x10, %cx
 	pushw	%cx
 	cld
@@ -429,6 +444,7 @@ is_disk1:
 	movb	$0xc0, %ah
 	stc
 	int	$0x15				# moves feature table to es:bx
+						# 中断设置了es:bx寄存器，通过寄存器获取计算机特性
 	jc	no_mca
 
 	pushw	%ds
@@ -438,7 +454,7 @@ is_disk1:
 	subw	$DELTA_INITSEG, %ax		# aka INITSEG
 	movw	%ax, %es
 	movw	%bx, %si
-	movw	$0xa0, %di
+	movw	$0xa0, %di			# 将MCA信息存到INITSEG的0xa0处
 	movw	(%si), %cx
 	addw	$2, %cx				# table length is a short
 	cmpw	$0x10, %cx
@@ -463,6 +479,7 @@ no_mca:
 no_psmouse:
 
 #if defined(CONFIG_APM) || defined(CONFIG_APM_MODULE)
+# APM : 高级电源管理
 # Then check for an APM BIOS...
 						# %ds points to the bootsector
 	movw	$0, 0x40			# version = 0 means no APM BIOS
@@ -520,11 +537,12 @@ apm_disconnect:					# Tidy up
 no_32_apm_bios:
 	andw	$0xfffd, (76)			# remove 32 bit support bit
 done_apm_bios:
-#endif
+#endif	/* CONFIG_APM || CONFIG_APM_MODULE */
 
 # Now we want to move to protected mode ...
+# 进入保护模式
 	cmpw	$0, %cs:realmode_swtch
-	jz	rmodeswtch_normal
+	jz	rmodeswtch_normal		# 正常的模式切换
 
 	lcall	%cs:realmode_swtch
 
@@ -542,8 +560,9 @@ rmodeswtch_end:
 
 # Now we move the system to its rightful place ... but we check if we have a
 # big-kernel. In that case we *must* not move it ...
-# 现在我们将system移动到正确的位置... 
-# 但是如果发现我们有一个big-kernel，此时我们不能移动它...
+# 
+# big-kernel 在bootsect_helper 中调用了 int 0x15 将自身移动到了恰当的位置，
+# 所以此处不需要移动.
 	testb	$LOADED_HIGH, %cs:loadflags
 	jz	do_move0			# .. then we have a normal low
 						# loaded zImage
@@ -581,6 +600,7 @@ end_move:
 	movw	%ax, %ds
 		
 # Check whether we need to be downward compatible with version <=201
+# 检查是否需要向后兼容
 	cmpl	$0, cmd_line_ptr
 	jne	end_move_self		# loader uses version >=202 features
 	cmpb	$0x20, type_of_loader
@@ -724,6 +744,7 @@ flush_instr:
 #	take our 48 bit far pointer. (INTeL 80386 Programmer's Reference
 #	Manual, Mixing 16-bit and 32-bit code, page 16-6)
 
+	# 此处通过直接通过机器码的形式跳转到system处执行
 	.byte 0x66, 0xea			# prefix + jmpi-opcode
 code32:	.long	0x1000				# will be set to 0x100000
 						# for big kernels
@@ -741,6 +762,8 @@ kernel_version:	.ascii	UTS_RELEASE
 
 # This is the default real mode switch routine.
 # to be called just before protected mode transition
+#
+# 模式切换之前调用，禁止中断
 default_switch:
 	cli					# no interrupts allowed !
 	movb	$0x80, %al			# disable NMI for bootup
@@ -753,14 +776,14 @@ default_switch:
 # Because there is no place left in the 512 bytes of the boot sector,
 # we must emigrate to code space here.
 #
-# 当我们用bootsec 加载 bzImage 时候会调用该程序.
-# 由于512字节的boot段当前没有剩余空间了，所以我们将这部分代码移到此处.
+# bootsec 加载 bzImage 时候会调用该程序.
+# 由于512字节的bootsec没有剩余空间了，所以我们将这部分代码移到此处.
 # es:bx 是起始地址.
-# TODO: next...
 bootsect_helper:
 	cmpw	$0, %cs:bootsect_es
 	jnz	bootsect_second
 
+	# 第一次执行bootsect_helper时跳转到此处
 	movb	$0x20, %cs:type_of_loader
 	movw	%es, %ax
 	shrw	$4, %ax
@@ -770,6 +793,7 @@ bootsect_helper:
 	subw	$SYSSEG, %ax
 	lret					# nothing else to do for now
 
+# 不是第一次执行bootsect_helper 时跳转到此处执行
 bootsect_second:
 	pushw	%cx
 	pushw	%si
@@ -780,9 +804,9 @@ bootsect_second:
 	movw	$0x8000, %cx			# full 64K, INT15 moves words
 	pushw	%cs
 	popw	%es
-	movw	$bootsect_gdt, %si
-	movw	$0x8700, %ax
-	int	$0x15
+	movw	$bootsect_gdt, %si		# es:si 设置
+	movw	$0x8700, %ax			# 功能号，内存拷贝，从源拷贝到目的
+	int	$0x15				# 
 	jc	bootsect_panic			# this, if INT15 fails
 
 	movw	%cs:bootsect_es, %es		# we reset %es to always point
@@ -797,6 +821,10 @@ bootsect_ex:
 	popw	%cx
 	lret
 
+# 全局描述符表
+# 从当前位置开始，一致到bootsect_es 上边结束，都是调用int 0x15 的参数部分，
+# 通过该方式，在保护模式下访问了1M 字节之外的内存，所以在do_move0 之前先判断，
+# 如果是big_kernel，就不需要移动了.
 bootsect_gdt:
 	.word	0, 0, 0, 0
 	.word	0, 0, 0, 0
@@ -926,6 +954,7 @@ gdt_48:
 #include "video.S"
 
 # Setup signature -- must be last
+# 设置签名，必须在最后
 setup_sig1:	.word	SIG1
 setup_sig2:	.word	SIG2
 
