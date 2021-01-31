@@ -24,6 +24,7 @@
 
 /*
  * References to members of the boot_cpu_data structure.
+ * boot_cpu_data{} 结构体偏移量
  */
 
 #define CPU_PARAMS	SYMBOL_NAME(boot_cpu_data)
@@ -38,6 +39,7 @@
 
 /*
  * swapper_pg_dir is the main page directory, address 0x00101000
+ * swapper_pg_dir 在该文件的下边定义.
  *
  * On entry, %esi points to the real-mode code as a 32-bit pointer.
  */
@@ -70,6 +72,12 @@ startup_32:
  *
  *	NOTE! We have to correct for the fact that we're
  *	not yet offset PAGE_OFFSET..
+ *
+ *	此处为什么要减去 __PAGE_OFFSET？
+ *	通过反汇编vmlinux 发现此时mmu_cr4_features 的虚拟地址为 0xc030e1ac，
+ *	此时.text 段起始地址是从 0xc0100000 开始的，此处减去 __PAGE_OFFSET
+ *	也就是通过虚拟地址找到实际的物理地址所在位置.
+ *	此处的偏移量是在 arch/i386/vmlinux.lds 中定义的.
  */
 #define cr4_bits mmu_cr4_features-__PAGE_OFFSET
 	cmpl $0,cr4_bits
@@ -79,9 +87,10 @@ startup_32:
 	movl %eax,%cr4
 	jmp 3f
 1:
-#endif
+#endif	/* CONFIG_SMP */
 /*
  * Initialize page tables
+ * 初始化页表(pg0, pg1)
  */
 	movl $pg0-__PAGE_OFFSET,%edi /* initialize page tables */
 	movl $007,%eax		/* "007" doesn't mean with right to kill, but
@@ -93,6 +102,7 @@ startup_32:
 
 /*
  * Enable paging
+ * 使能分页
  */
 3:
 	movl $swapper_pg_dir-__PAGE_OFFSET,%eax
@@ -247,8 +257,8 @@ is386:	pushl %ecx		# restore original EFLAGS
 #ifdef CONFIG_SMP
 	incb ready
 #endif
-	lgdt gdt_descr
-	lidt idt_descr
+	lgdt gdt_descr		# 加载全局描述符表
+	lidt idt_descr		# 加载中断描述符表
 	ljmp $(__KERNEL_CS),$1f
 1:	movl $(__KERNEL_DS),%eax	# reload all the segment registers
 	movl %eax,%ds		# after changing gdt.
@@ -269,6 +279,8 @@ is386:	pushl %ecx		# restore original EFLAGS
 	cmpb $1,%cl
 	je 1f			# the first CPU calls start_kernel
 				# all other CPUs call initialize_secondary
+				#
+				# TODO: 多核是如何工作的？
 	call SYMBOL_NAME(initialize_secondary)
 	jmp L6
 1:
@@ -310,6 +322,8 @@ check_x87:
  *  and the kernel moved to PAGE_OFFSET. Interrupts
  *  are enabled elsewhere, when we can be relatively
  *  sure everything is ok.
+ *
+ *  设置256个指向ignore_int 的中断门，此时并不真正加载idt.
  */
 setup_idt:
 	lea ignore_int,%edx
@@ -385,12 +399,13 @@ SYMBOL_NAME(gdt):
  * purposes) and another mapping of the 0-8M area at virtual address
  * PAGE_OFFSET.
  */
-.org 0x1000
+.org 0x1000	#4K
 ENTRY(swapper_pg_dir)
 	.long 0x00102007
 	.long 0x00103007
 	.fill BOOT_USER_PGD_PTRS-2,4,0
 	/* default: 766 entries */
+	/* 下边这两条页目录项，使得system中即使多了3G偏移量，也能够找到正确的位置 */
 	.long 0x00102007
 	.long 0x00103007
 	/* default: 254 entries */
@@ -399,11 +414,13 @@ ENTRY(swapper_pg_dir)
 /*
  * The page tables are initialized to only 8MB here - the final page
  * tables are set up later depending on memory size.
+ *
+ * 此处的页表仅初始化了8M，最终的页表在后续初始化.
  */
-.org 0x2000
+.org 0x2000	#8K
 ENTRY(pg0)
 
-.org 0x3000
+.org 0x3000	#12K
 ENTRY(pg1)
 
 /*
@@ -413,6 +430,10 @@ ENTRY(pg1)
 
 .org 0x4000
 ENTRY(empty_zero_page)
+/*
+ * 用于存放启动参数.
+ * 暂时不知道是做什么用的，看后边是如何解析的.
+ */
 
 .org 0x5000
 ENTRY(empty_bad_page)

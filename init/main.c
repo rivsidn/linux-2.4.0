@@ -516,7 +516,8 @@ static void __init smp_init(void)
 /*
  *	Activate the first processor.
  */
- 
+
+//TODO: next...
 asmlinkage void __init start_kernel(void)
 {
 	char * command_line;

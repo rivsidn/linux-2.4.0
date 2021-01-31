@@ -76,9 +76,14 @@ typedef struct { unsigned long pgprot; } pgprot_t;
  *
  * If you want more physical memory than this then see the CONFIG_HIGHMEM4G
  * and CONFIG_HIGHMEM64G options in the kernel configuration.
+ *
+ * __PAGE_OFFSET 值为0xC0000000 表示内核只能用1G 的虚拟地址，限制
+ * 只能用大约950MB 的物理内存.
+ * 如果想要更多的物理地址可以查看 CONFIG_HIGHMEM4G，CONFIG_HIGHMEM64G 内核配置
+ * 选项.
  */
 
-#define __PAGE_OFFSET		(0xC0000000)
+#define __PAGE_OFFSET		(0xC0000000)	//3G
 
 #ifndef __ASSEMBLY__
 

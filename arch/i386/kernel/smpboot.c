@@ -470,6 +470,9 @@ int __init start_secondary(void *unused)
  * CPUs - they just need to reload everything
  * from the task structure
  * This function must not return.
+ *
+ * TODO: 其它CPU 是如何工作的？
+ * 其他CPU 真正执行的时候，此时已经有进程了.
  */
 void __init initialize_secondary(void)
 {
