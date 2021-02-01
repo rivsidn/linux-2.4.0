@@ -434,6 +434,9 @@ struct task_struct {
 /*
  *  INIT_TASK is used to set up the first task table, touch at
  * your own risk!. Base=0, limit=0x1fffff (=2MB)
+ *
+ * INIT_TASK 用于设置第一个进程的task_struct{} 结构体，不要乱动，
+ * 后果自负.
  */
 #define INIT_TASK(tsk)	\
 {									\

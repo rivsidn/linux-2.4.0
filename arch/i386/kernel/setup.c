@@ -8,7 +8,7 @@
  *
  *  Force Cyrix 6x86(MX) and M II processors to report MTRR capability
  *  and Cyrix "coma bug" recognition by
- *      Zolt�n B�sz�rm�nyi <zboszor@mail.externet.hu> February 1999.
+ *      Zoltán Böszörményi <zboszor@mail.externet.hu> February 1999.
  * 
  *  Force Centaur C6 processors to report MTRR capability.
  *      Bart Hartgers <bart@etpmod.phys.tue.nl>, May 1999.
@@ -475,9 +475,9 @@ static int __init copy_e820_map(struct e820entry * biosmap, int nr_map)
 		 */
 		if (type == E820_RAM) {
 			if (start < 0x100000ULL && end > 0xA0000ULL) {
-				if (start < 0xA0000ULL)
+				if (start < 0xA0000ULL)	//640K
 					add_memory_region(start, 0xA0000ULL-start, type);
-				if (end <= 0x100000ULL)
+				if (end <= 0x100000ULL)	//1M
 					continue;
 				start = 0x100000ULL;
 				size = end - start;
@@ -519,7 +519,7 @@ void __init setup_memory_region(void)
 		e820.nr_map = 0;
 		add_memory_region(0, LOWMEMSIZE(), E820_RAM);
 		add_memory_region(HIGH_MEMORY, (mem_size << 10) - HIGH_MEMORY, E820_RAM);
-  	}
+	}
 	printk("BIOS-provided physical RAM map:\n");
 	print_memory_map(who);
 } /* setup_memory_region */
@@ -532,6 +532,7 @@ static inline void parse_mem_cmdline (char ** cmdline_p)
 	int usermem = 0;
 
 	/* Save unparsed command line copy for /proc/cmdline */
+	/* 保存未经过解析的命令行用于 /proc/cmdline 显示 */
 	memcpy(saved_command_line, COMMAND_LINE, COMMAND_LINE_SIZE);
 	saved_command_line[COMMAND_LINE_SIZE-1] = '\0';
 
@@ -626,6 +627,7 @@ void __init setup_arch(char **cmdline_p)
 
 	if (!MOUNT_ROOT_RDONLY)
 		root_mountflags &= ~MS_RDONLY;
+	//_text, _etext, _edata, _end 变量是由ld生成的，可以在链接脚本中找到.
 	init_mm.start_code = (unsigned long) &_text;
 	init_mm.end_code = (unsigned long) &_etext;
 	init_mm.end_data = (unsigned long) &_edata;
@@ -638,6 +640,9 @@ void __init setup_arch(char **cmdline_p)
 
 	parse_mem_cmdline(cmdline_p);
 
+/*
+ * PFN (page frame number)
+ */
 #define PFN_UP(x)	(((x) + PAGE_SIZE-1) >> PAGE_SHIFT)
 #define PFN_DOWN(x)	((x) >> PAGE_SHIFT)
 #define PFN_PHYS(x)	((x) << PAGE_SHIFT)
@@ -676,6 +681,9 @@ void __init setup_arch(char **cmdline_p)
 	/*
 	 * Determine low and high memory ranges:
 	 */
+	/*
+	 * TODO: next...
+	 */
 	max_low_pfn = max_pfn;
 	if (max_low_pfn > MAXMEM_PFN) {
 		max_low_pfn = MAXMEM_PFN;
@@ -688,7 +696,7 @@ void __init setup_arch(char **cmdline_p)
 		else
 			printk(KERN_WARNING "Use a HIGHMEM enabled kernel.\n");
 #else /* !CONFIG_HIGHMEM */
-#ifndef CONFIG_X86_PAE
+#ifndef CONFIG_X86_PAE	//PAE(Physical Address Extension)
 		if (max_pfn > MAX_NONPAE_PFN) {
 			max_pfn = MAX_NONPAE_PFN;
 			printk(KERN_WARNING "Warning only 4GB will be used.\n");

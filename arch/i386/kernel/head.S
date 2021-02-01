@@ -341,6 +341,9 @@ rp_sidt:
 	jne rp_sidt
 	ret
 
+/*
+ * 此处设置了栈，设置栈之后可以通过current 获取到进程的task_struct{} 结构体
+ */
 ENTRY(stack_start)
 	.long SYMBOL_NAME(init_task_union)+8192
 	.long __KERNEL_DS

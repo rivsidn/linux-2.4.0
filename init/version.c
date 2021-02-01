@@ -21,6 +21,9 @@ struct new_utsname system_utsname = {
 	UTS_MACHINE, UTS_DOMAINNAME
 };
 
+/*
+ * 在include/linux/version.h 中，通过顶层Makefile编译时候生成.
+ */
 const char *linux_banner = 
 	"Linux version " UTS_RELEASE " (" LINUX_COMPILE_BY "@"
 	LINUX_COMPILE_HOST ") (" LINUX_COMPILER ") " UTS_VERSION "\n";

@@ -515,9 +515,9 @@ static void __init smp_init(void)
 
 /*
  *	Activate the first processor.
+ *	激活第一个处理器
  */
 
-//TODO: next...
 asmlinkage void __init start_kernel(void)
 {
 	char * command_line;
@@ -528,6 +528,7 @@ asmlinkage void __init start_kernel(void)
  * enable them
  */
 	lock_kernel();
+	//TODO: 此处的printk是如何输出的？
 	printk(linux_banner);
 	setup_arch(&command_line);
 	printk("Kernel command line: %s\n", saved_command_line);
