@@ -42,9 +42,9 @@ typedef struct { unsigned long long pmd; } pmd_t;
 typedef struct { unsigned long long pgd; } pgd_t;
 #define pte_val(x)	((x).pte_low | ((unsigned long long)(x).pte_high << 32))
 #else
-typedef struct { unsigned long pte_low; } pte_t;
-typedef struct { unsigned long pmd; } pmd_t;
-typedef struct { unsigned long pgd; } pgd_t;
+typedef struct { unsigned long pte_low; } pte_t;	//page table  entry
+typedef struct { unsigned long pmd; } pmd_t;		//page middle directory
+typedef struct { unsigned long pgd; } pgd_t;		//page global directory
 #define pte_val(x)	((x).pte_low)
 #endif
 #define PTE_MASK	PAGE_MASK

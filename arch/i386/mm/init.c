@@ -311,6 +311,9 @@ static void __init fixrange_init (unsigned long start, unsigned long end, pgd_t 
 	}
 }
 
+//页表初始化
+//TODO: next...
+//页表是如何初始化的？
 static void __init pagetable_init (void)
 {
 	unsigned long vaddr, end;
@@ -440,11 +443,14 @@ void __init zap_low_mappings (void)
  *
  * This routines also unmaps the page at virtual kernel address 0, so
  * that we can trap those pesky NULL-reference errors in the kernel.
+ *
+ * 没有映射地址 0，所以访问NULL 的时候就会报异常.
  */
 void __init paging_init(void)
 {
 	pagetable_init();
 
+	//设置cr3
 	__asm__( "movl %%ecx,%%cr3\n" ::"c"(__pa(swapper_pg_dir)));
 
 #if CONFIG_X86_PAE

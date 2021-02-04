@@ -121,6 +121,8 @@ static unsigned long __init setup_trampoline(void)
 /*
  * We are called very early to get the low memory for the
  * SMP bootup trampoline page.
+ *
+ * 从低地址申请一页内存，该内存必须能够在实模式下访问.
  */
 void __init smp_alloc_memory(void)
 {
@@ -128,6 +130,8 @@ void __init smp_alloc_memory(void)
 	/*
 	 * Has to be in very low memory so we can execute
 	 * real-mode AP code.
+	 *
+	 * 申请得到的地址必须能够在实模式下执行.
 	 */
 	if (__pa(trampoline_base) >= 0x9F000)
 		BUG();

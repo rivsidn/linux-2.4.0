@@ -22,11 +22,14 @@
 /*
  * Access to this subsystem has to be serialized externally. (this is
  * true for the boot process anyway)
+ *
+ * 调用该子系统时候必须在外部保证串行化.
  */
-unsigned long max_low_pfn;
-unsigned long min_low_pfn;
+unsigned long max_low_pfn;		//页面数
+unsigned long min_low_pfn;		//最低页号
 
 /* return the number of _pages_ that will be allocated for the boot bitmap */
+/* 返回作为bitmap 需要的页面数 */
 unsigned long __init bootmem_bootmap_pages (unsigned long pages)
 {
 	unsigned long mapsize;
@@ -47,10 +50,12 @@ static unsigned long __init init_bootmem_core (pg_data_t *pgdat,
 	bootmem_data_t *bdata = pgdat->bdata;
 	unsigned long mapsize = ((end - start)+7)/8;
 
+	//添加到全局链表中
 	pgdat->node_next = pgdat_list;
 	pgdat_list = pgdat;
 
 	mapsize = (mapsize + (sizeof(long) - 1UL)) & ~(sizeof(long) - 1UL);
+	//map 指向的是虚拟地址
 	bdata->node_bootmem_map = phys_to_virt(mapstart << PAGE_SHIFT);
 	bdata->node_boot_start = (start << PAGE_SHIFT);
 	bdata->node_low_pfn = end;
@@ -58,6 +63,8 @@ static unsigned long __init init_bootmem_core (pg_data_t *pgdat,
 	/*
 	 * Initially all pages are reserved - setup_arch() has to
 	 * register free RAM areas explicitly.
+	 *
+	 * 将所有page都初始化成保留的.
 	 */
 	memset(bdata->node_bootmem_map, 0xff, mapsize);
 
@@ -113,6 +120,7 @@ static void __init free_bootmem_core(bootmem_data_t *bdata, unsigned long addr, 
 	sidx = start - (bdata->node_boot_start/PAGE_SIZE);
 
 	for (i = sidx; i < eidx; i++) {
+		//清空bit位置，表示当前可用
 		if (!test_and_clear_bit(i, bdata->node_bootmem_map))
 			BUG();
 	}
@@ -146,6 +154,8 @@ static void * __init __alloc_bootmem_core (bootmem_data_t *bdata,
 	/*
 	 * We try to allocate bootmem pages above 'goal'
 	 * first, then we try to allocate lower pages.
+	 *
+	 * 首先尝试从高于'goal' 的地方申请内存，然后再尝试lower 的页面.
 	 */
 	if (goal && (goal >= bdata->node_boot_start) && 
 			((goal >> PAGE_SHIFT) < bdata->node_low_pfn)) {
@@ -153,8 +163,11 @@ static void * __init __alloc_bootmem_core (bootmem_data_t *bdata,
 	} else
 		preferred = 0;
 
+	//起始页
 	preferred = ((preferred + align - 1) & ~(align - 1)) >> PAGE_SHIFT;
+	//页大小
 	areasize = (size+PAGE_SIZE-1)/PAGE_SIZE;
+	//增量
 	incr = align >> PAGE_SHIFT ? : 1;
 
 restart_scan:
@@ -172,6 +185,7 @@ restart_scan:
 		goto found;
 	fail_block:;
 	}
+	//先前不是从0开始，从0开始再来一遍
 	if (preferred) {
 		preferred = 0;
 		goto restart_scan;
@@ -213,11 +227,13 @@ found:
 	}
 	/*
 	 * Reserve the area now:
+	 * 申请结束，标识已用:
 	 */
 	for (i = start; i < start+areasize; i++)
 		if (test_and_set_bit(i, bdata->node_bootmem_map))
 			BUG();
 	memset(ret, 0, size);
+	//返回虚拟地址
 	return ret;
 }
 
@@ -233,6 +249,7 @@ static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 	count = 0;
 	idx = bdata->node_low_pfn - (bdata->node_boot_start >> PAGE_SHIFT);
 	for (i = 0; i < idx; i++, page++) {
+		///TODO: 为什么 !test_bit() 时候才会调用？
 		if (!test_bit(i, bdata->node_bootmem_map)) {
 			count++;
 			ClearPageReserved(page);

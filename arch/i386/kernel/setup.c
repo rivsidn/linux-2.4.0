@@ -682,7 +682,7 @@ void __init setup_arch(char **cmdline_p)
 	 * Determine low and high memory ranges:
 	 */
 	/*
-	 * TODO: next...
+	 * TODO: 此处的MAXMEM_PFN 是多大，怎么得出来的.
 	 */
 	max_low_pfn = max_pfn;
 	if (max_low_pfn > MAXMEM_PFN) {
@@ -697,6 +697,7 @@ void __init setup_arch(char **cmdline_p)
 			printk(KERN_WARNING "Use a HIGHMEM enabled kernel.\n");
 #else /* !CONFIG_HIGHMEM */
 #ifndef CONFIG_X86_PAE	//PAE(Physical Address Extension)
+		/* 开启了HIGHMEM，没开启PAE，最大支持4G内存 */
 		if (max_pfn > MAX_NONPAE_PFN) {
 			max_pfn = MAX_NONPAE_PFN;
 			printk(KERN_WARNING "Warning only 4GB will be used.\n");
@@ -716,11 +717,16 @@ void __init setup_arch(char **cmdline_p)
 #endif
 	/*
 	 * Initialize the boot-time allocator (with low memory only):
+	 *
+	 * 此处返回的是映射表的大小，每个bit对应一页
 	 */
 	bootmap_size = init_bootmem(start_pfn, max_low_pfn);
 
 	/*
 	 * Register fully available low RAM pages with the bootmem allocator.
+	 *
+	 * init_bootmem() 中将映射表中的每一位都设置成了 1，表示当前不可用.
+	 * 需要在此处将真正可用的内存设置成 0，表示当前可用.
 	 */
 	for (i = 0; i < e820.nr_map; i++) {
 		unsigned long curr_pfn, last_pfn, size;
@@ -758,6 +764,8 @@ void __init setup_arch(char **cmdline_p)
 	 * steps (first step was init_bootmem()) because this catches
 	 * the (very unlikely) case of us accidentally initializing the
 	 * bootmem allocator with an invalid RAM area.
+	 *
+	 * 作为映射表的内存地址当前不可用，保留.
 	 */
 	reserve_bootmem(HIGH_MEMORY, (PFN_PHYS(start_pfn) +
 			 bootmap_size + PAGE_SIZE-1) - (HIGH_MEMORY));
@@ -765,6 +773,8 @@ void __init setup_arch(char **cmdline_p)
 	/*
 	 * reserve physical page 0 - it's a special BIOS page on many boxes,
 	 * enabling clean reboots, SMP operation, laptop functions.
+	 *
+	 * page 0 不可用，保留.
 	 */
 	reserve_bootmem(0, PAGE_SIZE);
 
@@ -781,6 +791,7 @@ void __init setup_arch(char **cmdline_p)
 #ifdef CONFIG_X86_IO_APIC
 	/*
 	 * Find and reserve possible boot-time SMP configuration:
+	 * 查找配置，设置内部全局变量
 	 */
 	find_smp_config();
 #endif
