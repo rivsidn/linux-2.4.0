@@ -1241,6 +1241,7 @@ void __init init_idle(void)
 
 extern void init_timervecs (void);
 
+//调度初始化
 void __init sched_init(void)
 {
 	/*
@@ -1255,14 +1256,18 @@ void __init sched_init(void)
 	for(nr = 0; nr < PIDHASH_SZ; nr++)
 		pidhash[nr] = NULL;
 
+	//定时器初始化
 	init_timervecs();
 
+	//挂载后半段处理函数
 	init_bh(TIMER_BH, timer_bh);
 	init_bh(TQUEUE_BH, tqueue_bh);
 	init_bh(IMMEDIATE_BH, immediate_bh);
 
 	/*
 	 * The boot idle thread does lazy MMU switching as well:
+	 * 
+	 * TODO: 暂时不清楚enter lazy 是做什么用
 	 */
 	atomic_inc(&init_mm.mm_count);
 	enter_lazy_tlb(&init_mm, current, cpu);

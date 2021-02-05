@@ -311,6 +311,7 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 /* to find an entry in a page-table-directory. */
 #define pgd_index(address) ((address >> PGDIR_SHIFT) & (PTRS_PER_PGD-1))
 
+//虚地址在pgd表中的偏移量(虚地址在pgd表中的下标)
 #define __pgd_offset(address) pgd_index(address)
 
 #define pgd_offset(mm, address) ((mm)->pgd+pgd_index(address))

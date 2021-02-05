@@ -798,6 +798,10 @@ void __init setup_arch(char **cmdline_p)
 	paging_init();
 #ifdef CONFIG_X86_IO_APIC
 	/*
+	 * APIC : Advanced Programmable Interrupt Controller
+	 *        高级可编程中断控制器
+	 */
+	/*
 	 * get boot-time SMP configuration:
 	 */
 	if (smp_found_config)
@@ -814,8 +818,7 @@ void __init setup_arch(char **cmdline_p)
 			initrd_start =
 				INITRD_START ? INITRD_START + PAGE_OFFSET : 0;
 			initrd_end = initrd_start+INITRD_SIZE;
-		}
-		else {
+		} else {
 			printk("initrd extends beyond end of memory "
 			    "(0x%08lx > 0x%08lx)\ndisabling initrd\n",
 			    INITRD_START + INITRD_SIZE,
@@ -836,10 +839,10 @@ void __init setup_arch(char **cmdline_p)
 			continue;
 		res = alloc_bootmem_low(sizeof(struct resource));
 		switch (e820.map[i].type) {
-		case E820_RAM:	res->name = "System RAM"; break;
-		case E820_ACPI:	res->name = "ACPI Tables"; break;
-		case E820_NVS:	res->name = "ACPI Non-volatile Storage"; break;
-		default:	res->name = "reserved";
+			case E820_RAM:	res->name = "System RAM"; break;
+			case E820_ACPI:	res->name = "ACPI Tables"; break;
+			case E820_NVS:	res->name = "ACPI Non-volatile Storage"; break;
+			default:	res->name = "reserved";
 		}
 		res->start = e820.map[i].addr;
 		res->end = res->start + e820.map[i].size - 1;
@@ -858,6 +861,7 @@ void __init setup_arch(char **cmdline_p)
 	request_resource(&iomem_resource, &vram_resource);
 
 	/* request I/O space for devices used on all i[345]86 PCs */
+	/* 申请设备I/O空间，适用于所有i[345]86 PCs */
 	for (i = 0; i < STANDARD_IO_RESOURCES; i++)
 		request_resource(&ioport_resource, standard_io_resources+i);
 
@@ -2073,6 +2077,7 @@ void __init dodgy_tsc(void)
 {
 	get_cpu_vendor(&boot_cpu_data);
 
+	//cyrix 厂商的X86芯片
 	if ( boot_cpu_data.x86_vendor == X86_VENDOR_CYRIX )
 		init_cyrix(&boot_cpu_data);
 }

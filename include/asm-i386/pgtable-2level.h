@@ -2,6 +2,11 @@
 #define _I386_PGTABLE_2LEVEL_H
 
 /*
+ * 二级页表映射
+ * 32-bit 地址中，10-bit 用于页目录偏移，10-bit 用于页表偏移，12-bit 用于页内偏移.
+ */
+
+/*
  * traditional i386 two-level paging structure:
  */
 
@@ -11,6 +16,8 @@
 /*
  * the i386 is two-level, so we don't really have any
  * PMD directory physically.
+ * 
+ * 二级映射没有真正的PMD目录.
  */
 #define PMD_SHIFT	22
 #define PTRS_PER_PMD	1

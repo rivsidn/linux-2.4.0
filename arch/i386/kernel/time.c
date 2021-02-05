@@ -656,8 +656,12 @@ void __init time_init(void)
  	 */
  
  	dodgy_tsc();
- 	
+ 
+	//TSC: Time Stamp Counter
 	if (cpu_has_tsc) {
+		/*
+		 * TODO: 没仔细看这部分
+		 */
 		unsigned long tsc_quotient = calibrate_tsc();
 		if (tsc_quotient) {
 			fast_gettimeoffset_quotient = tsc_quotient;
@@ -701,6 +705,7 @@ void __init time_init(void)
 	/* Wire cpu IDT entry to s/w handler (and Cobalt APIC to IDT) */
 	setup_irq(CO_IRQ_TIMER, &irq0);
 #else
+	//设置时钟中断
 	setup_irq(0, &irq0);
 #endif
 }

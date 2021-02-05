@@ -312,8 +312,6 @@ static void __init fixrange_init (unsigned long start, unsigned long end, pgd_t 
 }
 
 //页表初始化
-//TODO: next...
-//页表是如何初始化的？
 static void __init pagetable_init (void)
 {
 	unsigned long vaddr, end;
@@ -338,6 +336,8 @@ static void __init pagetable_init (void)
 	i = __pgd_offset(PAGE_OFFSET);
 	pgd = pgd_base + i;
 
+	//从虚拟地址PAGE_OFFSET(3G)开始，设置页目录表.
+	//不支持PAE时pgd是一个 long 型指针.
 	for (; i < PTRS_PER_PGD; pgd++, i++) {
 		vaddr = i*PGDIR_SIZE;
 		if (end && (vaddr >= end))
@@ -346,14 +346,17 @@ static void __init pagetable_init (void)
 		pmd = (pmd_t *) alloc_bootmem_low_pages(PAGE_SIZE);
 		set_pgd(pgd, __pgd(__pa(pmd) + 0x1));
 #else
+		//二级映射，PMD和PGD是相同的
 		pmd = (pmd_t *)pgd;
 #endif
 		if (pmd != pmd_offset(pgd, 0))
 			BUG();
+		//二级映射时，此时PTRS_PER_PMD 为1，所以此处就只循环一次
 		for (j = 0; j < PTRS_PER_PMD; pmd++, j++) {
 			vaddr = i*PGDIR_SIZE + j*PMD_SIZE;
 			if (end && (vaddr >= end))
 				break;
+			//TODO: 此处暂时略过
 			if (cpu_has_pse) {
 				unsigned long __pe;
 
@@ -375,6 +378,7 @@ static void __init pagetable_init (void)
 			if (pte != pte_offset(pmd, 0))
 				BUG();
 
+			//设置页表
 			for (k = 0; k < PTRS_PER_PTE; pte++, k++) {
 				vaddr = i*PGDIR_SIZE + j*PMD_SIZE + k*PAGE_SIZE;
 				if (end && (vaddr >= end))
@@ -388,10 +392,16 @@ static void __init pagetable_init (void)
 	 * Fixed mappings, only the page table structure has to be
 	 * created - mappings will be set by set_fixmap():
 	 */
+	/*
+	 * TODO: Fixed mapping 是做什么的？
+	 */
 	vaddr = __fix_to_virt(__end_of_fixed_addresses - 1) & PMD_MASK;
 	fixrange_init(vaddr, 0, pgd_base);
 
 #if CONFIG_HIGHMEM
+	/*
+	 * TODO: 此处是做了什么操作？
+	 */
 	/*
 	 * Permanent kmaps:
 	 */

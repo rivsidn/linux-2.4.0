@@ -33,6 +33,9 @@
  * interrupt-controller happy.
  */
 
+/*
+ * 需要通过gcc -E，将宏定义展开后再看.
+ */
 BUILD_COMMON_IRQ()
 
 #define BI(x,y) \
@@ -448,10 +451,13 @@ void __init init_IRQ(void)
 	 * Cover the whole vector space, no vector can escape
 	 * us. (some of these will be overridden and become
 	 * 'special' SMP interrupts)
+	 *
+	 * 覆盖整个的外部向量，没有向量会逃脱.
+	 * 其中有些会被覆盖变成特殊的SMP 中断.
 	 */
 	for (i = 0; i < NR_IRQS; i++) {
 		int vector = FIRST_EXTERNAL_VECTOR + i;
-		if (vector != SYSCALL_VECTOR) 
+		if (vector != SYSCALL_VECTOR)
 			set_intr_gate(vector, interrupt[i]);
 	}
 
@@ -489,8 +495,8 @@ void __init init_IRQ(void)
 	 * vector now:
 	 */
 	outb_p(0x34,0x43);		/* binary, mode 2, LSB/MSB, ch 0 */
-	outb_p(LATCH & 0xff , 0x40);	/* LSB */
-	outb(LATCH >> 8 , 0x40);	/* MSB */
+	outb_p(LATCH & 0xff , 0x40);	/* LSB(最低有效位) */
+	outb(LATCH >> 8 , 0x40);	/* MSB(最高有效位) */
 
 #ifndef CONFIG_VISWS
 	setup_irq(2, &irq2);

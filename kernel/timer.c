@@ -103,6 +103,7 @@ static struct timer_vec * const tvecs[] = {
 
 #define NOOF_TVECS (sizeof(tvecs) / sizeof(tvecs[0]))
 
+//定时器初始化
 void init_timervecs (void)
 {
 	int i;

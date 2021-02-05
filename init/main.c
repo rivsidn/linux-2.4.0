@@ -426,6 +426,8 @@ __setup("quiet", quiet_kernel);
  *
  * This routine also checks for options meant for the kernel.
  * These options are not given to init - they are for internal kernel use only.
+ *
+ * TODO: 调试的时候看...
  */
 static void __init parse_options(char *line)
 {
@@ -438,20 +440,20 @@ static void __init parse_options(char *line)
 	envs = 1;	/* TERM is set to 'linux' by default */
 	next = line;
 	while ((line = next) != NULL) {
-                quote = strchr(line,'"');
-                next = strchr(line, ' ');
-                while (next != NULL && quote != NULL && quote < next) {
-                        /* we found a left quote before the next blank
-                         * now we have to find the matching right quote
-                         */
-                        next = strchr(quote+1, '"');
-                        if (next != NULL) {
-                                quote = strchr(next+1, '"');
-                                next = strchr(next+1, ' ');
-                        }
-                }
-                if (next != NULL)
-                        *next++ = 0;
+		quote = strchr(line,'"');
+		next = strchr(line, ' ');
+		while (next != NULL && quote != NULL && quote < next) {
+			/* we found a left quote before the next blank
+			 * now we have to find the matching right quote
+			 */
+			next = strchr(quote+1, '"');
+			if (next != NULL) {
+				quote = strchr(next+1, '"');
+				next = strchr(next+1, ' ');
+			}
+		}
+		if (next != NULL)
+			*next++ = 0;
 		if (!strncmp(line,"init=",5)) {
 			line += 5;
 			execute_command = line;
@@ -465,7 +467,7 @@ static void __init parse_options(char *line)
 		}
 		if (checksetup(line))
 			continue;
-		
+
 		/*
 		 * Then check if it's an environment variable or
 		 * an option.
@@ -481,6 +483,7 @@ static void __init parse_options(char *line)
 				argv_init[++args] = line;
 		}
 	}
+	//以NULL 结尾
 	argv_init[args+1] = NULL;
 	envp_init[envs+1] = NULL;
 }
@@ -538,6 +541,10 @@ asmlinkage void __init start_kernel(void)
 	sched_init();
 	time_init();
 	softirq_init();
+
+	/*
+	 * TODO: next...
+	 */
 
 	/*
 	 * HACK ALERT! This is early. We're enabling the console before

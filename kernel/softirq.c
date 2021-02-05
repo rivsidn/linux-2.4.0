@@ -73,6 +73,9 @@ restart:
 		h = softirq_vec;
 		mask &= ~active;
 
+		/*
+		 * 通过active 掩码执行对应软中断
+		 */
 		do {
 			if (active & 1)
 				h->action(h);
@@ -121,6 +124,9 @@ void open_softirq(int nr, void (*action)(struct softirq_action*), void *data)
 
 struct tasklet_head tasklet_vec[NR_CPUS] __cacheline_aligned;
 
+/*
+ * 参见 tasklet_hi_action() 注释.
+ */
 static void tasklet_action(struct softirq_action *a)
 {
 	int cpu = smp_processor_id();
@@ -166,6 +172,11 @@ static void tasklet_action(struct softirq_action *a)
 
 struct tasklet_head tasklet_hi_vec[NR_CPUS] __cacheline_aligned;
 
+/*
+ * 在函数tasklet_hi_schedule() 中将需要处理的tasklet_struct{} 挂载
+ * 在tasklet_hi_vec[] 中，在该函数中将tasklet_struct{} 结构体取出，
+ * 执行.
+ */
 static void tasklet_hi_action(struct softirq_action *a)
 {
 	int cpu = smp_processor_id();
@@ -198,7 +209,6 @@ static void tasklet_hi_action(struct softirq_action *a)
 		local_irq_enable();
 	}
 }
-
 
 void tasklet_init(struct tasklet_struct *t,
 		  void (*func)(unsigned long), unsigned long data)
@@ -247,6 +257,7 @@ static void bh_action(unsigned long nr)
 {
 	int cpu = smp_processor_id();
 
+	//处理时候必须要获取global_bh_lock，该操作确保后半部串行化处理.
 	if (!spin_trylock(&global_bh_lock))
 		goto resched;
 

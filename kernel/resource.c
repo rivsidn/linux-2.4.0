@@ -70,12 +70,14 @@ static struct resource * __request_resource(struct resource *root, struct resour
 	unsigned long end = new->end;
 	struct resource *tmp, **p;
 
+	//new不在root范围内则退出
 	if (end < start)
 		return root;
 	if (start < root->start)
 		return root;
 	if (end > root->end)
 		return root;
+	//new肯定在root范围内
 	p = &root->child;
 	for (;;) {
 		tmp = *p;
