@@ -1020,7 +1020,7 @@ free_module(struct module *mod, int tag_freed)
 	unsigned i;
 
 	/* Let the module clean up.  */
-
+	/* 调用模块自己的clean 函数执行清理动作 */
 	if (mod->flags & MOD_RUNNING)
 	{
 		if(mod->cleanup)
@@ -1029,7 +1029,8 @@ free_module(struct module *mod, int tag_freed)
 	}
 
 	/* Remove the module from the dependency lists.  */
-
+	/* 依赖链表中将模块删除 */
+	/* TODO: 这部分是怎么操作的？ */
 	for (i = 0, dep = mod->deps; i < mod->ndeps; ++i, ++dep) {
 		struct module_ref **pp;
 		for (pp = &dep->dep->refs; *pp != dep; pp = &(*pp)->next_ref)
@@ -1040,7 +1041,7 @@ free_module(struct module *mod, int tag_freed)
 	}
 
 	/* And from the main module list.  */
-
+	/* 从模块列表中将模块删除 */
 	if (mod == module_list) {
 		module_list = mod->next;
 	} else {
@@ -1051,14 +1052,16 @@ free_module(struct module *mod, int tag_freed)
 	}
 
 	/* And free the memory.  */
-
+	/* 释放对应内存 */
 	module_unmap(mod);
 }
 
 /*
  * Called by the /proc file system to return a current list of modules.
+ * proc 文件系统通过调用该函数获取内核模块链表
+ *
+ * TODO: 看完proc 文件系统实现之后再仔细看该函数实现
  */
-
 int get_module_list(char *p)
 {
 	size_t left = PAGE_SIZE;
@@ -1139,8 +1142,10 @@ fini:
 
 /*
  * Called by the /proc file system to return a current list of ksyms.
+ * proc 文件系统调用该函数返回当前的内核符号表
+ *
+ * TODO: 后续看proc文件系统时候仔细看该函数实现
  */
-
 int
 get_ksyms_list(char *buf, char **start, off_t offset, int length)
 {
@@ -1150,6 +1155,7 @@ get_ksyms_list(char *buf, char **start, off_t offset, int length)
 	off_t pos   = 0;
 	off_t begin = 0;
 
+	//遍历所有模块
 	for (mod = module_list; mod; mod = mod->next) {
 		unsigned i;
 		struct module_symbol *sym;

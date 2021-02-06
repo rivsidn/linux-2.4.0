@@ -531,8 +531,7 @@ asmlinkage void __init start_kernel(void)
  * enable them
  */
 	lock_kernel();
-	//TODO: 此处的printk是如何输出的？
-	printk(linux_banner);
+	printk(linux_banner);	//TODO: 此处的printk是如何输出的？
 	setup_arch(&command_line);
 	printk("Kernel command line: %s\n", saved_command_line);
 	parse_options(command_line);
@@ -543,15 +542,11 @@ asmlinkage void __init start_kernel(void)
 	softirq_init();
 
 	/*
-	 * TODO: next...
-	 */
-
-	/*
 	 * HACK ALERT! This is early. We're enabling the console before
 	 * we've done PCI setups etc, and console_init() must be aware of
 	 * this. But we do want output early, in case something goes wrong.
 	 */
-	console_init();
+	console_init();		//TODO: 这个函数没看
 #ifdef CONFIG_MODULES
 	init_modules();
 #endif
