@@ -14,6 +14,7 @@
 unsigned long
 __generic_copy_to_user(void *to, const void *from, unsigned long n)
 {
+	//TODO: 这个宏是如何实现的？
 	if (access_ok(VERIFY_WRITE, to, n))
 	{
 		if(n<512)

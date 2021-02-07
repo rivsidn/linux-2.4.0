@@ -68,7 +68,7 @@ struct module
 	unsigned nsyms;
 	unsigned ndeps;
 
-	struct module_symbol *syms;
+	struct module_symbol *syms;	/* 数组 */
 	struct module_ref *deps;
 	struct module_ref *refs;
 	int (*init)(void);

@@ -241,8 +241,8 @@ void __init init_modules(void)
 
 /*
  * Copy the name of a module from user space.
+ * 将模块名从用户态cp到内核态，跟 put_mod_name() 配合使用.
  */
-
 static inline long
 get_mod_name(const char *user_name, char **buf)
 {
@@ -275,8 +275,8 @@ put_mod_name(char *buf)
 
 /*
  * Allocate space for a module.
+ * 模块空间申请，加载模块时需要在 init_module() 之前调用该函数.
  */
-
 asmlinkage unsigned long
 sys_create_module(const char *name_user, size_t size)
 {
@@ -295,6 +295,7 @@ sys_create_module(const char *name_user, size_t size)
 		error = -EINVAL;
 		goto err1;
 	}
+	//找到了表示已经存在，返回错误码 EEXIST.
 	if (find_module(name) != NULL) {
 		error = -EEXIST;
 		goto err1;
@@ -326,8 +327,13 @@ err0:
 
 /*
  * Initialize a module.
+ * 模块初始化
+ *
+ * TODO: 需要通过实例查看.
+ *       1. 模块如何导出符号表?
+ *       2. 其他模块如何引用导出的符号表
+ *       3. 代码如何跳转到模块执行
  */
-
 asmlinkage long
 sys_init_module(const char *name_user, struct module *mod_user)
 {
@@ -337,6 +343,7 @@ sys_init_module(const char *name_user, struct module *mod_user)
 	unsigned long mod_user_size;
 	struct module_ref *dep;
 
+	//权限查询
 	if (!capable(CAP_SYS_MODULE))
 		return -EPERM;
 	lock_kernel();
@@ -344,6 +351,7 @@ sys_init_module(const char *name_user, struct module *mod_user)
 		error = namelen;
 		goto err0;
 	}
+	//sys_create_module() 中将模块头添加到module_list
 	if ((mod = find_module(name)) == NULL) {
 		error = -ENOENT;
 		goto err1;
@@ -363,9 +371,11 @@ sys_init_module(const char *name_user, struct module *mod_user)
 		goto err1;
 	}
 
-	/* Hold the current contents while we play with the user's idea
-	   of righteousness.  */
-	mod_tmp = *mod;
+	/* 
+	 * Hold the current contents while we play with the user's idea
+	 * of righteousness.
+	 */
+	mod_tmp = *mod;		//内存拷贝，不是存储指针
 	name_tmp = kmalloc(strlen(mod->name) + 1, GFP_KERNEL);	/* Where's kstrdup()? */
 	if (name_tmp == NULL) {
 		error = -ENOMEM;
@@ -389,7 +399,7 @@ sys_init_module(const char *name_user, struct module *mod_user)
 	}
 
 	/* Make sure all interesting pointers are sane.  */
-
+	/* 确保其他感兴趣的指针是合法的(此处要检测的所有指针元素都是以数组形式组织的) */
 	if (!mod_bound(mod->name, namelen, mod)) {
 		printk(KERN_ERR "init_module: mod->name out of bounds.\n");
 		goto err2;
@@ -402,6 +412,7 @@ sys_init_module(const char *name_user, struct module *mod_user)
 		printk(KERN_ERR "init_module: mod->deps out of bounds.\n");
 		goto err2;
 	}
+	//当mod_bound()第二个参数为0 时，表示只检测第一个参数
 	if (mod->init && !mod_bound(mod->init, 0, mod)) {
 		printk(KERN_ERR "init_module: mod->init out of bounds.\n");
 		goto err2;
@@ -490,6 +501,7 @@ sys_init_module(const char *name_user, struct module *mod_user)
 		goto err3;
 	}
 
+	//对i386来说，该函数被定义成一个返回为 0 的宏
 	if (module_arch_init(mod))
 		goto err3;
 
@@ -583,6 +595,7 @@ int try_inc_mod_count(struct module *mod)
 	return res;
 }
 
+//TODO: 该函数没仔细看
 asmlinkage long
 sys_delete_module(const char *name_user)
 {
@@ -591,6 +604,7 @@ sys_delete_module(const char *name_user)
 	long error;
 	int something_changed;
 
+	//权限查询
 	if (!capable(CAP_SYS_MODULE))
 		return -EPERM;
 
@@ -698,6 +712,7 @@ calc_space_needed:
 		return -ENOSPC;
 }
 
+//查询依赖的模块
 static int
 qm_deps(struct module *mod, char *buf, size_t bufsize, size_t *ret)
 {
@@ -741,6 +756,7 @@ calc_space_needed:
 		return -ENOSPC;
 }
 
+//查询引用的模块
 static int
 qm_refs(struct module *mod, char *buf, size_t bufsize, size_t *ret)
 {
@@ -785,6 +801,7 @@ calc_space_needed:
 		return -ENOSPC;
 }
 
+//查询符号表
 static int
 qm_symbols(struct module *mod, char *buf, size_t bufsize, size_t *ret)
 {
@@ -804,6 +821,7 @@ qm_symbols(struct module *mod, char *buf, size_t bufsize, size_t *ret)
 	i = len = 0;
 	s = mod->syms;
 
+	//需要的空间大于bufsize
 	if (space > bufsize)
 		goto calc_space_needed;
 
@@ -835,6 +853,7 @@ qm_symbols(struct module *mod, char *buf, size_t bufsize, size_t *ret)
 		return 0;
 
 calc_space_needed:
+	//没有足够的空间，返回出错码，并标明需要的空间大小
 	for (; i < mod->nsyms; ++i, ++s)
 		space += strlen(s->name)+1;
 
@@ -865,12 +884,14 @@ qm_info(struct module *mod, char *buf, size_t bufsize, size_t *ret)
 	} else
 		error = -ENOSPC;
 
+	//返回长度
 	if (put_user(sizeof(struct module_info), ret))
 		return -EFAULT;
 
 	return error;
 }
 
+//查询模块有关的各种信息
 asmlinkage long
 sys_query_module(const char *name_user, int which, char *buf, size_t bufsize,
 		 size_t *ret)
@@ -934,8 +955,11 @@ out:
  *
  * This call is obsolete.  New programs should use query_module+QM_SYMBOLS
  * which does not arbitrarily limit the length of symbols.
+ *
+ * 将内核符号表拷贝到用户态，如果参数是NULL，只返回符号表大小.
+ * 该函数已经过时了，新的程序应该调用query_module+QM_SYMBOLS，该函数并不强制
+ * 限制符号长度.
  */
-
 asmlinkage long
 sys_get_kernel_syms(struct kernel_sym *table)
 {
@@ -944,6 +968,7 @@ sys_get_kernel_syms(struct kernel_sym *table)
 	struct kernel_sym ksym;
 
 	lock_kernel();
+	/* 获取模块的内核符号表个数 */
 	for (mod = module_list, i = 0; mod; mod = mod->next) {
 		/* include the count for the module name! */
 		i += mod->nsyms + 1;
@@ -963,11 +988,13 @@ sys_get_kernel_syms(struct kernel_sym *table)
 			continue;
 
 		/* magic: write module info as a pseudo symbol */
+		/* 模块信息会作为一个假的符号表输出到用户态 */
 		ksym.value = (unsigned long)mod;
 		ksym.name[0] = '#';
 		strncpy(ksym.name+1, mod->name, sizeof(ksym.name)-1);
 		ksym.name[sizeof(ksym.name)-1] = '\0';
 
+		//不成功，退出
 		if (copy_to_user(table, &ksym, sizeof(ksym)) != 0)
 			goto out;
 		++i, ++table;
@@ -992,14 +1019,16 @@ out:
 
 /*
  * Look for a module by name, ignoring modules marked for deletion.
+ *
+ * 通过名称查找模块，忽略已经被标记为删除的模块.
  */
-
 struct module *
 find_module(const char *name)
 {
 	struct module *mod;
 
 	for (mod = module_list; mod ; mod = mod->next) {
+		//忽略标记为删除的模块
 		if (mod->flags & MOD_DELETED)
 			continue;
 		if (!strcmp(mod->name, name))
@@ -1029,8 +1058,10 @@ free_module(struct module *mod, int tag_freed)
 	}
 
 	/* Remove the module from the dependency lists.  */
-	/* 依赖链表中将模块删除 */
-	/* TODO: 这部分是怎么操作的？ */
+	/*
+	 * 一个模块依赖的模块是固定的，以数组形式组织；被依赖的模块是不固定的通过
+	 * module_ref{} 中的next_ref 指针将module_ref{} 串联起来.
+	 */
 	for (i = 0, dep = mod->deps; i < mod->ndeps; ++i, ++dep) {
 		struct module_ref **pp;
 		for (pp = &dep->dep->refs; *pp != dep; pp = &(*pp)->next_ref)
