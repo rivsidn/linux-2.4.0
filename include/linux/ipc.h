@@ -62,7 +62,7 @@ struct kern_ipc_perm
 	uid_t		cuid;
 	gid_t		cgid;
 	mode_t		mode; 
-	unsigned long	seq;
+	unsigned long	seq;	//TODO: 做什么用的？
 };
 
 #endif /* __KERNEL__ */

@@ -85,6 +85,7 @@ struct sem {
 };
 
 /* One sem_array data structure for each set of semaphores in the system. */
+/* 一个数组中有多个sem，拥有相同的权限 */
 struct sem_array {
 	struct kern_ipc_perm	sem_perm;	/* permissions .. see ipc.h */
 	time_t			sem_otime;	/* last semop time */
@@ -97,6 +98,7 @@ struct sem_array {
 };
 
 /* One queue for each sleeping process in the system. */
+/* 每个队列对应系统中一个sleeping的进程 */
 struct sem_queue {
 	struct sem_queue *	next;	 /* next entry in the queue */
 	struct sem_queue **	prev;	 /* previous entry in the queue, *(q->prev) == q */

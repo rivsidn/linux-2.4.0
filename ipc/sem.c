@@ -109,6 +109,7 @@ void __init sem_init (void)
 #endif
 }
 
+//创建新信号
 static int newary (key_t key, int nsems, int semflg)
 {
 	int id;
@@ -144,6 +145,7 @@ static int newary (key_t key, int nsems, int semflg)
 	sma->sem_ctime = CURRENT_TIME;
 	sem_unlock(id);
 
+	//返回id
 	return sem_buildid(id, sma->sem_perm.seq);
 }
 
@@ -999,6 +1001,7 @@ void sem_exit (void)
 			sem_unlock(semid);
 	}
 
+	//TODO: next...
 	for (up = &current->semundo; (u = *up); *up = u->proc_next, kfree(u)) {
 		int semid = u->semid;
 		if(semid == -1)

@@ -24,6 +24,7 @@ struct ipc_ids {
 };
 
 struct ipc_id {
+	//指针
 	struct kern_ipc_perm* p;
 };
 

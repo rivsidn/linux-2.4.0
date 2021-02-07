@@ -215,6 +215,7 @@ struct kern_ipc_perm* ipc_rmid(struct ipc_ids* ids, int id)
 void* ipc_alloc(int size)
 {
 	void* out;
+	//TODO: vmalloc, kmalloc 之间什么区别？
 	if(size > PAGE_SIZE)
 		out = vmalloc(size);
 	else
