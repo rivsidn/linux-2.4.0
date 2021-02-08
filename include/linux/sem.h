@@ -37,8 +37,11 @@ struct semid_ds {
 /* semop system calls takes an array of these. */
 struct sembuf {
 	unsigned short  sem_num;	/* semaphore index in array */
+					/* 信号数组中信号的下标 */
 	short		sem_op;		/* semaphore operation */
+					/* 信号操作 */
 	short		sem_flg;	/* operation flags */
+					/* 操作标志位 */
 };
 
 /* arg for semctl system calls. */
@@ -81,7 +84,9 @@ struct  seminfo {
 /* One semaphore structure for each semaphore in the system. */
 struct sem {
 	int	semval;		/* current value */
+				/* 信号当前值 */
 	int	sempid;		/* pid of last operation */
+				/* 最后一次操作的pid */
 };
 
 /* One sem_array data structure for each set of semaphores in the system. */
@@ -108,6 +113,7 @@ struct sem_queue {
 	int    			status;	 /* completion status of operation */
 	struct sem_array *	sma;	 /* semaphore array for operations */
 	int			id;	 /* internal sem id */
+					 /* 通过id可以获取到sem_array{}结构体 */
 	struct sembuf *		sops;	 /* array of pending operations */
 	int			nsops;	 /* number of operations */
 	int			alter;	 /* operation will alter semaphore */
@@ -115,11 +121,13 @@ struct sem_queue {
 
 /* Each task has a list of undo requests. They are executed automatically
  * when the process exits.
+ * 每个进程有一个undo请求，在进程退出的时候自动执行.
  */
 struct sem_undo {
 	struct sem_undo *	proc_next;	/* next entry on this process */
 	struct sem_undo *	id_next;	/* next entry on this semaphore set */
 	int			semid;		/* semaphore set identifier */
+						/* 通过semid 可以获取到sem_array{}结构体 */
 	short *			semadj;		/* array of adjustments, one per semaphore */
 };
 

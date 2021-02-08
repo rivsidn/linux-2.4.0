@@ -239,7 +239,6 @@ static inline void remove_from_queue (struct sem_array * sma,
  * Determine whether a sequence of semaphore operations would succeed
  * all at once. Return 0 if yes, 1 if need to sleep, else return error code.
  */
-
 static int try_atomic_semop (struct sem_array * sma, struct sembuf * sops,
 			     int nsops, struct sem_undo *un, int pid,
 			     int do_undo)
@@ -252,8 +251,9 @@ static int try_atomic_semop (struct sem_array * sma, struct sembuf * sops,
 		curr = sma->sem_base + sop->sem_num;
 		sem_op = sop->sem_op;
 
+		//TODO: next...
 		if (!sem_op && curr->semval)
-			goto would_block;
+			goto would_block;	//TODO: 为什么？？
 
 		curr->sempid = (curr->sempid << 16) | pid;
 		curr->semval += sem_op;
@@ -300,7 +300,8 @@ undo:
 	return result;
 }
 
-/* Go through the pending queue for the indicated semaphore
+/*
+ * Go through the pending queue for the indicated semaphore
  * looking for tasks that can be completed.
  */
 static void update_queue (struct sem_array * sma)
@@ -318,7 +319,7 @@ static void update_queue (struct sem_array * sma)
 
 		/* Does q->sleeper still need to sleep? */
 		if (error <= 0) {
-				/* Found one, wake it up */
+			/* Found one, wake it up */
 			wake_up_process(q->sleeper);
 			if (error == 0 && q->alter) {
 				/* if q-> alter let it self try */
@@ -984,8 +985,11 @@ void sem_exit (void)
 	struct sem_array *sma;
 	int nsems, i;
 
-	/* If the current process was sleeping for a semaphore,
+	/*
+	 * If the current process was sleeping for a semaphore,
 	 * remove it from the queue.
+	 *
+	 * 如果进程阻塞在信号上，将该进程从信号阻塞链表上删除.
 	 */
 	if ((q = current->semsleeping)) {
 		int semid = q->id;
@@ -1001,7 +1005,7 @@ void sem_exit (void)
 			sem_unlock(semid);
 	}
 
-	//TODO: next...
+	//当进程退出时候，需要将该进程对信号做的所有修改都还原
 	for (up = &current->semundo; (u = *up); *up = u->proc_next, kfree(u)) {
 		int semid = u->semid;
 		if(semid == -1)
@@ -1014,7 +1018,7 @@ void sem_exit (void)
 			goto next_entry;
 
 		if (sem_checkid(sma,u->semid))
-			goto next_entry;
+			goto next_entry;	//此处什么时候会执行到
 
 		/* remove u from the sma->undo list */
 		for (unp = &sma->undo; (un = *unp); unp = &un->id_next) {
