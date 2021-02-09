@@ -368,8 +368,8 @@ struct task_struct {
 	struct tty_struct *tty; /* NULL if no tty */
 	unsigned int locks; /* How many file locks are being held */
 /* ipc stuff */
-	struct sem_undo *semundo;
-	struct sem_queue *semsleeping;
+	struct sem_undo *semundo;	//一进程可能存在多个sem_undo{} 结构体
+	struct sem_queue *semsleeping;	//一个进程只对应一个sem_queue{} 结构体
 /* CPU-specific state of this task */
 	struct thread_struct thread;
 /* filesystem information */

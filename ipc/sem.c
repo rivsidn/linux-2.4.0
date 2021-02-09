@@ -185,6 +185,7 @@ asmlinkage long sys_semget (key_t key, int nsems, int semflg)
 }
 
 /* doesn't acquire the sem_lock on error! */
+/* 出错时候需要释放sem_lock 锁 */
 static int sem_revalidate(int semid, struct sem_array* sma, int nsems, short flg)
 {
 	struct sem_array* smanew;
@@ -203,16 +204,22 @@ static int sem_revalidate(int semid, struct sem_array* sma, int nsems, short flg
 	}
 	return 0;
 }
-/* Manage the doubly linked list sma->sem_pending as a FIFO:
+/*
+ * Manage the doubly linked list sma->sem_pending as a FIFO:
  * insert new queue elements at the tail sma->sem_pending_last.
+ *
+ * 管理sma->sem_pending 这个二级链表作为FIFO:
+ * 将新的队列元素插入到sma->sem_pending_last 中.
  */
 static inline void append_to_queue (struct sem_array * sma,
 				    struct sem_queue * q)
 {
+	//TODO: 二级指针的灵活运用
 	*(q->prev = sma->sem_pending_last) = q;
 	*(sma->sem_pending_last = &q->next) = NULL;
 }
 
+//头插
 static inline void prepend_to_queue (struct sem_array * sma,
 				     struct sem_queue * q)
 {
@@ -224,6 +231,7 @@ static inline void prepend_to_queue (struct sem_array * sma,
 		sma->sem_pending_last = &q->next;
 }
 
+//将元素从队列中移除
 static inline void remove_from_queue (struct sem_array * sma,
 				      struct sem_queue * q)
 {
@@ -251,12 +259,12 @@ static int try_atomic_semop (struct sem_array * sma, struct sembuf * sops,
 		curr = sma->sem_base + sop->sem_num;
 		sem_op = sop->sem_op;
 
-		//TODO: next...
 		if (!sem_op && curr->semval)
 			goto would_block;	//TODO: 为什么？？
 
 		curr->sempid = (curr->sempid << 16) | pid;
 		curr->semval += sem_op;
+		//设置了SEM_UNDO 标识位，进程退出的时候回自动还原之前的操作
 		if (sop->sem_flg & SEM_UNDO)
 			un->semadj[sop->sem_num] -= sem_op;
 
@@ -287,6 +295,7 @@ would_block:
 		result = 1;
 
 undo:
+	//还原所做的修改
 	while (sop >= sops) {
 		curr = sma->sem_base + sop->sem_num;
 		curr->semval -= sop->sem_op;
@@ -303,6 +312,8 @@ undo:
 /*
  * Go through the pending queue for the indicated semaphore
  * looking for tasks that can be completed.
+ *
+ * 在指定信号的挂起队列中查找能满足条件的进程.
  */
 static void update_queue (struct sem_array * sma)
 {
@@ -323,6 +334,7 @@ static void update_queue (struct sem_array * sma)
 			wake_up_process(q->sleeper);
 			if (error == 0 && q->alter) {
 				/* if q-> alter let it self try */
+				/* 如果设置了 q->alter，让进程自己去try */
 				q->status = 1;
 				return;
 			}
@@ -332,9 +344,12 @@ static void update_queue (struct sem_array * sma)
 	}
 }
 
-/* The following counts are associated to each semaphore:
+/*
+ * The following counts are associated to each semaphore:
  *   semncnt        number of tasks waiting on semval being nonzero
+ *                  等待信号为非 0 的进程数量
  *   semzcnt        number of tasks waiting on semval being zero
+ *                  等待信号为 0 的进程数量
  * This model assumes that a task waits on exactly one semaphore.
  * Since semaphore operations are to be performed atomically, tasks actually
  * wait on a whole sequence of semaphores simultaneously.
@@ -379,6 +394,7 @@ static int count_semzcnt (struct sem_array * sma, ushort semnum)
 }
 
 /* Free a semaphore set. */
+/* 释放一个信号集合，跟newary()对应 */
 static void freeary (int id)
 {
 	struct sem_array *sma;
@@ -430,6 +446,7 @@ static unsigned long copy_semid_to_user(void *buf, struct semid64_ds *in, int ve
 	}
 }
 
+//用户态内核态信息交互
 int semctl_nolock(int semid, int semnum, int cmd, int version, union semun arg)
 {
 	int err = -EINVAL;
@@ -741,6 +758,7 @@ out_unlock:
 	return err;
 }
 
+//用户态内核态信息交互
 asmlinkage long sys_semctl (int semid, int semnum, int cmd, union semun arg)
 {
 	int err = -EINVAL;
@@ -796,6 +814,7 @@ static struct sem_undo* freeundos(struct sem_array *sma, struct sem_undo* un)
 }
 
 /* returns without sem_lock on error! */
+/* 错误时返回，不带sem_lock 锁 */
 static int alloc_undo(struct sem_array *sma, struct sem_undo** unp, int semid, int alter)
 {
 	int size, nsems, error;
@@ -816,10 +835,13 @@ static int alloc_undo(struct sem_array *sma, struct sem_undo** unp, int semid, i
 		return error;
 	}
 
+	//指向头部末尾
 	un->semadj = (short *) &un[1];
 	un->semid = semid;
+	//插入到该进程列表中
 	un->proc_next = current->semundo;
 	current->semundo = un;
+	//插入到信号量结合列表中
 	un->id_next = sma->undo;
 	sma->undo = un;
 	*unp = un;
@@ -845,10 +867,12 @@ asmlinkage long sys_semop (int semid, struct sembuf *tsops, unsigned nsops)
 		if(sops==NULL)
 			return -ENOMEM;
 	}
+	//用户态获取操作结构体
 	if (copy_from_user (sops, tsops, nsops * sizeof(*tsops))) {
 		error=-EFAULT;
 		goto out_free;
 	}
+	//获取信号
 	sma = sem_lock(semid);
 	error=-EINVAL;
 	if(sma==NULL)
@@ -869,6 +893,7 @@ asmlinkage long sys_semop (int semid, struct sembuf *tsops, unsigned nsops)
 	}
 	alter |= decrease;
 
+	//检查权限
 	error = -EACCES;
 	if (ipcperms(&sma->sem_perm, alter ? S_IWUGO : S_IRUGO))
 		goto out_unlock_free;
@@ -894,11 +919,14 @@ asmlinkage long sys_semop (int semid, struct sembuf *tsops, unsigned nsops)
 		un = NULL;
 
 	error = try_atomic_semop (sma, sops, nsops, un, current->pid, 0);
-	if (error <= 0)
+	if (error <= 0)		//出错或满足条件
 		goto update;
 
-	/* We need to sleep on this operation, so we put the current
+	/*
+	 * We need to sleep on this operation, so we put the current
 	 * task into the pending queue and go to sleep.
+	 *
+	 * 不能满足条件，此时需要休眠
 	 */
 		
 	queue.sma = sma;
@@ -906,17 +934,18 @@ asmlinkage long sys_semop (int semid, struct sembuf *tsops, unsigned nsops)
 	queue.nsops = nsops;
 	queue.undo = un;
 	queue.pid = current->pid;
-	queue.alter = decrease;
+	queue.alter = decrease;		//TODO:？？？
 	queue.id = semid;
 	if (alter)
-		append_to_queue(sma ,&queue);
+		append_to_queue(sma ,&queue);	//尾插
 	else
-		prepend_to_queue(sma ,&queue);
+		prepend_to_queue(sma ,&queue);	//头插
+	//此时的queue是一个局部变量
 	current->semsleeping = &queue;
 
 	for (;;) {
 		struct sem_array* tmp;
-		queue.status = -EINTR;
+		queue.status = -EINTR;	//TODO: 进程调度？？？
 		queue.sleeper = current;
 		current->state = TASK_INTERRUPTIBLE;
 		sem_unlock(semid);

@@ -98,6 +98,7 @@ struct sem_array {
 	struct sem		*sem_base;	/* ptr to first semaphore in array */
 	struct sem_queue	*sem_pending;	/* pending operations to be processed */
 	struct sem_queue	**sem_pending_last; /* last pending operation */
+						    /* 链表中最后一个元素的位置，用于链表尾插操作 */
 	struct sem_undo		*undo;		/* undo requests on this array */
 	unsigned long		sem_nsems;	/* no. of semaphores in array */
 };
@@ -108,6 +109,7 @@ struct sem_queue {
 	struct sem_queue *	next;	 /* next entry in the queue */
 	struct sem_queue **	prev;	 /* previous entry in the queue, *(q->prev) == q */
 	struct task_struct*	sleeper; /* this process */
+					 /* 该进程 */
 	struct sem_undo *	undo;	 /* undo structure */
 	int    			pid;	 /* process id of requesting process */
 	int    			status;	 /* completion status of operation */
@@ -115,8 +117,11 @@ struct sem_queue {
 	int			id;	 /* internal sem id */
 					 /* 通过id可以获取到sem_array{}结构体 */
 	struct sembuf *		sops;	 /* array of pending operations */
+					 /* 挂起的操作数组 */
 	int			nsops;	 /* number of operations */
+					 /* 操作数量 */
 	int			alter;	 /* operation will alter semaphore */
+					 /* 操作会改变信号 */
 };
 
 /* Each task has a list of undo requests. They are executed automatically
