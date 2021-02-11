@@ -50,8 +50,7 @@ struct module_ref
 /* TBD */
 struct module_persist;
 
-struct module
-{
+struct module {
 	unsigned long size_of_struct;	/* == sizeof(module) */
 	struct module *next;
 	const char *name;

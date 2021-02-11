@@ -455,6 +455,8 @@ void __init zap_low_mappings (void)
  * that we can trap those pesky NULL-reference errors in the kernel.
  *
  * 没有映射地址 0，所以访问NULL 的时候就会报异常.
+ *
+ * TODO: 调用到该函数之前，实模式、保护模式、分页.
  */
 void __init paging_init(void)
 {
