@@ -769,9 +769,10 @@ out_free_ph:
 	goto out;
 }
 
-/* This is really simpleminded and specialized - we are loading an
-   a.out library that is given an ELF header. */
-
+/*
+ * This is really simpleminded and specialized - we are loading an
+ * a.out library that is given an ELF header.
+ */
 static int load_elf_library(struct file *file)
 {
 	struct elf_phdr *elf_phdata;
