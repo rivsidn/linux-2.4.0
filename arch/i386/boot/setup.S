@@ -267,7 +267,7 @@ no_sig:
 no_sig_loop:
 	jmp	no_sig_loop
 
-# 签名是正确的
+# setup程序签名是正确的
 good_sig:
 	movw	%cs, %ax			# aka SETUPSEG
 	subw	$DELTA_INITSEG, %ax 		# aka INITSEG
@@ -745,9 +745,12 @@ flush_instr:
 #	Manual, Mixing 16-bit and 32-bit code, page 16-6)
 
 	# 此处通过直接通过机器码的形式跳转到system处执行
+	# 此时没有设置分页，仅仅开启了保护模式，由于此时段描述符的基地址
+	# 都是从0 开始，所以此处跳转的地址就是实际的物理地址.
 	.byte 0x66, 0xea			# prefix + jmpi-opcode
 code32:	.long	0x1000				# will be set to 0x100000
 						# for big kernels
+						# rmodeswtch_end 处设置.
 	.word	__KERNEL_CS
 
 # Here's a bunch of information about your current kernel..
@@ -948,6 +951,7 @@ gdt_48:
 						#  256 GDT entries
 
 	.word	0, 0				# gdt base (filled in later)
+						# 加载之前设置的该部分
 
 # Include video setup & detection code
 

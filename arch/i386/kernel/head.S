@@ -42,6 +42,10 @@
  * swapper_pg_dir 在该文件的下边定义.
  *
  * On entry, %esi points to the real-mode code as a 32-bit pointer.
+ *
+ * 跳转到此处执行的时候，此时为保护模式，没有开启分页，由于当时设置的
+ * 全局描述符表内存地址会被覆盖掉，所以在之后需要重新设置全局描述符表
+ * 和中断描述符表.
  */
 ENTRY(stext)
 ENTRY(_stext)
@@ -408,7 +412,10 @@ ENTRY(swapper_pg_dir)
 	.long 0x00103007
 	.fill BOOT_USER_PGD_PTRS-2,4,0
 	/* default: 766 entries */
-	/* 下边这两条页目录项，使得system中即使多了3G偏移量，也能够找到正确的位置 */
+	/*
+	 * 下边这两条页目录项，指向的是pg0、pg1，使得system中即使多了3G偏移量，
+	 * 也能够找到正确的位置.
+	 */
 	.long 0x00102007
 	.long 0x00103007
 	/* default: 254 entries */

@@ -338,6 +338,7 @@ static void __init pagetable_init (void)
 
 	//从虚拟地址PAGE_OFFSET(3G)开始，设置页目录表.
 	//不支持PAE时pgd是一个 long 型指针.
+	//仅映射了内核态内存.
 	for (; i < PTRS_PER_PGD; pgd++, i++) {
 		vaddr = i*PGDIR_SIZE;
 		if (end && (vaddr >= end))
@@ -372,13 +373,14 @@ static void __init pagetable_init (void)
 				continue;
 			}
 
+			//申请页表
 			pte = (pte_t *) alloc_bootmem_low_pages(PAGE_SIZE);
 			set_pmd(pmd, __pmd(_KERNPG_TABLE + __pa(pte)));
 
 			if (pte != pte_offset(pmd, 0))
 				BUG();
 
-			//设置页表
+			//设置页表项
 			for (k = 0; k < PTRS_PER_PTE; pte++, k++) {
 				vaddr = i*PGDIR_SIZE + j*PMD_SIZE + k*PAGE_SIZE;
 				if (end && (vaddr >= end))
@@ -450,11 +452,12 @@ void __init zap_low_mappings (void)
 /*
  * paging_init() sets up the page tables - note that the first 8MB are
  * already mapped by head.S.
+ * paging_init() 建立页表-最开始的8MB内存已经再head.S中初始化了.
  *
  * This routines also unmaps the page at virtual kernel address 0, so
  * that we can trap those pesky NULL-reference errors in the kernel.
  *
- * 没有映射地址 0，所以访问NULL 的时候就会报异常.
+ * 没有映射地址 0，所以访问NULL 的时候就会报异常？？？这句话怎么理解
  *
  * TODO: 调用到该函数之前，实模式、保护模式、分页.
  */
@@ -462,7 +465,7 @@ void __init paging_init(void)
 {
 	pagetable_init();
 
-	//设置cr3
+	//设置cr3，其中存着页表指针
 	__asm__( "movl %%ecx,%%cr3\n" ::"c"(__pa(swapper_pg_dir)));
 
 #if CONFIG_X86_PAE

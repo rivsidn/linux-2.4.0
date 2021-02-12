@@ -435,11 +435,13 @@ void release_segments(struct mm_struct *mm)
 
 /*
  * Create a kernel thread
+ * 创建一个内核线程，调用fn函数，之后返回
  */
 int kernel_thread(int (*fn)(void *), void * arg, unsigned long flags)
 {
 	long retval, d0;
 
+	//TODO: 内核态中调用系统调用的流程.
 	__asm__ __volatile__(
 		"movl %%esp,%%esi\n\t"
 		"int $0x80\n\t"		/* Linux/i386 system call */

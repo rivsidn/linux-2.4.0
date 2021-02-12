@@ -27,6 +27,8 @@ extern void die(const char *,struct pt_regs *,long);
 
 /*
  * Ugly, ugly, but the goto's result in better assembly..
+ *
+ * 判断该用户态虚拟地址该进程是否拥有写权限.
  */
 int __verify_write(const void * addr, unsigned long size)
 {
@@ -36,6 +38,8 @@ int __verify_write(const void * addr, unsigned long size)
 	if (!size)
 		return 1;
 
+	//TODO: next...
+	//find_vma() 函数实现
 	vma = find_vma(current->mm, start);
 	if (!vma)
 		goto bad_area;
@@ -97,6 +101,8 @@ extern unsigned long idt;
  * This routine handles page faults.  It determines the address,
  * and the problem, and then passes it off to one of the appropriate
  * routines.
+ * 该程序用于处理页面异常。该程序用于查明地址、问题，并将他传递给合适
+ * 的程序处理.
  *
  * error_code:
  *	bit 0 == 0 means no page found, 1 means protection fault
@@ -254,6 +260,7 @@ bad_area_nosemaphore:
 
 no_context:
 	/* Are we prepared to handle this kernel fault?  */
+	/* 我们准备处理这个内核异常么？ */
 	if ((fixup = search_exception_table(regs->eip)) != 0) {
 		regs->eip = fixup;
 		return;
