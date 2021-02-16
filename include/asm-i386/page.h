@@ -119,6 +119,7 @@ extern __inline__ int get_order(unsigned long size)
 #define PAGE_OFFSET		((unsigned long)__PAGE_OFFSET)
 #define __pa(x)			((unsigned long)(x)-PAGE_OFFSET)
 #define __va(x)			((void *)((unsigned long)(x)+PAGE_OFFSET))
+/* 寻找mem_map中对应的物理页面 */
 #define virt_to_page(kaddr)	(mem_map + (__pa(kaddr) >> PAGE_SHIFT))
 #define VALID_PAGE(page)	((page - mem_map) < max_mapnr)
 

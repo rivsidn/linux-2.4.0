@@ -3,6 +3,9 @@
  *
  * Copyright (C) 1992 Krishna Balasubramanian and Linus Torvalds
  * Copyright (C) 1999 Ingo Molnar <mingo@redhat.com>
+ *
+ * 实现了 modify_ldt() 系统调用，“WINE” 会用到，用于实现模拟windows系统功能，
+ * 该文件本身并不属于Linux内核本身的存储管理框架.
  */
 
 #include <linux/errno.h>

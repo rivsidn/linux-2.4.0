@@ -37,19 +37,24 @@ extern struct list_head inactive_dirty_list;
  * per VM-area/task.  A VM area is any part of the process virtual memory
  * space that has a special rule for the page-fault handlers (ie a shared
  * library, the executable area etc).
+ *
+ * 虚拟地址映射区间
  */
 struct vm_area_struct {
 	struct mm_struct * vm_mm;	/* VM area parameters */
+	//表示的虚拟地址为[vm_start,vm_end)组成的半闭半开区间
 	unsigned long vm_start;
 	unsigned long vm_end;
 
 	/* linked list of VM areas per task, sorted by address */
+	/* 指向下一个虚拟地址空间，按地址顺序排列 */
 	struct vm_area_struct *vm_next;
 
 	pgprot_t vm_page_prot;
 	unsigned long vm_flags;
 
 	/* AVL tree of VM areas per task, sorted by address */
+	/* 平衡二叉树 */
 	short vm_avl_height;
 	struct vm_area_struct * vm_avl_left;
 	struct vm_area_struct * vm_avl_right;
@@ -130,6 +135,9 @@ struct vm_operations_struct {
  *
  * The first line is data used in page cache lookup, the second line
  * is used for linear searches (eg. clock algorithm scans). 
+ *
+ * 代表一个实际的物理页面，系统初始化的时候根据物理内存的大小建立起一个page{}
+ * 结构数组mem_map。物理页面划分成 ZONE_DMA，ZONE_NORMAL两个管理区(还可能有ZONE_HIGHMEM).
  */
 typedef struct page {
 	struct list_head list;

@@ -200,14 +200,22 @@ struct files_struct {
 /* Number of map areas at which the AVL tree is activated. This is arbitrary. */
 #define AVL_MIN_MAP_COUNT	32
 
+//进程虚拟地址映射.
+//每个进程只有一个mm_struct{} 结构，但是该结构体可能会被多个进程共享.
+//一个虚拟地址如果有对应的虚存空间存在，并不保证该地址所在的页面已经
+//映射到某一个物理地址，更不保证该页面就在内存中.
 struct mm_struct {
 	struct vm_area_struct * mmap;		/* list of VMAs */
+						/* 单链表线性队列 */
 	struct vm_area_struct * mmap_avl;	/* tree of VMAs */
+						/* AVL 树 */
 	struct vm_area_struct * mmap_cache;	/* last find_vma result */
-	pgd_t * pgd;
+						/* find_vma() 最近的返回值 */
+	pgd_t * pgd;				/* 进程的全局描述符表 */
 	atomic_t mm_users;			/* How many users with user space? */
 	atomic_t mm_count;			/* How many references to "struct mm_struct" (users count as 1) */
 	int map_count;				/* number of VMAs */
+						/* 进程中有几个虚存空间 */
 	struct semaphore mmap_sem;
 	spinlock_t page_table_lock;
 

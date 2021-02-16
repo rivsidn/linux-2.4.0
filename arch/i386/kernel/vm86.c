@@ -18,6 +18,11 @@
 #include <asm/io.h>
 
 /*
+ * 用于实现模拟DOS软件功能。
+ * 该文件并不属于内核内存管理框架。
+ */
+
+/*
  * Known problems:
  *
  * Interrupt handling is not guaranteed:

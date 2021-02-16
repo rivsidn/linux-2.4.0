@@ -67,6 +67,7 @@ static inline void copy_cow_page(struct page * from, struct page * to, unsigned 
 	copy_user_highpage(to, from, address);
 }
 
+//指向一个page{} 数据结构的数组，每个page{} 代表着一个页面
 mem_map_t * mem_map;
 
 /*

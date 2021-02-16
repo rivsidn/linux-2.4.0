@@ -21,12 +21,13 @@ typedef struct free_area_struct {
 
 struct pglist_data;
 
+/* 管理区 */
 typedef struct zone_struct {
 	/*
 	 * Commonly accessed fields:
 	 */
 	spinlock_t		lock;
-	unsigned long		offset;
+	unsigned long		offset;		//起始页面号
 	unsigned long		free_pages;
 	unsigned long		inactive_clean_pages;
 	unsigned long		inactive_dirty_pages;
@@ -52,6 +53,7 @@ typedef struct zone_struct {
 	struct page		*zone_mem_map;
 } zone_t;
 
+/* 管理区类型 */
 #define ZONE_DMA		0
 #define ZONE_NORMAL		1
 #define ZONE_HIGHMEM		2
@@ -76,17 +78,21 @@ typedef struct zonelist_struct {
 #define NR_GFPINDEX		0x100
 
 struct bootmem_data;
+/*
+ * NUMA
+ * 代表着存储节点的结构体，每个存储节点至少有两个管理区
+ */
 typedef struct pglist_data {
-	zone_t node_zones[MAX_NR_ZONES];
-	zonelist_t node_zonelists[NR_GFPINDEX];
-	struct page *node_mem_map;
+	zone_t node_zones[MAX_NR_ZONES];	//管理区，最多三个
+	zonelist_t node_zonelists[NR_GFPINDEX];	//规定不同的分配策略
+	struct page *node_mem_map;		//具体节点的page{}结构 
 	unsigned long *valid_addr_bitmap;
 	struct bootmem_data *bdata;
 	unsigned long node_start_paddr;
 	unsigned long node_start_mapnr;
 	unsigned long node_size;
 	int node_id;
-	struct pglist_data *node_next;
+	struct pglist_data *node_next;		//存储节点的单链表
 } pg_data_t;
 
 extern int numnodes;

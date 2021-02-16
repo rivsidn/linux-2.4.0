@@ -101,8 +101,8 @@ extern unsigned long idt;
  * This routine handles page faults.  It determines the address,
  * and the problem, and then passes it off to one of the appropriate
  * routines.
- * 该程序用于处理页面异常。该程序用于查明地址、问题，并将他传递给合适
- * 的程序处理.
+ * 该程序用于处理页面异常。
+ * 程序用于查明地址、问题，并将他传递给合适的程序处理。
  *
  * error_code:
  *	bit 0 == 0 means no page found, 1 means protection fault
@@ -121,6 +121,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	siginfo_t info;
 
 	/* get the address */
+	/* 出错的地址存在cr2中 */
 	__asm__("movl %%cr2,%0":"=r" (address));
 
 	tsk = current;
@@ -137,6 +138,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	if (address >= TASK_SIZE)
 		goto vmalloc_fault;
 
+	//TODO: next...
 	mm = tsk->mm;
 	info.si_code = SEGV_MAPERR;
 

@@ -402,6 +402,7 @@ unsigned long get_unmapped_area(unsigned long addr, unsigned long len)
 #include "mmap_avl.c"
 
 /* Look up the first VMA which satisfies  addr < vm_end,  NULL if none. */
+/* 给定进程的虚拟地址映射和虚拟地址，查找满足条件的虚拟地址区间 */
 struct vm_area_struct * find_vma(struct mm_struct * mm, unsigned long addr)
 {
 	struct vm_area_struct *vma = NULL;
@@ -411,6 +412,7 @@ struct vm_area_struct * find_vma(struct mm_struct * mm, unsigned long addr)
 		/* (Cache hit rate is typically around 35%.) */
 		vma = mm->mmap_cache;
 		if (!(vma && vma->vm_end > addr && vma->vm_start <= addr)) {
+			//如果平衡二叉树不存在就查找线性表，如果存在就查找平衡二叉树
 			if (!mm->mmap_avl) {
 				/* Go through the linear list. */
 				vma = mm->mmap;
@@ -432,10 +434,12 @@ struct vm_area_struct * find_vma(struct mm_struct * mm, unsigned long addr)
 						tree = tree->vm_avl_right;
 				}
 			}
+			//如果找到了缓存一下.
 			if (vma)
 				mm->mmap_cache = vma;
 		}
 	}
+	//返回找到的虚拟地址区间
 	return vma;
 }
 
@@ -933,6 +937,7 @@ void __insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vmp)
 	vmp->vm_next = *pprev;
 	*pprev = vmp;
 
+	//进程虚拟映射中的虚拟区间个数满足条件的时候才创建AVL树
 	mm->map_count++;
 	if (mm->map_count >= AVL_MIN_MAP_COUNT && !mm->mmap_avl)
 		build_mmap_avl(mm);
@@ -958,6 +963,7 @@ void __insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vmp)
 	}
 }
 
+//将vmp插入到虚拟映射中
 void insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vmp)
 {
 	lock_vma_mappings(vmp);
