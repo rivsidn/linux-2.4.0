@@ -117,24 +117,27 @@ extern inline pte_t * pte_alloc_kernel(pmd_t * pmd, unsigned long address)
 	return (pte_t *) pmd_page(*pmd) + address;
 }
 
+//建立页中间目录表对应表项
 extern inline pte_t * pte_alloc(pmd_t * pmd, unsigned long address)
 {
+	//页表在PMD 中的下标
 	address = (address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1);
 
-	if (pmd_none(*pmd))
+	if (pmd_none(*pmd))	//如果目录项为空
 		goto getnew;
 	if (pmd_bad(*pmd))
 		goto fix;
 	return (pte_t *)pmd_page(*pmd) + address;
 getnew:
-{
-	unsigned long page = (unsigned long) get_pte_fast();
-	
-	if (!page)
-		return get_pte_slow(pmd, address);
-	set_pmd(pmd, __pmd(_PAGE_TABLE + __pa(page)));
-	return (pte_t *)page + address;
-}
+	{
+		//申请一个页表，填充到目录项中
+		unsigned long page = (unsigned long) get_pte_fast();
+
+		if (!page)
+			return get_pte_slow(pmd, address);
+		set_pmd(pmd, __pmd(_PAGE_TABLE + __pa(page)));
+		return (pte_t *)page + address;
+	}
 fix:
 	__handle_bad_pmd(pmd);
 	return NULL;

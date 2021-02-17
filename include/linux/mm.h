@@ -492,18 +492,26 @@ extern struct page *filemap_nopage(struct vm_area_struct *, unsigned long, int);
 
 #define GFP_HIGHMEM	__GFP_HIGHMEM
 
-/* vma is the first one with  address < vma->vm_end,
- * and even  address < vma->vm_start. Have to extend vma. */
+/*
+ * vma is the first one with  address < vma->vm_end,
+ * and even  address < vma->vm_start. Have to extend vma.
+ *
+ * 虚拟映射区间拓展
+ * 仅仅改变了 vm_area_struct{} 结构体，并没有拓展页面对物理内存的映射。
+ */
 static inline int expand_stack(struct vm_area_struct * vma, unsigned long address)
 {
 	unsigned long grow;
 
+	//地址按页面大小对齐，向下取整
 	address &= PAGE_MASK;
 	grow = (vma->vm_start - address) >> PAGE_SHIFT;
+	//如果超出限制则返回错误 
 	if (vma->vm_end - address > current->rlim[RLIMIT_STACK].rlim_cur ||
 	    ((vma->vm_mm->total_vm + grow) << PAGE_SHIFT) > current->rlim[RLIMIT_AS].rlim_cur)
 		return -ENOMEM;
 	vma->vm_start = address;
+	//栈都是向下拓展，所以此处是减去grow
 	vma->vm_pgoff -= grow;
 	vma->vm_mm->total_vm += grow;
 	if (vma->vm_flags & VM_LOCKED)

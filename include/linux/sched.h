@@ -211,7 +211,7 @@ struct mm_struct {
 						/* AVL 树 */
 	struct vm_area_struct * mmap_cache;	/* last find_vma result */
 						/* find_vma() 最近的返回值 */
-	pgd_t * pgd;				/* 进程的全局描述符表 */
+	pgd_t * pgd;				/* 进程的全局描述符表指针(虚拟地址) */
 	atomic_t mm_users;			/* How many users with user space? */
 	atomic_t mm_count;			/* How many references to "struct mm_struct" (users count as 1) */
 	int map_count;				/* number of VMAs */

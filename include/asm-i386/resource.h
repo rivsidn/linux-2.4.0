@@ -9,12 +9,14 @@
 #define RLIMIT_FSIZE	1		/* Maximum filesize */
 #define RLIMIT_DATA	2		/* max data size */
 #define RLIMIT_STACK	3		/* max stack size */
+					/* 栈的最大值 */
 #define RLIMIT_CORE	4		/* max core file size */
 #define RLIMIT_RSS	5		/* max resident set size */
 #define RLIMIT_NPROC	6		/* max number of processes */
 #define RLIMIT_NOFILE	7		/* max number of open files */
 #define RLIMIT_MEMLOCK	8		/* max locked-in-memory address space */
 #define RLIMIT_AS	9		/* address space limit */
+					/* 地址空间限制 */
 #define RLIMIT_LOCKS	10		/* maximum file locks held */
 
 #define RLIM_NLIMITS	11

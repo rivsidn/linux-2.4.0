@@ -38,14 +38,14 @@ int __verify_write(const void * addr, unsigned long size)
 	if (!size)
 		return 1;
 
-	//TODO: next...
-	//find_vma() 函数实现
 	vma = find_vma(current->mm, start);
 	if (!vma)
 		goto bad_area;
 	if (vma->vm_start > start)
 		goto check_stack;
 
+	//TODO: next...
+	//下边这部分是如何实现的？
 good_area:
 	if (!(vma->vm_flags & VM_WRITE))
 		goto bad_area;
@@ -78,6 +78,7 @@ check_stack:
 		goto good_area;
 
 bad_area:
+	//没有写权限返回 0
 	return 0;
 }
 
@@ -134,11 +135,13 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	 * be in an interrupt or a critical region, and should
 	 * only copy the information from the master page table,
 	 * nothing more.
+	 *
+	 * TODO: 这地方并不完全理解
+	 * TASK_SIZE == PAGE_OFFSET == 3GB
 	 */
 	if (address >= TASK_SIZE)
 		goto vmalloc_fault;
 
-	//TODO: next...
 	mm = tsk->mm;
 	info.si_code = SEGV_MAPERR;
 
@@ -164,6 +167,8 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 		 * The "+ 32" is there due to some instructions (like
 		 * pusha) doing post-decrement on the stack and that
 		 * doesn't show up until later..
+		 *
+		 * 是否满足堆栈拓展条件
 		 */
 		if (address + 32 < regs->esp)
 			goto bad_area;
@@ -173,6 +178,8 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 /*
  * Ok, we have a good vm_area for this memory access, so
  * we can handle it..
+ * 好了，此时我们有一个正确的vm_area{} 与此时的内存访问对应，
+ * 所以我们能够处理它了。
  */
 good_area:
 	info.si_code = SEGV_ACCERR;
@@ -200,6 +207,8 @@ good_area:
 	 * If for any reason at all we couldn't handle the fault,
 	 * make sure we exit gracefully rather than endlessly redo
 	 * the fault.
+	 * 如果我们不能正确处理该异常，确保能够体面的退出，不会继续
+	 * 触发该异常。
 	 */
 	switch (handle_mm_fault(mm, vma, address, write)) {
 	case 1:
@@ -234,6 +243,7 @@ bad_area:
 
 bad_area_nosemaphore:
 	/* User mode accesses just cause a SIGSEGV */
+	/* 用户态下的访问触发异常信号 */
 	if (error_code & 4) {
 		tsk->thread.cr2 = address;
 		tsk->thread.error_code = error_code;

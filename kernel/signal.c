@@ -557,8 +557,9 @@ printk(" %d -> %d\n", signal_pending(t), ret);
 /*
  * Force a signal that the process can't ignore: if necessary
  * we unblock the signal and change any SIG_IGN to SIG_DFL.
+ *
+ * 强制触发信号：如果需要的话我们将信号解锁，将SIG_IGN 改成 SIG_DFL。
  */
-
 int
 force_sig_info(int sig, struct siginfo *info, struct task_struct *t)
 {
@@ -570,6 +571,7 @@ force_sig_info(int sig, struct siginfo *info, struct task_struct *t)
 		return -ESRCH;
 	}
 
+	//TODO: 如此操作后续会不会出问题？
 	if (t->sig->action[sig-1].sa.sa_handler == SIG_IGN)
 		t->sig->action[sig-1].sa.sa_handler = SIG_DFL;
 	sigdelset(&t->blocked, sig);

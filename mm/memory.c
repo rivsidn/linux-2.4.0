@@ -1072,6 +1072,7 @@ static int do_anonymous_page(struct mm_struct * mm, struct vm_area_struct * vma,
 		mm->rss++;
 		flush_page_to_ram(page);
 	}
+	//设置页表项
 	set_pte(page_table, entry);
 	/* No need to invalidate - it was non-present before */
 	update_mmu_cache(vma, addr, entry);
@@ -1197,6 +1198,7 @@ int handle_mm_fault(struct mm_struct *mm, struct vm_area_struct * vma,
 	pgd_t *pgd;
 	pmd_t *pmd;
 
+	//mm->pgd 为虚拟地址，设置到cr3时改为物理地址
 	pgd = pgd_offset(mm, address);
 	pmd = pmd_alloc(pgd, address);
 
