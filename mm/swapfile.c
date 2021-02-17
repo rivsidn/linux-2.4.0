@@ -20,8 +20,12 @@
 spinlock_t swaplock = SPIN_LOCK_UNLOCKED;
 unsigned int nr_swapfiles;
 
+//swap_list_t.head 存储的是优先级最高(prio值越大优先级越高)的swap_info_struct{} 下标
+//swap_info_struct{} 之间通过next 形成一个单链表
+//swap_list_t.next 存储的下一个首先去访问的swap_info_struct{} 下标，并不参与构建链表
 struct swap_list_t swap_list = {-1, -1};
 
+//内核中用于页面交换的文件数组
 struct swap_info_struct swap_info[MAX_SWAPFILES];
 
 #define SWAPFILE_CLUSTER 256
@@ -141,6 +145,8 @@ bad_count:
 /*
  * Caller has made sure that the swapdevice corresponding to entry
  * is still around or has not been recycled.
+ *
+ * 释放一个磁盘页面
  */
 void __swap_free(swp_entry_t entry, unsigned short count)
 {
@@ -153,26 +159,29 @@ void __swap_free(swp_entry_t entry, unsigned short count)
 	type = SWP_TYPE(entry);
 	if (type >= nr_swapfiles)
 		goto bad_nofile;
-	p = & swap_info[type];
+	p = & swap_info[type];		//通过type 获取对应的交换文件
 	if (!(p->flags & SWP_USED))
 		goto bad_device;
 	offset = SWP_OFFSET(entry);
-	if (offset >= p->max)
+	if (offset >= p->max)		//如果偏移量超出了文件页面最大值
 		goto bad_offset;
 	if (!p->swap_map[offset])
 		goto bad_free;
 	swap_list_lock();
+	//TODO: 这部分怎么理解？？
 	if (p->prio > swap_info[swap_list.next].prio)
 		swap_list.next = type;
 	swap_device_lock(p);
 	if (p->swap_map[offset] < SWAP_MAP_MAX) {
 		if (p->swap_map[offset] < count)
 			goto bad_count;
+		//减去count 后为0 表示此时已经没有引用该页面的了
 		if (!(p->swap_map[offset] -= count)) {
 			if (offset < p->lowest_bit)
 				p->lowest_bit = offset;
 			if (offset > p->highest_bit)
 				p->highest_bit = offset;
+			//用于交换的页面数+1.
 			nr_swap_pages++;
 		}
 	}
@@ -541,6 +550,8 @@ int is_swap_partition(kdev_t dev) {
  * Written 01/25/92 by Simmule Turner, heavily changed by Linus.
  *
  * The swapon system call
+ *
+ * 开启磁盘页面交换
  */
 asmlinkage long sys_swapon(const char * specialfile, int swap_flags)
 {

@@ -12,6 +12,11 @@
  *
  * We have to move it here, since not every user of fs.h is including
  * mm.h, but m.h is including fs.h via sched .h :-/
+ *
+ * 32位无符号整数，分为3部分：
+ * [offset(24-bit)]:[type(7-bit)]:[0(1-bit)] 可以通过SWP_TYPE，SWP_OFFSET 来访问。
+ * 当页面在内存中时，也表项最后一位为 1，表示页面在内存中，当页表项不在内存中
+ * 时，页表项内容变成 swp_entry_t，指示这个页面的去处。
  */
 typedef struct {
 	unsigned long val;

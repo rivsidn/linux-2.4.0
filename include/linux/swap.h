@@ -46,20 +46,22 @@ union swap_header {
 #define SWAP_MAP_MAX	0x7fff
 #define SWAP_MAP_BAD	0x8000
 
+//用于磁盘交换的文件
 struct swap_info_struct {
 	unsigned int flags;
 	kdev_t swap_device;
 	spinlock_t sdev_lock;
 	struct dentry * swap_file;
 	struct vfsmount *swap_vfsmnt;
-	unsigned short * swap_map;
+	unsigned short * swap_map;	/* 下标表示物理页面的位置，数值表示是否分配 */
+	//供页面交换使用的页面范围
 	unsigned int lowest_bit;
 	unsigned int highest_bit;
 	unsigned int cluster_next;
 	unsigned int cluster_nr;
 	int prio;			/* swap priority */
-	int pages;
-	unsigned long max;
+	int pages;			/* 交换的页面数量 */
+	unsigned long max;		/* 文件的最大页面号 */
 	int next;			/* next entry on swap list */
 };
 
