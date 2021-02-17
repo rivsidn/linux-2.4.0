@@ -478,17 +478,23 @@ void filemap_fdatawait(struct address_space * mapping)
  *
  * The caller must have locked the page and 
  * set all the page flags correctly..
+ *
+ * 将page 添加到inode page 缓存中.
+ * 调用者必须要锁定页面并且正确设置page的标识位.
  */
 void add_to_page_cache_locked(struct page * page, struct address_space *mapping, unsigned long index)
 {
 	if (!PageLocked(page))
 		BUG();
 
-	page_cache_get(page);
+	page_cache_get(page);		//增加page->count引用计数
 	spin_lock(&pagecache_lock);
 	page->index = index;
+	//添加page 到mapping->clean_pages 链表中
 	add_page_to_inode_queue(mapping, page);
+	//添加page 到page_hash_table+hash 中
 	add_page_to_hash_queue(page, page_hash(mapping, index));
+	//添加page 到active_list 链表中
 	lru_cache_add(page);
 	spin_unlock(&pagecache_lock);
 }

@@ -51,6 +51,7 @@ void show_swap_cache_info(void)
 }
 #endif
 
+//将刚从磁盘换入的页面添加到相应的队列中
 void add_to_swap_cache(struct page *page, swp_entry_t entry)
 {
 	unsigned long flags;

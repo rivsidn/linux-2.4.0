@@ -27,6 +27,7 @@ static int zone_balance_ratio[MAX_NR_ZONES] = { 32, 128, 128, };
 static int zone_balance_min[MAX_NR_ZONES] = { 10 , 10, 10, };
 static int zone_balance_max[MAX_NR_ZONES] = { 255 , 255, 255, };
 
+//全局链表
 struct list_head active_list;
 struct list_head inactive_dirty_list;
 /*

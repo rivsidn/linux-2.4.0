@@ -165,7 +165,7 @@ typedef struct page {
 #define PG_locked		 0
 #define PG_error		 1
 #define PG_referenced		 2
-#define PG_uptodate		 3
+#define PG_uptodate		 3		//与磁盘内容保持一致
 #define PG_dirty		 4
 #define PG_decr_after		 5
 #define PG_active		 6

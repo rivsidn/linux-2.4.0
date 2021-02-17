@@ -362,11 +362,17 @@ struct address_space_operations {
 	int (*bmap)(struct address_space *, long);
 };
 
+//同一个文件的页面通过一个address_space{} 来管理；
+//文件的读写缓冲，磁盘页面交换都需要用到下边这个结构体。
 struct address_space {
 	struct list_head	clean_pages;	/* list of clean pages */
+						/* 干净的页面 */
 	struct list_head	dirty_pages;	/* list of dirty pages */
+						/* 脏的页面 */
 	struct list_head	locked_pages;	/* list of locked pages */
+						/* 暂时锁住不让换出的页面 */
 	unsigned long		nrpages;	/* number of total pages */
+						/* 页面数量 */
 	struct address_space_operations *a_ops;	/* methods */
 	struct inode		*host;		/* owner: inode, block_device */
 	struct vm_area_struct	*i_mmap;	/* list of private mappings */

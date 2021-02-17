@@ -153,6 +153,7 @@ void age_page_down(struct page * page)
 
 /**
  * (de)activate_page - move pages from/to active and inactive lists
+ *                   - 将页面从active 移到inactive 表中
  * @page: the page we want to move
  * @nolock - are we already holding the pagemap_lru_lock?
  *
@@ -184,7 +185,7 @@ void deactivate_page_nolock(struct page * page)
 		del_page_from_active_list(page);
 		add_page_to_inactive_dirty_list(page);
 	}
-}	
+}
 
 void deactivate_page(struct page * page)
 {
@@ -235,6 +236,7 @@ void lru_cache_add(struct page * page)
 	DEBUG_ADD_PAGE
 	add_page_to_active_list(page);
 	/* This should be relatively rare */
+	/* 页面老化时间为 0，页面已经老化 */
 	if (!page->age)
 		deactivate_page_nolock(page);
 	spin_unlock(&pagemap_lru_lock);
