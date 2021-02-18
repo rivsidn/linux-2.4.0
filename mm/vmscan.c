@@ -698,6 +698,7 @@ page_active:
 
 /**
  * refill_inactive_scan - scan the active list and find pages to deactivate
+ *                      - 扫描active 链表，将页面移到deactivate 中
  * @priority: the priority at which to scan
  * @oneshot: exit after deactivating one page
  *
@@ -804,17 +805,21 @@ int free_shortage(void)
 
 /*
  * How many inactive pages are we short?
+ * 我们缺少多少inactive 的页面？
  */
 int inactive_shortage(void)
 {
 	int shortage = 0;
 
+	//先加上期望页面数
 	shortage += freepages.high;
 	shortage += inactive_target;
+	//减去当前满足条件的页面数
 	shortage -= nr_free_pages();
 	shortage -= nr_inactive_clean_pages();
 	shortage -= nr_inactive_dirty_pages;
 
+	//如果大于0 表示当前满足条件的小于期望
 	if (shortage > 0)
 		return shortage;
 
@@ -932,6 +937,7 @@ static int do_try_to_free_pages(unsigned int gfp_mask, int user)
 	} else {
 		/*
 		 * Reclaim unused slab cache memory.
+		 * 回收没用的slab cache 内存
 		 */
 		kmem_cache_reap(gfp_mask);
 		ret = 1;
@@ -947,6 +953,7 @@ struct task_struct *kswapd_task;
 /*
  * The background pageout daemon, started as a kernel thread
  * from the init process. 
+ * 后台的页面换出守护进程，是一个内核线程由init 进程创建。
  *
  * This basically trickles out pages so that we have _some_
  * free memory available even if there is no other activity
@@ -966,7 +973,7 @@ int kswapd(void *unused)
 	strcpy(tsk->comm, "kswapd");
 	sigfillset(&tsk->blocked);
 	kswapd_task = tsk;
-	
+
 	/*
 	 * Tell the memory management that we're a "memory allocator",
 	 * and that if we need more memory we should get access to it
@@ -992,7 +999,8 @@ int kswapd(void *unused)
 			int wait = 0;
 			/* Do we need to do some synchronous flushing? */
 			if (waitqueue_active(&kswapd_done))
-				wait = 1;
+				wait = 1;	//有函数在等待队列中等待执行
+			//TODO: next...
 			do_try_to_free_pages(GFP_KSWAPD, wait);
 		}
 
@@ -1045,6 +1053,7 @@ int kswapd(void *unused)
 	}
 }
 
+//block 意思是是否需要阻塞当前进程
 void wakeup_kswapd(int block)
 {
 	DECLARE_WAITQUEUE(wait, current);
@@ -1052,6 +1061,7 @@ void wakeup_kswapd(int block)
 	if (current == kswapd_task)
 		return;
 
+	//不阻塞当前进程，唤醒，退出
 	if (!block) {
 		if (waitqueue_active(&kswapd_wait))
 			wake_up(&kswapd_wait);
@@ -1062,6 +1072,9 @@ void wakeup_kswapd(int block)
 	 * Kswapd could wake us up before we get a chance
 	 * to sleep, so we have to be very careful here to
 	 * prevent SMP races...
+	 */
+	/*
+	 * 阻塞当前进程，将进程添加到等待队列中，调度
 	 */
 	__set_current_state(TASK_UNINTERRUPTIBLE);
 	add_wait_queue(&kswapd_done, &wait);
@@ -1147,6 +1160,7 @@ static int __init kswapd_init(void)
 {
 	printk("Starting kswapd v1.8\n");
 	swap_setup();
+	//创建内核线程
 	kernel_thread(kswapd, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	kernel_thread(kreclaimd, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	return 0;

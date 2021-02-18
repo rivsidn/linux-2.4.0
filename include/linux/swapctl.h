@@ -16,9 +16,9 @@ extern buffer_mem_t page_cache;
 
 typedef struct freepages_v1
 {
-	unsigned int	min;
-	unsigned int	low;
-	unsigned int	high;
+	unsigned int	min;	//最小
+	unsigned int	low;	//低
+	unsigned int	high;	//高
 } freepages_v1;
 typedef freepages_v1 freepages_t;
 extern freepages_t freepages;

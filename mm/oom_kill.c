@@ -137,6 +137,7 @@ static struct task_struct * select_bad_process(void)
 
 /**
  * oom_kill - kill the "best" process when we run out of memory
+ *          - 杀进程
  *
  * If we run out of memory, we have the choice between either
  * killing a random task (bad), letting the system crash (worse)
@@ -185,7 +186,7 @@ void oom_kill(void)
 
 /**
  * out_of_memory - is the system out of memory?
- *
+ *               - 是否内存短缺
  * Returns 0 if there is still enough memory left,
  * 1 when we are out of memory (otherwise).
  */
