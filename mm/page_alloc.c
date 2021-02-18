@@ -145,6 +145,8 @@ static void __free_pages_ok (struct page *page, unsigned long order)
 		memory_pressure--;
 }
 
+//TODO: 为什么这个地方的MARK_USED() 需要(1+order)？？？
+//内存页面在zone 中是如何组织到一起的？还没搞清楚
 #define MARK_USED(index, order, area) \
 	change_bit((index) >> (1+(order)), (area)->map)
 
@@ -159,6 +161,7 @@ static inline struct page * expand (zone_t *zone, struct page *page,
 		area--;
 		high--;
 		size >>= 1;
+		//将第一个页面的list 链接到(area)->free_list 中
 		memlist_add_head(&(page)->list, &(area)->free_list);
 		MARK_USED(index, high, area);
 		index += size;
@@ -169,6 +172,7 @@ static inline struct page * expand (zone_t *zone, struct page *page,
 	return page;
 }
 
+/* 从一个zone 中分配2^order 连续页面 */
 static FASTCALL(struct page * rmqueue(zone_t *zone, unsigned long order));
 static struct page * rmqueue(zone_t *zone, unsigned long order)
 {
@@ -183,13 +187,15 @@ static struct page * rmqueue(zone_t *zone, unsigned long order)
 		head = &area->free_list;
 		curr = memlist_next(head);
 
-		if (curr != head) {
+		if (curr != head) {		//非空
 			unsigned int index;
 
+			//通过list找到对应的page页面
 			page = memlist_entry(curr, struct page, list);
 			if (BAD_RANGE(zone,page))
 				BUG();
 			memlist_del(curr);
+			//(page-mem_map) 说明所有页面都在mem_map 数组中有一个唯一的下标
 			index = (page - mem_map) - zone->offset;
 			MARK_USED(index, curr_order, area);
 			zone->free_pages -= 1 << order;
@@ -197,12 +203,13 @@ static struct page * rmqueue(zone_t *zone, unsigned long order)
 			page = expand(zone, page, index, order, curr_order, area);
 			spin_unlock_irqrestore(&zone->lock, flags);
 
-			set_page_count(page, 1);
+			set_page_count(page, 1);	//设置page引用计数
 			if (BAD_RANGE(zone,page))
 				BUG();
 			DEBUG_ADD_PAGE
 			return page;	
 		}
+		//继续找较大的空闲页面拆开
 		curr_order++;
 		area++;
 	} while (curr_order < MAX_ORDER);
@@ -219,6 +226,8 @@ static struct page * rmqueue(zone_t *zone, unsigned long order)
  * This function does the dirty work for __alloc_pages
  * and is separated out to keep the code size smaller.
  * (suggested by Davem at 1:30 AM, typed by Rik at 6 AM)
+ *
+ * 由alloc_pages() 中分离出来用于保持代码整洁
  */
 static struct page * __alloc_pages_limit(zonelist_t *zonelist,
 			unsigned long order, int limit, int direct_reclaim)
@@ -240,16 +249,17 @@ static struct page * __alloc_pages_limit(zonelist_t *zonelist,
 		 */
 		switch (limit) {
 			default:
-			case PAGES_MIN:
+			case PAGES_MIN:		//最小
 				water_mark = z->pages_min;
 				break;
-			case PAGES_LOW:
+			case PAGES_LOW:		//低
 				water_mark = z->pages_low;
 				break;
-			case PAGES_HIGH:
+			case PAGES_HIGH:	//高
 				water_mark = z->pages_high;
 		}
 
+		//此处的water_mark 只是用于判断
 		if (z->free_pages + z->inactive_clean_pages > water_mark) {
 			struct page *page = NULL;
 			/* If possible, reclaim a page directly. */
@@ -297,7 +307,7 @@ struct page * __alloc_pages(zonelist_t *zonelist, unsigned long order)
 	 */
 	if (order == 0 && (gfp_mask & __GFP_WAIT) &&
 			!(current->flags & PF_MEMALLOC))
-		direct_reclaim = 1;
+		direct_reclaim = 1;		//表示可以从不活跃干净页面回收
 
 	/*
 	 * If we are about to get low on free pages and we also have
@@ -324,17 +334,19 @@ try_again:
 	zone = zonelist->zones;
 	for (;;) {
 		zone_t *z = *(zone++);
-		if (!z)
+		if (!z)		//为空时结束
 			break;
 		if (!z->size)
 			BUG();
 
+		//TODO: 需要理清除这里的限制条件
 		if (z->free_pages >= z->pages_low) {
 			page = rmqueue(z, order);
 			if (page)
 				return page;
 		} else if (z->free_pages < z->pages_min &&
 					waitqueue_active(&kreclaimd_wait)) {
+				//唤醒等待队列
 				wake_up_interruptible(&kreclaimd_wait);
 		}
 	}
@@ -383,7 +395,7 @@ try_again:
 	wakeup_kswapd(0);
 	if (gfp_mask & __GFP_WAIT) {
 		__set_current_state(TASK_RUNNING);
-		current->policy |= SCHED_YIELD;
+		current->policy |= SCHED_YIELD;		//TODO: 进程调度
 		schedule();
 	}
 
@@ -407,18 +419,23 @@ try_again:
 	 * - we're /really/ tight on memory
 	 * 	--> wait on the kswapd waitqueue until memory is freed
 	 */
+	/* 没有设置PF_MEMALLOC，此时为一般进程 */
 	if (!(current->flags & PF_MEMALLOC)) {
 		/*
 		 * Are we dealing with a higher order allocation?
+		 * 申请的页面太大，无法满足当前条件
 		 *
 		 * Move pages from the inactive_clean to the free list
 		 * in the hope of creating a large, physically contiguous
 		 * piece of free memory.
+		 * 将页面从inactive_clean 移动到 free 链表中，期望能够组成
+		 * 一个大的物理上连续的空闲内存。
 		 */
 		if (order > 0 && (gfp_mask & __GFP_WAIT)) {
 			zone = zonelist->zones;
 			/* First, clean some dirty pages. */
 			current->flags |= PF_MEMALLOC;
+			//将脏页面洗干净，然后回收
 			page_launder(gfp_mask, 1);
 			current->flags &= ~PF_MEMALLOC;
 			for (;;) {
@@ -427,6 +444,8 @@ try_again:
 					break;
 				if (!z->size)
 					continue;
+				//将页面从 inactive_clean_pages 中移动到free 链表中，
+				//尝试分配内存看看是否满足条件。
 				while (z->inactive_clean_pages) {
 					struct page * page;
 					/* Move one page to the free list. */

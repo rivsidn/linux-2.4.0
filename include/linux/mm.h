@@ -356,6 +356,7 @@ static inline struct page * alloc_pages(int gfp_mask, unsigned long order)
 	 */
 	if (order >= MAX_ORDER)
 		return NULL;
+	//连续区间只有一个存储节点，不连续区间有多个
 	return __alloc_pages(contig_page_data.node_zonelists+(gfp_mask), order);
 }
 #else /* !CONFIG_DISCONTIGMEM */

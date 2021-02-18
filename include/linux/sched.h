@@ -416,6 +416,7 @@ struct task_struct {
 #define PF_DUMPCORE	0x00000200	/* dumped core */
 #define PF_SIGNALED	0x00000400	/* killed by a signal */
 #define PF_MEMALLOC	0x00000800	/* Allocating memory */
+					/* kswapd, kreclaimd 设置此标识位，表示申请内存时候拥有更高优先级 */
 #define PF_VFORK	0x00001000	/* Wake up parent in mm_release */
 
 #define PF_USEDFPU	0x00100000	/* task used FPU this quantum (SMP) */

@@ -12,6 +12,7 @@
 int numnodes = 1;	/* Initialized for UMA platforms */
 
 static bootmem_data_t contig_bootmem_data;
+//连续区间只有一个存储节点
 pg_data_t contig_page_data = { bdata: &contig_bootmem_data };
 
 #ifndef CONFIG_DISCONTIGMEM
@@ -85,12 +86,16 @@ void __init free_area_init_node(int nid, pg_data_t *pgdat, struct page *pmap,
 static struct page * alloc_pages_pgdat(pg_data_t *pgdat, int gfp_mask,
 	unsigned long order)
 {
+	//通过分配策略找到 zonelist_t{} 结构体
 	return __alloc_pages(pgdat->node_zonelists + gfp_mask, order);
 }
 
 /*
  * This can be refined. Currently, tries to do round robin, instead
  * should do concentratic circle search, starting from current node.
+ *
+ * gfp_mask	分配策略
+ * order	分配页面大小
  */
 struct page * alloc_pages(int gfp_mask, unsigned long order)
 {
@@ -113,12 +118,14 @@ struct page * alloc_pages(int gfp_mask, unsigned long order)
 	spin_unlock_irqrestore(&node_lock, flags);
 #endif
 	start = temp;
+	//由于是单链表，所以最后为空
 	while (temp) {
 		if ((ret = alloc_pages_pgdat(temp, gfp_mask, order)))
 			return(ret);
 		temp = temp->node_next;
 	}
 	temp = pgdat_list;
+	//从start遍历到最后，如果没有申请到再从头开始遍历到start
 	while (temp != start) {
 		if ((ret = alloc_pages_pgdat(temp, gfp_mask, order)))
 			return(ret);
