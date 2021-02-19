@@ -25,7 +25,7 @@
 #include <asm/mmu_context.h>
 
 /* The idle threads do not count.. */
-int nr_threads;
+int nr_threads;		//内核中进程(+线程)之和
 int nr_running;
 
 int max_threads;

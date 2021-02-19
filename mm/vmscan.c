@@ -56,6 +56,7 @@ static int try_to_swap_out(struct mm_struct * mm, struct vm_area_struct* vma, un
 
 	onlist = PageActive(page);
 	/* Don't look at this pte if it's been accessed recently. */
+	/* 跳过刚访问过的页面 */
 	if (ptep_test_and_clear_young(page_table)) {
 		age_page_up(page);
 		goto out_failed;
@@ -325,22 +326,24 @@ static int swap_out(unsigned int priority, int gfp_mask)
 	if (counter < 1)
 		counter = 1;
 
+	//循环次数由进程数量和priority 来决定
 	for (; counter >= 0; counter--) {
 		struct list_head *p;
 		unsigned long max_cnt = 0;
 		struct mm_struct *best = NULL;
-		int assign = 0;
+		int assign = 0;		//通过assign 标识是第几遍扫描
 		int found_task = 0;
 	select:
 		spin_lock(&mmlist_lock);
 		p = init_mm.mmlist.next;
 		for (; p != &init_mm.mmlist; p = p->next) {
 			struct mm_struct *mm = list_entry(p, struct mm_struct, mmlist);
-	 		if (mm->rss <= 0)
+	 		if (mm->rss <= 0)	//rss=resident set 驻内页面集合
 				continue;
 			found_task++;
 			/* Refresh swap_cnt? */
-			if (assign == 1) {
+	     		if (assign == 1) {
+				//重新设置swap_cnt
 				mm->swap_cnt = (mm->rss >> SWAP_SHIFT);
 				if (mm->swap_cnt < SWAP_MIN)
 					mm->swap_cnt = SWAP_MIN;
@@ -481,6 +484,9 @@ out:
  * This code is heavily inspired by the FreeBSD source code. Thanks
  * go out to Matthew Dillon.
  */
+/*
+ * page_cluster 在 swap_setup() 中根据内存大小设置。
+ */
 #define MAX_LAUNDER 		(4 * (1 << page_cluster))
 int page_launder(int gfp_mask, int sync)
 {
@@ -502,8 +508,10 @@ int page_launder(int gfp_mask, int sync)
 dirty_page_rescan:
 	spin_lock(&pagemap_lru_lock);
 	maxscan = nr_inactive_dirty_pages;
+	//遍历整个不活跃脏链表
 	while ((page_lru = inactive_dirty_list.prev) != &inactive_dirty_list &&
 				maxscan-- > 0) {
+		//page{} 通过lru 链接在inactive_dirty_list 表中
 		page = list_entry(page_lru, struct page, lru);
 
 		/* Wrong page on list?! (list corruption, should not happen) */
@@ -517,8 +525,9 @@ dirty_page_rescan:
 
 		/* Page is or was in use?  Move it to the active list. */
 		if (PageTestandClearReferenced(page) || page->age > 0 ||
-				(!page->buffers && page_count(page) > 1) ||
+				(!page->buffers && page_count(page) > 1) ||	//没有用作读写缓冲区并且有别的进程在用这个页面
 				page_ramdisk(page)) {
+			//将页面从 inactive_dirty_list 中删除，添加到 active_list 中
 			del_page_from_inactive_dirty_list(page);
 			add_page_to_active_list(page);
 			continue;
@@ -558,6 +567,8 @@ dirty_page_rescan:
 			page_cache_get(page);
 			spin_unlock(&pagemap_lru_lock);
 
+			//将页面中内容同步到磁盘
+			//TODO: 写成功之后为什么没有从inactive_dirty_list中移除
 			result = writepage(page);
 			page_cache_release(page);
 
@@ -579,7 +590,10 @@ dirty_page_rescan:
 		 * On the first round, we should free all previously cleaned
 		 * buffer pages
 		 */
-		if (page->buffers) {
+		/*
+		 * 到这里的页面必定是干净的。
+		 */
+		if (page->buffers) {		//文件读写缓冲的页面
 			int wait, clearedbuf;
 			int freed_page = 0;
 			/*
@@ -614,6 +628,7 @@ dirty_page_rescan:
 				add_page_to_inactive_dirty_list(page);
 
 			/* The page was only in the buffer cache. */
+			/* TODO: 什么意思？？？*/
 			} else if (!page->mapping) {
 				atomic_dec(&buffermem_pages);
 				freed_page = 1;
@@ -714,6 +729,7 @@ int refill_inactive_scan(unsigned int priority, int oneshot)
 
 	/* Take the lock while messing with the list... */
 	spin_lock(&pagemap_lru_lock);
+	/* 优先级控制扫描的最大数量 */
 	maxscan = nr_active_pages >> priority;
 	while (maxscan-- > 0 && (page_lru = active_list.prev) != &active_list) {
 		page = list_entry(page_lru, struct page, lru);
@@ -728,6 +744,7 @@ int refill_inactive_scan(unsigned int priority, int oneshot)
 
 		/* Do aging on the pages. */
 		if (PageTestandClearReferenced(page)) {
+			//如果被访问了，增加page 的寿命
 			age_page_up_nolock(page);
 			page_active = 1;
 		} else {
@@ -756,6 +773,7 @@ int refill_inactive_scan(unsigned int priority, int oneshot)
 		 * deactivated by age_page_down and we exit successfully.
 		 */
 		if (page_active || PageActive(page)) {
+			//移动到active lru 队列的后边
 			list_del(page_lru);
 			list_add(page_lru, &active_list);
 		} else {
@@ -854,11 +872,12 @@ static int refill_inactive(unsigned int gfp_mask, int user)
 	do {
 		made_progress = 0;
 
+		//为了防止长时间占用CPU不放，强制调度
 		if (current->need_resched) {
 			__set_current_state(TASK_RUNNING);
 			schedule();
 		}
-
+		//从active 中找出能转移到 inactive 状态的页面
 		while (refill_inactive_scan(priority, 1)) {
 			made_progress = 1;
 			if (--count <= 0)
@@ -875,6 +894,7 @@ static int refill_inactive(unsigned int gfp_mask, int user)
 
 		/*
 		 * Then, try to page stuff out..
+		 * 扫描进程映射表，从中找出能够转入不活跃状态的页面.
 		 */
 		while (swap_out(priority, gfp_mask)) {
 			made_progress = 1;
@@ -894,6 +914,8 @@ static int refill_inactive(unsigned int gfp_mask, int user)
 		 * Only switch to a lower "priority" if we
 		 * didn't make any useful progress in the
 		 * last loop.
+		 * 如果在最后一次扫描中没有取得实质性进展则
+		 * 增加优先级。
 		 */
 		if (!made_progress)
 			priority--;
@@ -937,9 +959,8 @@ static int do_try_to_free_pages(unsigned int gfp_mask, int user)
 	} else {
 		/*
 		 * Reclaim unused slab cache memory.
-		 * 回收没用的slab cache 内存
 		 */
-		kmem_cache_reap(gfp_mask);
+		kmem_cache_reap(gfp_mask);		//refill_inactive() 中同样会调用该函数
 		ret = 1;
 	}
 
@@ -971,8 +992,8 @@ int kswapd(void *unused)
 	tsk->session = 1;
 	tsk->pgrp = 1;
 	strcpy(tsk->comm, "kswapd");
-	sigfillset(&tsk->blocked);
-	kswapd_task = tsk;
+	sigfillset(&tsk->blocked);	//屏蔽所有信号
+	kswapd_task = tsk;		//设置全局变量
 
 	/*
 	 * Tell the memory management that we're a "memory allocator",
@@ -994,13 +1015,16 @@ int kswapd(void *unused)
 	for (;;) {
 		static int recalc = 0;
 
+		/*
+		 * 分两部分，第一部分是之后页面短缺的时候才会执行；
+		 * 第二部分是每次都会执行。
+		 */
 		/* If needed, try to free some memory. */
 		if (inactive_shortage() || free_shortage()) {
 			int wait = 0;
 			/* Do we need to do some synchronous flushing? */
 			if (waitqueue_active(&kswapd_done))
 				wait = 1;	//有函数在等待队列中等待执行
-			//TODO: next...
 			do_try_to_free_pages(GFP_KSWAPD, wait);
 		}
 
@@ -1110,6 +1134,8 @@ DECLARE_WAIT_QUEUE_HEAD(kreclaimd_wait);
  * Kreclaimd will move pages from the inactive_clean list to the
  * free list, in order to keep atomic allocations possible under
  * all circumstances. Even when kswapd is blocked on IO.
+ *
+ * 将inactive_clean 页面移动到free 页面。
  */
 int kreclaimd(void *unused)
 {
@@ -1155,12 +1181,11 @@ int kreclaimd(void *unused)
 	}
 }
 
-
 static int __init kswapd_init(void)
 {
 	printk("Starting kswapd v1.8\n");
 	swap_setup();
-	//创建内核线程
+	//创建两个内核线程
 	kernel_thread(kswapd, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	kernel_thread(kreclaimd, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	return 0;

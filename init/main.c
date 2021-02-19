@@ -605,6 +605,7 @@ asmlinkage void __init start_kernel(void)
 	 *	make syscalls (and thus be locked).
 	 */
 	smp_init();
+	//TODO: 多核初始化过程，为什么init进程只会创建一个？
 	kernel_thread(init, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	unlock_kernel();
 	current->need_resched = 1;

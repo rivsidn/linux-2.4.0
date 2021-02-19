@@ -28,8 +28,8 @@ static int zone_balance_min[MAX_NR_ZONES] = { 10 , 10, 10, };
 static int zone_balance_max[MAX_NR_ZONES] = { 255 , 255, 255, };
 
 //全局链表
-struct list_head active_list;
-struct list_head inactive_dirty_list;
+struct list_head active_list;		//活跃链表
+struct list_head inactive_dirty_list;	//不活跃脏链表
 /*
  * Free_page() adds the page to the free lists. This is optimized for
  * fast normal cases (no error jumps taken normally).
