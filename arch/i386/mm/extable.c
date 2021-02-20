@@ -9,6 +9,10 @@
 extern const struct exception_table_entry __start___ex_table[];
 extern const struct exception_table_entry __stop___ex_table[];
 
+/*
+ * TODO: 查找修复地址，暂时没弄明白做什么用的
+ */
+
 static inline unsigned long
 search_one_table(const struct exception_table_entry *first,
 		const struct exception_table_entry *last,

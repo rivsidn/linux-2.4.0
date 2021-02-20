@@ -38,25 +38,26 @@ int __verify_write(const void * addr, unsigned long size)
 	if (!size)
 		return 1;
 
+	//find_vma() 找的是第一个vm_end 大于start 的虚拟地址映射
 	vma = find_vma(current->mm, start);
 	if (!vma)
 		goto bad_area;
 	if (vma->vm_start > start)
 		goto check_stack;
 
-	//TODO: next...
-	//下边这部分是如何实现的？
 good_area:
 	if (!(vma->vm_flags & VM_WRITE))
 		goto bad_area;
 	size--;
-	size += start & ~PAGE_MASK;
-	size >>= PAGE_SHIFT;
+	size += start & ~PAGE_MASK;	//start & 0xfff 表示 start 的页内偏移
+	size >>= PAGE_SHIFT;		//(size + (start & 0xfff)) >> PAGE_SHIFT
 	start &= PAGE_MASK;
 
 	for (;;) {
+		//建立映射
 		if (handle_mm_fault(current->mm, vma, start, 1) <= 0)
 			goto bad_area;
+		//直到 size == 0 结束，如果刚开始size 就等于 0 也执行一次
 		if (!size)
 			break;
 		size--;
@@ -66,14 +67,16 @@ good_area:
 		vma = vma->vm_next;
 		if (!vma || vma->vm_start != start)
 			goto bad_area;
-		if (!(vma->vm_flags & VM_WRITE))
+		if (!(vma->vm_flags & VM_WRITE))	//没有写权限
 			goto bad_area;;
 	}
 	return 1;
 
 check_stack:
+	//不是栈区间跳转到 bad_area
 	if (!(vma->vm_flags & VM_GROWSDOWN))
 		goto bad_area;
+	//是栈区间拓展栈
 	if (expand_stack(vma, start) == 0)
 		goto good_area;
 
@@ -109,6 +112,8 @@ extern unsigned long idt;
  *	bit 0 == 0 means no page found, 1 means protection fault
  *	bit 1 == 0 means read, 1 means write
  *	bit 2 == 0 means kernel, 1 means user-mode
+ *
+ * TODO : next...
  */
 asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 {

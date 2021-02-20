@@ -497,7 +497,7 @@ extern struct page *filemap_nopage(struct vm_area_struct *, unsigned long, int);
  * vma is the first one with  address < vma->vm_end,
  * and even  address < vma->vm_start. Have to extend vma.
  *
- * 虚拟映射区间拓展
+ * 拓展栈的虚拟映射区间
  * 仅仅改变了 vm_area_struct{} 结构体，并没有拓展页面对物理内存的映射。
  */
 static inline int expand_stack(struct vm_area_struct * vma, unsigned long address)
