@@ -457,9 +457,7 @@ void __init zap_low_mappings (void)
  * This routines also unmaps the page at virtual kernel address 0, so
  * that we can trap those pesky NULL-reference errors in the kernel.
  *
- * 没有映射地址 0，所以访问NULL 的时候就会报异常？？？这句话怎么理解
- *
- * TODO: 调用到该函数之前，实模式、保护模式、分页.
+ * TODO: 没有映射地址 0，所以访问NULL 的时候就会报异常？？？这句话怎么理解
  */
 void __init paging_init(void)
 {
@@ -516,12 +514,13 @@ void __init paging_init(void)
  */
 static int do_test_wp_bit(unsigned long vaddr);
 
+//WP: Write Protect 写保护
 void __init test_wp_bit(void)
 {
 /*
  * Ok, all PSE-capable CPUs are definitely handling the WP bit right.
  */
-	const unsigned long vaddr = PAGE_OFFSET;
+	const unsigned long vaddr = PAGE_OFFSET;	//3GB
 	pgd_t *pgd;
 	pmd_t *pmd;
 	pte_t *pte, old_pte;
@@ -532,7 +531,7 @@ void __init test_wp_bit(void)
 	pmd = pmd_offset(pgd, vaddr);
 	pte = pte_offset(pmd, vaddr);
 	old_pte = *pte;
-	*pte = mk_pte_phys(0, PAGE_READONLY);
+	*pte = mk_pte_phys(0, PAGE_READONLY);	//设置第0页地址只读
 	local_flush_tlb();
 
 	boot_cpu_data.wp_works_ok = do_test_wp_bit(vaddr);
@@ -577,6 +576,8 @@ void __init mem_init(void)
 	int codesize, reservedpages, datasize, initsize;
 	int tmp;
 
+	//setup_arch()->paging_init()->free_area_init()->free_area_init_core()
+	//中初始化
 	if (!mem_map)
 		BUG();
 
@@ -589,9 +590,11 @@ void __init mem_init(void)
 	high_memory = (void *) __va(max_low_pfn * PAGE_SIZE);
 
 	/* clear the zero-page */
+	/* arch/i386/kernel/head.S 中定义 */
 	memset(empty_zero_page, 0, PAGE_SIZE);
 
 	/* this will put all low memory onto the freelists */
+	/* 将所有的空闲内存添加到空闲链表中 */
 	totalram_pages += free_all_bootmem();
 
 	reservedpages = 0;
@@ -656,6 +659,7 @@ static int do_test_wp_bit(unsigned long vaddr)
 	char tmp_reg;
 	int flag;
 
+	//TODO: 这部分代码没看明白
 	__asm__ __volatile__(
 		"	movb %0,%1	\n"
 		"1:	movb %1,%0	\n"
@@ -674,11 +678,13 @@ static int do_test_wp_bit(unsigned long vaddr)
 	return flag;
 }
 
+//释放init 部分内存
 void free_initmem(void)
 {
 	unsigned long addr;
 
 	addr = (unsigned long)(&__init_begin);
+	//__init_begin、__init_end 都是4K 对齐
 	for (; addr < (unsigned long)(&__init_end); addr += PAGE_SIZE) {
 		ClearPageReserved(virt_to_page(addr));
 		set_page_count(virt_to_page(addr), 1);
@@ -702,6 +708,7 @@ void free_initrd_mem(unsigned long start, unsigned long end)
 }
 #endif
 
+//获取系统内存信息
 void si_meminfo(struct sysinfo *val)
 {
 	val->totalram = totalram_pages;

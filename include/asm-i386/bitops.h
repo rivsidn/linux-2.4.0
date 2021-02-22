@@ -112,6 +112,7 @@ static __inline__ int __test_and_clear_bit(int nr, volatile void * addr)
 	return oldbit;
 }
 
+//改变一位并返回之前的值
 static __inline__ int test_and_change_bit(int nr, volatile void * addr)
 {
 	int oldbit;

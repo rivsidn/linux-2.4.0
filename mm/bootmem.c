@@ -247,9 +247,9 @@ static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 	if (!bdata->node_bootmem_map) BUG();
 
 	count = 0;
+	/* 释放可用的页 */
 	idx = bdata->node_low_pfn - (bdata->node_boot_start >> PAGE_SHIFT);
 	for (i = 0; i < idx; i++, page++) {
-		///TODO: 为什么 !test_bit() 时候才会调用？
 		if (!test_bit(i, bdata->node_bootmem_map)) {
 			count++;
 			ClearPageReserved(page);
@@ -263,6 +263,7 @@ static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 	 * Now free the allocator bitmap itself, it's not
 	 * needed anymore:
 	 */
+	/* 释放位图 */
 	page = virt_to_page(bdata->node_bootmem_map);
 	count = 0;
 	for (i = 0; i < ((bdata->node_low_pfn-(bdata->node_boot_start >> PAGE_SHIFT))/8 + PAGE_SIZE-1)/PAGE_SIZE; i++,page++) {

@@ -113,7 +113,6 @@ extern unsigned long idt;
  *	bit 1 == 0 means read, 1 means write
  *	bit 2 == 0 means kernel, 1 means user-mode
  *
- * TODO : next...
  */
 asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 {
@@ -141,7 +140,6 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	 * only copy the information from the master page table,
 	 * nothing more.
 	 *
-	 * TODO: 这地方并不完全理解
 	 * TASK_SIZE == PAGE_OFFSET == 3GB
 	 */
 	if (address >= TASK_SIZE)
@@ -153,6 +151,9 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	/*
 	 * If we're in an interrupt or have no user
 	 * context, we must not take the fault..
+	 */
+	/*
+	 * TODO: 为什么在中断中不能处理该异常？
 	 */
 	if (in_interrupt() || !mm)
 		goto no_context;
@@ -346,6 +347,11 @@ vmalloc_fault:
 		/*
 		 * Synchronize this task's top level page-table
 		 * with the 'reference' page table.
+		 */
+		/*
+		 * 所有进程的内核地址映射都是一致的，如果出现问题，
+		 * 将当前进程出现问题地址处的页目录项、页表项与init
+		 * 进程同步.
 		 */
 		int offset = __pgd_offset(address);
 		pgd_t *pgd, *pgd_k;

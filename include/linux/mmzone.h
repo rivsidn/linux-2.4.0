@@ -85,7 +85,7 @@ struct bootmem_data;
 typedef struct pglist_data {
 	zone_t node_zones[MAX_NR_ZONES];	//管理区，最多三个
 	zonelist_t node_zonelists[NR_GFPINDEX];	//规定不同的分配策略
-	struct page *node_mem_map;		//具体节点的page{}结构 
+	struct page *node_mem_map;		//节点的page{}结构数组
 	unsigned long *valid_addr_bitmap;
 	struct bootmem_data *bdata;
 	unsigned long node_start_paddr;

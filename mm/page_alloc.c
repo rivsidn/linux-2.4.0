@@ -81,6 +81,7 @@ static void __free_pages_ok (struct page *page, unsigned long order)
 		BUG();
 	if (PageDecrAfter(page))
 		BUG();
+	//将要释放的页面不存在于active, inactive dirty, inatcive clean任意链表中
 	if (PageActive(page))
 		BUG();
 	if (PageInactiveDirty(page))
@@ -95,16 +96,16 @@ static void __free_pages_ok (struct page *page, unsigned long order)
 
 	mask = (~0UL) << order;
 	base = mem_map + zone->offset;
-	page_idx = page - base;
+	page_idx = page - base;			//page 在zone 中的偏移量
 	if (page_idx & ~mask)
 		BUG();
-	index = page_idx >> (1 + order);
-
+	index = page_idx >> (1 + order);	//page 在area->map 中偏移量
+						//TODO: 这个偏移量是如何获取到的还没有很理解
 	area = zone->free_area + order;
 
 	spin_lock_irqsave(&zone->lock, flags);
 
-	zone->free_pages -= mask;
+	zone->free_pages -= mask;		//-mask = (1+~mask)
 
 	while (mask + (1 << (MAX_ORDER-1))) {
 		struct page *buddy1, *buddy2;
@@ -126,12 +127,13 @@ static void __free_pages_ok (struct page *page, unsigned long order)
 		if (BAD_RANGE(zone,buddy2))
 			BUG();
 
-		memlist_del(&buddy1->list);
+		memlist_del(&buddy1->list);	//将buddy1 从之前的链中删除
 		mask <<= 1;
 		area++;
 		index >>= 1;
 		page_idx &= mask;
 	}
+	//添加到新的链表中...
 	memlist_add_head(&(base + page_idx)->list, &area->free_list);
 
 	spin_unlock_irqrestore(&zone->lock, flags);
@@ -568,6 +570,7 @@ unsigned long get_zeroed_page(int gfp_mask)
 
 void __free_pages(struct page *page, unsigned long order)
 {
+	//如果不是保留页面，且引用计数为 0
 	if (!PageReserved(page) && put_page_testzero(page))
 		__free_pages_ok(page, order);
 }
@@ -779,6 +782,9 @@ static inline void build_zonelists(pg_data_t *pgdat)
  *   - mark all memory queues empty
  *   - clear the memory bitmaps
  */
+/*
+ * 建立 zone_t{} 结构体
+ */
 void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	unsigned long *zones_size, unsigned long zone_start_paddr, 
 	unsigned long *zholes_size, struct page *lmem_map)
@@ -801,6 +807,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 			
 	printk("On node %d totalpages: %lu\n", nid, realtotalpages);
 
+	//初始化全局的活跃链表、不活跃脏链表
 	memlist_init(&active_list);
 	memlist_init(&inactive_dirty_list);
 
@@ -826,6 +833,11 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	 * Initially all pages are reserved - free ones are freed
 	 * up by free_all_bootmem() once the early boot process is
 	 * done.
+	 */
+	/*
+	 * 将所有的页面设置为PG_reserved 模式。
+	 * boot 过程结束之后，通过 free_all_bootmem() 将所有的空闲页面
+	 * 释放。
 	 */
 	for (p = lmem_map; p < lmem_map + totalpages; p++) {
 		set_page_count(p, 0);
@@ -856,6 +868,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		if (!size)
 			continue;
 
+		//TODO: next...
 		zone->offset = offset;
 		cumulative += size;
 		mask = (realsize / zone_balance_ratio[j]);
@@ -911,8 +924,6 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	build_zonelists(pgdat);
 }
 
-//TODO: next...
-//该函数作了什么动作？
 void __init free_area_init(unsigned long *zones_size)
 {
 	free_area_init_core(0, &contig_page_data, &mem_map, zones_size, 0, 0, 0);

@@ -69,6 +69,9 @@ static __inline__ void atomic_dec(atomic_t *v)
 		:"m" (v->counter));
 }
 
+/*
+ * 递减原子变量，递减后结果为 0 返回 true
+ */
 static __inline__ int atomic_dec_and_test(atomic_t *v)
 {
 	unsigned char c;
