@@ -165,6 +165,10 @@ inline int vmalloc_area_pages (unsigned long address, unsigned long size,
 	return ret;
 }
 
+/*
+ * 获取到一个vm_struct{} 结构体
+ * 并将获取到的vm_struct{} 按照地址顺序放到vmlist 链表中
+ */
 struct vm_struct * get_vm_area(unsigned long size, unsigned long flags)
 {
 	unsigned long addr;
@@ -173,11 +177,11 @@ struct vm_struct * get_vm_area(unsigned long size, unsigned long flags)
 	area = (struct vm_struct *) kmalloc(sizeof(*area), GFP_KERNEL);
 	if (!area)
 		return NULL;
-	size += PAGE_SIZE;
+	size += PAGE_SIZE;	//TODO: 这里为什么要这要做？
 	addr = VMALLOC_START;
 	write_lock(&vmlist_lock);
 	for (p = &vmlist; (tmp = *p) ; p = &tmp->next) {
-		if ((size + addr) < addr) {
+		if ((size + addr) < addr) {			//越界
 			write_unlock(&vmlist_lock);
 			kfree(area);
 			return NULL;
