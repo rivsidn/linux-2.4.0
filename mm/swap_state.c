@@ -157,7 +157,9 @@ void free_page_and_swap_cache(struct page *page)
  * lock getting page table operations atomic even if we drop the page
  * lock before returning.
  */
-
+/*
+ * 从交换缓存中查找页面
+ */
 struct page * lookup_swap_cache(swp_entry_t entry)
 {
 	struct page *found;
@@ -183,7 +185,7 @@ repeat:
 		 */
 		if (!PageSwapCache(found)) {
 			UnlockPage(found);
-			page_cache_release(found);
+			page_cache_release(found);	//释放引用计数
 			goto repeat;
 		}
 		if (found->mapping != &swapper_space)

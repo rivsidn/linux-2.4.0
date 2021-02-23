@@ -1016,6 +1016,8 @@ void swapin_readahead(swp_entry_t entry)
 	return;
 }
 
+//处理在磁盘中的页面
+//TODO: next...
 static int do_swap_page(struct mm_struct * mm,
 	struct vm_area_struct * vma, unsigned long address,
 	pte_t * page_table, swp_entry_t entry, int write_access)
@@ -1190,6 +1192,9 @@ static inline int handle_pte_fault(struct mm_struct *mm,
 
 /*
  * By the time we get here, we already hold the mm semaphore
+ */
+/*
+ * 建立虚拟地址和物理页面映射
  */
 int handle_mm_fault(struct mm_struct *mm, struct vm_area_struct * vma,
 	unsigned long address, int write_access)
