@@ -732,6 +732,7 @@ static inline void build_zonelists(pg_data_t *pgdat)
 {
 	int i, j, k;
 
+	//分配策略初始化
 	for (i = 0; i < NR_GFPINDEX; i++) {
 		zonelist_t *zonelist;
 		zone_t *zone;
@@ -868,7 +869,6 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		if (!size)
 			continue;
 
-		//TODO: next...
 		zone->offset = offset;
 		cumulative += size;
 		mask = (realsize / zone_balance_ratio[j]);

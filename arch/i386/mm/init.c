@@ -223,6 +223,7 @@ void show_mem(void)
 	printk("%d pages shared\n",shared);
 	printk("%d pages swap cached\n",cached);
 	printk("%ld pages in page table cache\n",pgtable_cache_size);
+	//TODO: 这个函数暂时没看...
 	show_buffers();
 }
 
@@ -393,9 +394,6 @@ static void __init pagetable_init (void)
 	/*
 	 * Fixed mappings, only the page table structure has to be
 	 * created - mappings will be set by set_fixmap():
-	 */
-	/*
-	 * TODO: Fixed mapping 是做什么的？
 	 */
 	vaddr = __fix_to_virt(__end_of_fixed_addresses - 1) & PMD_MASK;
 	fixrange_init(vaddr, 0, pgd_base);
