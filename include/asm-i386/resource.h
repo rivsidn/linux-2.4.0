@@ -7,6 +7,7 @@
 
 #define RLIMIT_CPU	0		/* CPU time in ms */
 #define RLIMIT_FSIZE	1		/* Maximum filesize */
+					/* 最大文件大小 */
 #define RLIMIT_DATA	2		/* max data size */
 #define RLIMIT_STACK	3		/* max stack size */
 					/* 栈的最大值 */

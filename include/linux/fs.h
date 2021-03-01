@@ -376,7 +376,9 @@ struct address_space {
 	struct address_space_operations *a_ops;	/* methods */
 	struct inode		*host;		/* owner: inode, block_device */
 	struct vm_area_struct	*i_mmap;	/* list of private mappings */
+						/* 私有映射链表 */
 	struct vm_area_struct	*i_mmap_shared; /* list of shared mappings */
+						/* 共享映射链表 */
 	spinlock_t		i_shared_lock;  /* and spinlock protecting it */
 };
 
@@ -394,7 +396,7 @@ struct inode {
 	struct list_head	i_hash;
 	struct list_head	i_list;
 	struct list_head	i_dentry;
-	
+
 	struct list_head	i_dirty_buffers;
 
 	unsigned long		i_ino;

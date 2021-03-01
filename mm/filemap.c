@@ -193,8 +193,9 @@ void invalidate_inode_pages(struct inode * inode)
 
 static inline void truncate_partial_page(struct page *page, unsigned partial)
 {
+	//i386 中什么都没做
 	memclear_highpage_flush(page, partial, PAGE_CACHE_SIZE-partial);
-				
+
 	if (page->buffers)
 		block_flushpage(page, partial);
 
@@ -226,7 +227,7 @@ static int truncate_list_pages(struct list_head *head, unsigned long start, unsi
 	struct page * page;
 
 	curr = head->next;
-	while (curr != head) {
+	while (curr != head) {		//是否为空
 		unsigned long offset;
 
 		page = list_entry(curr, struct page, list);
@@ -246,16 +247,21 @@ static int truncate_list_pages(struct list_head *head, unsigned long start, unsi
 			spin_unlock(&pagecache_lock);
 
 			if (*partial && (offset + 1) == start) {
+				//截断部分页面
 				truncate_partial_page(page, *partial);
 				*partial = 0;
-			} else 
+			} else {
+				//截断全部页面
 				truncate_complete_page(page);
+			}
 
 			UnlockPage(page);
 			page_cache_release(page);
 			return 1;
 		}
 	}
+
+	//只有当为空或页面全部都truncate 之后才返回 0
 	return 0;
 }
 
@@ -269,12 +275,15 @@ static int truncate_list_pages(struct list_head *head, unsigned long start, unsi
  * that are beyond that offset (and zeroing out partial pages).
  * If any page is locked we wait for it to become unlocked.
  */
-void truncate_inode_pages(struct address_space * mapping, loff_t lstart) 
+void truncate_inode_pages(struct address_space * mapping, loff_t lstart)
 {
+	//向上取整
 	unsigned long start = (lstart + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+	//页内偏移量
 	unsigned partial = lstart & (PAGE_CACHE_SIZE - 1);
 
 repeat:
+	//将相应页面从mapping 中删除
 	spin_lock(&pagecache_lock);
 	if (truncate_list_pages(&mapping->clean_pages, start, &partial))
 		goto repeat;
@@ -287,7 +296,7 @@ repeat:
 
 static inline struct page * __find_page_nolock(struct address_space *mapping, unsigned long offset, struct page *page)
 {
-	goto inside;
+	goto inside;	//洋气啊...
 
 	for (;;) {
 		page = page->next_hash;
@@ -690,7 +699,6 @@ struct page * __find_get_page(struct address_space *mapping,
 struct page * __find_lock_page (struct address_space *mapping,
 				unsigned long offset, struct page **hash)
 {
-	//TODO: next...
 	struct page *page;
 
 	/*

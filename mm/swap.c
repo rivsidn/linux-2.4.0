@@ -53,8 +53,11 @@ int page_cluster;
  */
 int memory_pressure;
 
-/* We track the number of pages currently being asynchronously swapped
-   out, so that we don't try to swap TOO many pages out at once */
+/*
+ * We track the number of pages currently being asynchronously swapped
+ * out, so that we don't try to swap TOO many pages out at once
+ */
+/* 跟踪当前正在同步出去的页面数量，不能同时交换出太多的页面 */
 atomic_t nr_async_pages = ATOMIC_INIT(0);
 
 buffer_mem_t buffer_mem = {

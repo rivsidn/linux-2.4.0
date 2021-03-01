@@ -172,6 +172,7 @@ struct page * lookup_swap_cache(swp_entry_t entry)
 		 * Right now the pagecache is 32-bit only.  But it's a 32 bit index. =)
 		 */
 repeat:
+		//从swapper_space 中寻找对应的page
 		found = find_lock_page(&swapper_space, entry.val);
 		if (!found)
 			return 0;
@@ -212,12 +213,14 @@ out_bad:
  * A failure return means that either the page allocation failed or that
  * the swap entry is no longer in use.
  */
-
+/*
+ * 从磁盘中读取数据到内存中
+ */
 struct page * read_swap_cache_async(swp_entry_t entry, int wait)
 {
 	struct page *found_page = 0, *new_page;
 	unsigned long new_page_addr;
-	
+
 	/*
 	 * Make sure the swap entry is still in use.
 	 */
@@ -230,9 +233,11 @@ struct page * read_swap_cache_async(swp_entry_t entry, int wait)
 	if (found_page)
 		goto out_free_swap;
 
+	//获取空闲页面
 	new_page_addr = __get_free_page(GFP_USER);
 	if (!new_page_addr)
 		goto out_free_swap;	/* Out of memory */
+	//映射到虚拟地址对应的page{}
 	new_page = virt_to_page(new_page_addr);
 
 	/*
@@ -245,8 +250,8 @@ struct page * read_swap_cache_async(swp_entry_t entry, int wait)
 	 * Add it to the swap cache and read its contents.
 	 */
 	lock_page(new_page);
-	add_to_swap_cache(new_page, entry);
-	rw_swap_page(READ, new_page, wait);
+	add_to_swap_cache(new_page, entry);	//添加到对应链表中
+	rw_swap_page(READ, new_page, wait);	//读取磁盘内容
 	return new_page;
 
 out_free_page:

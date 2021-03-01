@@ -32,7 +32,7 @@
  * atomic, which is particularly important when we are trying to ensure 
  * that shared pages stay shared while being swapped.
  */
-
+/* 读写交换页面 */
 static int rw_swap_page_base(int rw, swp_entry_t entry, struct page *page, int wait)
 {
 	unsigned long offset;
@@ -103,6 +103,8 @@ static int rw_swap_page_base(int rw, swp_entry_t entry, struct page *page, int w
  *  - the page is locked
  *  - it's marked as being swap-cache
  *  - it's associated with the swap inode
+ *
+ * rw_swap_page_base() 的简单封装
  */
 void rw_swap_page(int rw, struct page *page, int wait)
 {

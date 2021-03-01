@@ -827,7 +827,7 @@ static int do_wp_page(struct mm_struct *mm, struct vm_area_struct * vma,
 	old_page = pte_page(pte);
 	if (!VALID_PAGE(old_page))
 		goto bad_wp_page;
-	
+
 	/*
 	 * We can avoid the copy if:
 	 * - we're the only user (count == 1)
@@ -836,6 +836,9 @@ static int do_wp_page(struct mm_struct *mm, struct vm_area_struct * vma,
 	 *   in which case we can just continue to
 	 *   use the same swap cache (it will be
 	 *   marked dirty).
+	 */
+	/*
+	 * TODO: next...
 	 */
 	switch (page_count(old_page)) {
 	case 2:
@@ -900,20 +903,23 @@ static void vmtruncate_list(struct vm_area_struct *mpnt,
 		unsigned long diff;
 
 		/* mapping wholly truncated? */
+		/* 映射整个需要截断 */
 		if (mpnt->vm_pgoff >= pgoff) {
-			flush_cache_range(mm, start, end);
+			flush_cache_range(mm, start, end);	//i386中为空
 			zap_page_range(mm, start, len);
 			flush_tlb_range(mm, start, end);
 			continue;
 		}
 
 		/* mapping wholly unaffected? */
+		/* 映射全部不受影响 */
 		len = len >> PAGE_SHIFT;
 		diff = pgoff - mpnt->vm_pgoff;
 		if (diff >= len)
 			continue;
 
 		/* Ok, partially affected.. */
+		/* 映射中部分内容受影响 */
 		start += diff << PAGE_SHIFT;
 		len = (len - diff) << PAGE_SHIFT;
 		flush_cache_range(mm, start, end);
@@ -948,8 +954,10 @@ void vmtruncate(struct inode * inode, loff_t offset)
 	pgoff = (offset + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
 	partial = (unsigned long)offset & (PAGE_CACHE_SIZE - 1);
 
+	//私有映射
 	if (mapping->i_mmap != NULL)
 		vmtruncate_list(mapping->i_mmap, pgoff, partial);
+	//共享映射
 	if (mapping->i_mmap_shared != NULL)
 		vmtruncate_list(mapping->i_mmap_shared, pgoff, partial);
 
@@ -988,6 +996,9 @@ out:
  * because it doesn't cost us any seek time.  We also make sure to queue
  * the 'original' request together with the readahead ones...  
  */
+/*
+ * 从交换设备中读取页面到内存中，多预读几个页面.
+ */
 void swapin_readahead(swp_entry_t entry)
 {
 	int i, num;
@@ -998,11 +1009,14 @@ void swapin_readahead(swp_entry_t entry)
 	 * Get the number of handles we should do readahead io to. Also,
 	 * grab temporary references on them, releasing them as io completes.
 	 */
+	/* 返回从entry 开始我们可以读多少个页面 */
 	num = valid_swaphandles(entry, &offset);
 	for (i = 0; i < num; offset++, i++) {
 		/* Don't block on I/O for read-ahead */
 		if (atomic_read(&nr_async_pages) >= pager_daemon.swap_cluster
 				* (1 << page_cluster)) {
+			//超过了最大限度之后，剩余的就不访问了，通过swap_free()
+			//减少在valid_swaphandles()中增加的引用计数。
 			while (i++ < num)
 				swap_free(SWP_ENTRY(SWP_TYPE(entry), offset++));
 			break;
@@ -1017,28 +1031,28 @@ void swapin_readahead(swp_entry_t entry)
 }
 
 //处理在磁盘中的页面
-//TODO: next...
 static int do_swap_page(struct mm_struct * mm,
 	struct vm_area_struct * vma, unsigned long address,
 	pte_t * page_table, swp_entry_t entry, int write_access)
 {
-	struct page *page = lookup_swap_cache(entry);
+	struct page *page = lookup_swap_cache(entry);	//从swap_address中寻找对应的page
 	pte_t pte;
 
-	if (!page) {
+	if (!page) {	//swap_address 中没找到
 		lock_kernel();
-		swapin_readahead(entry);
+		swapin_readahead(entry);	//将磁盘中内容读取到内存中，并添加到相应链表
 		page = read_swap_cache(entry);
 		unlock_kernel();
 		if (!page)
 			return -1;
 
-		flush_page_to_ram(page);
-		flush_icache_page(vma, page);
+		flush_page_to_ram(page);	//i386中为空
+		flush_icache_page(vma, page);	//i386中为空
 	}
 
 	mm->rss++;
 
+	//生成页表项
 	pte = mk_pte(page, vma->vm_page_prot);
 
 	/*
@@ -1052,9 +1066,10 @@ static int do_swap_page(struct mm_struct * mm,
 		pte = pte_mkwrite(pte_mkdirty(pte));
 	UnlockPage(page);
 
+	//设置页表项
 	set_pte(page_table, pte);
 	/* No need to invalidate - it was non-present before */
-	update_mmu_cache(vma, address, pte);
+	update_mmu_cache(vma, address, pte);	//i386中为空
 	return 1;	/* Minor fault */
 }
 

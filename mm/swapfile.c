@@ -168,7 +168,8 @@ void __swap_free(swp_entry_t entry, unsigned short count)
 	if (!p->swap_map[offset])
 		goto bad_free;
 	swap_list_lock();
-	//TODO: 这部分怎么理解？？
+	//swap_list.next 并不是跟head 一起将组成一个双向链表，
+	//存储的是新近访问的swap_info_struct{} 结构体
 	if (p->prio > swap_info[swap_list.next].prio)
 		swap_list.next = type;
 	swap_device_lock(p);
@@ -870,6 +871,7 @@ int swap_duplicate(swp_entry_t entry)
 out:
 	return result;
 
+	//输出出错信息返回
 bad_file:
 	printk("Bad swap file entry %08lx\n", entry.val);
 	goto out;
@@ -971,9 +973,11 @@ int valid_swaphandles(swp_entry_t entry, unsigned long *offset)
 {
 	int ret = 0, i = 1 << page_cluster;
 	unsigned long toff;
+	//获取对应的交换设备信息
 	struct swap_info_struct *swapdev = SWP_TYPE(entry) + swap_info;
 
 	*offset = SWP_OFFSET(entry);
+	//offset 向下沿page_cluster 对齐
 	toff = *offset = (*offset >> page_cluster) << page_cluster;
 
 	swap_device_lock(swapdev);
