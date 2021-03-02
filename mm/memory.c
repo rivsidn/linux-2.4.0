@@ -158,16 +158,18 @@ int copy_page_range(struct mm_struct *dst, struct mm_struct *src,
 	unsigned long end = vma->vm_end;
 	unsigned long cow = (vma->vm_flags & (VM_SHARED | VM_MAYWRITE)) == VM_MAYWRITE;
 
+	//此处减了1，后边处理的时候首先递增一次
 	src_pgd = pgd_offset(src, address)-1;
 	dst_pgd = pgd_offset(dst, address)-1;
-	
+
+	//TODO: next...
 	for (;;) {
 		pmd_t * src_pmd, * dst_pmd;
 
 		src_pgd++; dst_pgd++;
-		
+
 		/* copy_pmd_range */
-		
+
 		if (pgd_none(*src_pgd))
 			goto skip_copy_pmd_range;
 		if (pgd_bad(*src_pgd)) {
@@ -182,7 +184,7 @@ skip_copy_pmd_range:	address = (address + PGDIR_SIZE) & PGDIR_MASK;
 			if (!pmd_alloc(dst_pgd, 0))
 				goto nomem;
 		}
-		
+
 		src_pmd = pmd_offset(src_pgd, address);
 		dst_pmd = pmd_offset(dst_pgd, address);
 
@@ -262,6 +264,7 @@ nomem:
  */
 static inline int free_pte(pte_t pte)
 {
+	//真正的页面
 	if (pte_present(pte)) {
 		struct page *page = pte_page(pte);
 		if ((!VALID_PAGE(page)) || PageReserved(page))
@@ -275,6 +278,7 @@ static inline int free_pte(pte_t pte)
 		free_page_and_swap_cache(page);
 		return 1;
 	}
+	//页面为空，所以pte为swp_entry_t{}
 	swap_free(pte_to_swp_entry(pte));
 	return 0;
 }
@@ -309,12 +313,12 @@ static inline int zap_pte_range(struct mm_struct *mm, pmd_t * pmd, unsigned long
 		pte_t page;
 		if (!size)
 			break;
-		page = ptep_get_and_clear(pte);
+		page = ptep_get_and_clear(pte);		//清空页表项
 		pte++;
 		size--;
 		if (pte_none(page))
 			continue;
-		freed += free_pte(page);
+		freed += free_pte(page);		//释放页面
 	}
 	return freed;
 }
@@ -348,6 +352,9 @@ static inline int zap_pmd_range(struct mm_struct *mm, pgd_t * dir, unsigned long
 
 /*
  * remove user pages in a given range.
+ */
+/*
+ * 给定范围内移除用户页面
  */
 void zap_page_range(struct mm_struct *mm, unsigned long address, unsigned long size)
 {
@@ -387,6 +394,9 @@ void zap_page_range(struct mm_struct *mm, unsigned long address, unsigned long s
 /*
  * Do a quick page-table lookup for a single page. 
  */
+/*
+ * 通过address 找到对应的page{} 结构体
+ */
 static struct page * follow_page(unsigned long address) 
 {
 	pgd_t *pgd;
@@ -408,7 +418,7 @@ static struct page * follow_page(unsigned long address)
  * it?  This may become more complex in the future if we start dealing
  * with IO-aperture pages in kiobufs.
  */
-
+/* 检测页面是否是有效 */
 static inline struct page * get_page_map(struct page *page)
 {
 	if (!VALID_PAGE(page))
@@ -446,15 +456,15 @@ int map_user_kiobuf(int rw, struct kiobuf *iobuf, unsigned long va, size_t len)
 	if (err)
 		return err;
 
-	down(&mm->mmap_sem);
+	down(&mm->mmap_sem);	//获取信号量
 
 	err = -EFAULT;
 	iobuf->locked = 0;
-	iobuf->offset = va & ~PAGE_MASK;
+	iobuf->offset = va & ~PAGE_MASK;	//页内偏移量
 	iobuf->length = len;
-	
+
 	i = 0;
-	
+
 	/* 
 	 * First of all, try to fault in all of the necessary pages
 	 */
@@ -475,7 +485,7 @@ int map_user_kiobuf(int rw, struct kiobuf *iobuf, unsigned long va, size_t len)
 				goto out_unlock;
 			}
 		}
-		if (handle_mm_fault(current->mm, vma, ptr, datain) <= 0) 
+		if (handle_mm_fault(current->mm, vma, ptr, datain) <= 0)
 			goto out_unlock;
 		spin_lock(&mm->page_table_lock);
 		map = follow_page(ptr);
@@ -487,14 +497,14 @@ int map_user_kiobuf(int rw, struct kiobuf *iobuf, unsigned long va, size_t len)
 		map = get_page_map(map);
 		if (map) {
 			flush_dcache_page(map);
-			atomic_inc(&map->count);
+			atomic_inc(&map->count);	//增加页面引用计数
 		} else
 			printk (KERN_INFO "Mapped page missing [%d]\n", i);
 		spin_unlock(&mm->page_table_lock);
 		iobuf->maplist[i] = map;
 		iobuf->nr_pages = ++i;
-		
-		ptr += PAGE_SIZE;
+
+		ptr += PAGE_SIZE;	//依次处理ptr
 	}
 
 	up(&mm->mmap_sem);
