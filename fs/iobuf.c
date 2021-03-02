@@ -41,7 +41,7 @@ void kiobuf_init(struct kiobuf *iobuf)
 	memset(iobuf, 0, sizeof(*iobuf));
 	init_waitqueue_head(&iobuf->wait_queue);
 	iobuf->array_len = KIO_STATIC_PAGES;
-	iobuf->maplist   = iobuf->map_array;
+	iobuf->maplist   = iobuf->map_array;	//初始化时候指向此处
 }
 
 int alloc_kiovec(int nr, struct kiobuf **bufp)
@@ -77,13 +77,15 @@ void free_kiovec(int nr, struct kiobuf **bufp)
 	}
 }
 
+//wanted 为页面数
 int expand_kiobuf(struct kiobuf *iobuf, int wanted)
 {
 	struct page ** maplist;
-	
+
 	if (iobuf->array_len >= wanted)
 		return 0;
-	
+
+	//申请的是二级指针
 	maplist = (struct page **) 
 		kmalloc(wanted * sizeof(struct page **), GFP_KERNEL);
 	if (!maplist)
@@ -94,12 +96,13 @@ int expand_kiobuf(struct kiobuf *iobuf, int wanted)
 		kfree(maplist);
 		return 0;
 	}
-	
+
+	//将之前的二级指针cp 到当前maplist 中
 	memcpy (maplist, iobuf->maplist, iobuf->array_len * sizeof(struct page **));
 
 	if (iobuf->array_len > KIO_STATIC_PAGES)
 		kfree (iobuf->maplist);
-	
+
 	iobuf->maplist   = maplist;
 	iobuf->array_len = wanted;
 	return 0;

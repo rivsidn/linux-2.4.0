@@ -34,9 +34,13 @@
 struct kiobuf 
 {
 	int		nr_pages;	/* Pages actually referenced */
+					/* 实际引用的页面 */
 	int		array_len;	/* Space in the allocated lists */
+					/* 申请链表中页面数 */
 	int		offset;		/* Offset to start of valid data */
+					/* 有效数据的偏移量 */
 	int		length;		/* Number of valid bytes of data */
+					/* 有效数据的长度 */
 
 	/* Keep separate track of the physical addresses and page
 	 * structs involved.  If we do IO to a memory-mapped device
@@ -46,14 +50,17 @@ struct kiobuf
 	struct page **	maplist;
 
 	unsigned int	locked : 1;	/* If set, pages has been locked */
-	
+
 	/* Always embed enough struct pages for 64k of IO */
 	struct page *	map_array[KIO_STATIC_PAGES];
 
 	/* Dynamic state for IO completion: */
 	atomic_t	io_count;	/* IOs still in progress */
+					/* IOs 正在处理 */
 	int		errno;		/* Status of completed IO */
-	void		(*end_io) (struct kiobuf *); /* Completion callback */
+					/* 结束的IO状态 */
+	void		(*end_io) (struct kiobuf *);	/* Completion callback */
+							/* 结束的回调函数 */
 	wait_queue_head_t wait_queue;
 };
 

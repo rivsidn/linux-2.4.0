@@ -61,10 +61,10 @@ struct page *highmem_start_page;
 static inline void copy_cow_page(struct page * from, struct page * to, unsigned long address)
 {
 	if (from == ZERO_PAGE(address)) {
-		clear_user_highpage(to, address);
+		clear_user_highpage(to, address);	//清空
 		return;
 	}
-	copy_user_highpage(to, from, address);
+	copy_user_highpage(to, from, address);		//拷贝
 }
 
 //指向一个page{} 数据结构的数组，每个page{} 代表着一个页面
@@ -421,7 +421,7 @@ static inline struct page * get_page_map(struct page *page)
  * and pin them in physical memory.  
  */
 
-#define dprintk(x...)
+#define dprintk(x...)	//注释掉调试代码
 int map_user_kiobuf(int rw, struct kiobuf *iobuf, unsigned long va, size_t len)
 {
 	unsigned long		ptr, end;
@@ -431,14 +431,15 @@ int map_user_kiobuf(int rw, struct kiobuf *iobuf, unsigned long va, size_t len)
 	struct page *		map;
 	int			i;
 	int			datain = (rw == READ);
-	
+
 	/* Make sure the iobuf is not already mapped somewhere. */
 	if (iobuf->nr_pages)
 		return -EINVAL;
 
 	mm = current->mm;
 	dprintk ("map_user_kiobuf: begin\n");
-	
+
+	//起始地址向下取整；结束地址向上取整
 	ptr = va & PAGE_MASK;
 	end = (va + len + PAGE_SIZE - 1) & PAGE_MASK;
 	err = expand_kiobuf(iobuf, (end - ptr) >> PAGE_SHIFT);
@@ -517,7 +518,8 @@ void unmap_kiobuf (struct kiobuf *iobuf)
 {
 	int i;
 	struct page *map;
-	
+
+	//释放并解锁所有页面
 	for (i = 0; i < iobuf->nr_pages; i++) {
 		map = iobuf->maplist[i];
 		if (map) {
@@ -526,7 +528,7 @@ void unmap_kiobuf (struct kiobuf *iobuf)
 			__free_page(map);
 		}
 	}
-	
+
 	iobuf->nr_pages = 0;
 	iobuf->locked = 0;
 }
@@ -559,6 +561,7 @@ int lock_kiovec(int nr, struct kiobuf *iovec[], int wait)
 			continue;
 		iobuf->locked = 1;
 
+		//访问page
 		ppage = iobuf->maplist;
 		for (j = 0; j < iobuf->nr_pages; ppage++, j++) {
 			page = *ppage;
@@ -570,7 +573,7 @@ int lock_kiovec(int nr, struct kiobuf *iovec[], int wait)
 		}
 	}
 
-	return 0;
+	return 0;	//成功返回0
 	
  retry:
 	
@@ -578,7 +581,9 @@ int lock_kiovec(int nr, struct kiobuf *iovec[], int wait)
 	 * We couldn't lock one of the pages.  Undo the locking so far,
 	 * wait on the page we got to, and try again.  
 	 */
-	
+	/*
+	 * TODO: 这段代码没看明白
+	 */
 	unlock_kiovec(nr, iovec);
 	if (!wait)
 		return -EAGAIN;
@@ -615,14 +620,14 @@ int unlock_kiovec(int nr, struct kiobuf *iovec[])
 	struct kiobuf *iobuf;
 	int i, j;
 	struct page *page, **ppage;
-	
+
 	for (i = 0; i < nr; i++) {
 		iobuf = iovec[i];
 
 		if (!iobuf->locked)
 			continue;
 		iobuf->locked = 0;
-		
+
 		ppage = iobuf->maplist;
 		for (j = 0; j < iobuf->nr_pages; ppage++, j++) {
 			page = *ppage;
@@ -646,8 +651,8 @@ static inline void zeromap_pte_range(pte_t * pte, unsigned long address,
 	do {
 		pte_t zero_pte = pte_wrprotect(mk_pte(ZERO_PAGE(address), prot));
 		pte_t oldpage = ptep_get_and_clear(pte);
-		set_pte(pte, zero_pte);
-		forget_pte(oldpage);
+		set_pte(pte, zero_pte);		//设置页表项为zero_pte
+		forget_pte(oldpage);		//释放old_page
 		address += PAGE_SIZE;
 		pte++;
 	} while (address && (address < end));
@@ -720,6 +725,7 @@ static inline void remap_pte_range(pte_t * pte, unsigned long address, unsigned 
 
 		page = virt_to_page(__va(phys_addr));
 		if ((!VALID_PAGE(page)) || PageReserved(page))
+			//通过物理地址生成页表项放到页表中
  			set_pte(pte, mk_pte_phys(phys_addr, prot));
 		forget_pte(oldpage);
 		address += PAGE_SIZE;
@@ -790,6 +796,7 @@ static inline void establish_pte(struct vm_area_struct * vma, unsigned long addr
 	update_mmu_cache(vma, address, entry);
 }
 
+//cow: copy on write
 static inline void break_cow(struct vm_area_struct * vma, struct page *	old_page, struct page * new_page, unsigned long address, 
 		pte_t *page_table)
 {
@@ -836,9 +843,6 @@ static int do_wp_page(struct mm_struct *mm, struct vm_area_struct * vma,
 	 *   in which case we can just continue to
 	 *   use the same swap cache (it will be
 	 *   marked dirty).
-	 */
-	/*
-	 * TODO: next...
 	 */
 	switch (page_count(old_page)) {
 	case 2:
