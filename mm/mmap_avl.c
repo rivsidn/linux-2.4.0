@@ -7,7 +7,10 @@
  * ElectricFence.
  * Written by Bruno Haible <haible@ma2s2.mathematik.uni-karlsruhe.de>.
  */
-
+/*
+ * 查找VMA 的平衡二叉树实现
+ * TODO: 该部分代码没读
+ */
 /* We keep the list and tree sorted by address. */
 #define vm_avl_key	vm_end
 #define vm_avl_key_t	unsigned long	/* typeof(vma->avl_key) */

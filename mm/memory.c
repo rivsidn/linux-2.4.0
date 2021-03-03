@@ -90,6 +90,7 @@ static inline void free_one_pmd(pmd_t * dir)
 	pte_free(pte);
 }
 
+//释放pgd 及其下属的页面映射
 static inline void free_one_pgd(pgd_t * dir)
 {
 	int j;
@@ -162,7 +163,6 @@ int copy_page_range(struct mm_struct *dst, struct mm_struct *src,
 	src_pgd = pgd_offset(src, address)-1;
 	dst_pgd = pgd_offset(dst, address)-1;
 
-	//TODO: next...
 	for (;;) {
 		pmd_t * src_pmd, * dst_pmd;
 
@@ -173,7 +173,7 @@ int copy_page_range(struct mm_struct *dst, struct mm_struct *src,
 		if (pgd_none(*src_pgd))
 			goto skip_copy_pmd_range;
 		if (pgd_bad(*src_pgd)) {
-			pgd_ERROR(*src_pgd);
+			pgd_ERROR(*src_pgd);	//输出错误信息
 			pgd_clear(src_pgd);
 skip_copy_pmd_range:	address = (address + PGDIR_SIZE) & PGDIR_MASK;
 			if (!address || (address >= end))
@@ -185,6 +185,7 @@ skip_copy_pmd_range:	address = (address + PGDIR_SIZE) & PGDIR_MASK;
 				goto nomem;
 		}
 
+		//操作pmd
 		src_pmd = pmd_offset(src_pgd, address);
 		dst_pmd = pmd_offset(dst_pgd, address);
 

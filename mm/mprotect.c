@@ -225,6 +225,13 @@ static int mprotect_fixup(struct vm_area_struct * vma,
 	return 0;
 }
 
+/*
+ * 系统调用设置一部分内存的保护模式:
+ * PROT_NONE
+ * PROT_READ
+ * PROT_WRITE
+ * PROT_EXEC
+ */
 asmlinkage long sys_mprotect(unsigned long start, size_t len, unsigned long prot)
 {
 	unsigned long nstart, end, tmp;
@@ -237,23 +244,24 @@ asmlinkage long sys_mprotect(unsigned long start, size_t len, unsigned long prot
 	end = start + len;
 	if (end < start)
 		return -EINVAL;
+	//只能设置这三个标识位或不设置
 	if (prot & ~(PROT_READ | PROT_WRITE | PROT_EXEC))
 		return -EINVAL;
 	if (end == start)
 		return 0;
 
-	down(&current->mm->mmap_sem);
+	down(&current->mm->mmap_sem);	//获取信号量
 
 	vma = find_vma(current->mm, start);
 	error = -EFAULT;
-	if (!vma || vma->vm_start > start)
+	if (!vma || vma->vm_start > start)	//没有找到匹配的vma
 		goto out;
 
 	for (nstart = start ; ; ) {
 		unsigned int newflags;
 
 		/* Here we know that  vma->vm_start <= nstart < vma->vm_end. */
-
+		/* TODO: next... */
 		newflags = prot | (vma->vm_flags & ~(PROT_READ | PROT_WRITE | PROT_EXEC));
 		if ((newflags & ~(newflags >> 4)) & 0xf) {
 			error = -EACCES;
