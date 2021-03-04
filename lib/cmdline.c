@@ -27,8 +27,11 @@
  *
  *	Return values:
  *	0 : no int in string
+ *	    字符串中没有找到整数
  *	1 : int found, no subsequent comma
+ *	    字符串中找到了整数但是没有后续的逗号
  *	2 : int found including a subsequent comma
+ *	    字符串中找到了整数和后续的逗号
  */
 
 int get_option (char **str, int *pint)
@@ -37,7 +40,7 @@ int get_option (char **str, int *pint)
 
 	if (!cur || !(*cur))
 		return 0;
-	*pint = simple_strtol (cur, str, 0);
+	*pint = simple_strtol (cur, str, 0);	//第三个参数为0表示10进制
 	if (cur == *str)
 		return 0;
 	if (**str == ',') {

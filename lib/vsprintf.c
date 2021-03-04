@@ -43,7 +43,7 @@ unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
 
 long simple_strtol(const char *cp,char **endp,unsigned int base)
 {
-	if(*cp=='-')
+	if(*cp=='-')	//负数
 		return -simple_strtoul(cp+1,endp,base);
 	return simple_strtoul(cp,endp,base);
 }

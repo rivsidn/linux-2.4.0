@@ -717,7 +717,7 @@ void show_free_areas_core(pg_data_t *pgdat)
 
 #ifdef SWAP_CACHE_INFO
 	show_swap_cache_info();
-#endif	
+#endif
 }
 
 void show_free_areas(void)
@@ -737,6 +737,7 @@ static inline void build_zonelists(pg_data_t *pgdat)
 		zonelist_t *zonelist;
 		zone_t *zone;
 
+		//首先清空
 		zonelist = pgdat->node_zonelists + i;
 		memset(zonelist, 0, sizeof(*zonelist));
 
@@ -772,7 +773,7 @@ static inline void build_zonelists(pg_data_t *pgdat)
 					zonelist->zones[j++] = zone;
 		}
 		zonelist->zones[j++] = NULL;
-	} 
+	}
 }
 
 #define LONG_ALIGN(x) (((x)+(sizeof(long))-1)&~((sizeof(long))-1))
@@ -798,13 +799,13 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 
 	totalpages = 0;
 	for (i = 0; i < MAX_NR_ZONES; i++) {
-		unsigned long size = zones_size[i];
+		unsigned long size = zones_size[i];	//zones_size[] 为输入参数
 		totalpages += size;
 	}
 	realtotalpages = totalpages;
 	if (zholes_size)
 		for (i = 0; i < MAX_NR_ZONES; i++)
-			realtotalpages -= zholes_size[i];
+			realtotalpages -= zholes_size[i];	//zholes_size[] 为输入参数
 			
 	printk("On node %d totalpages: %lu\n", nid, realtotalpages);
 
@@ -821,6 +822,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	 */
 	map_size = (totalpages + 1)*sizeof(struct page);
 	if (lmem_map == (struct page *)0) {
+		//申请内存
 		lmem_map = (struct page *) alloc_bootmem_node(pgdat, map_size);
 		lmem_map = (struct page *)(PAGE_OFFSET + 
 			MAP_ALIGN((unsigned long)lmem_map - PAGE_OFFSET));
@@ -841,13 +843,13 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	 * 释放。
 	 */
 	for (p = lmem_map; p < lmem_map + totalpages; p++) {
-		set_page_count(p, 0);
-		SetPageReserved(p);
-		init_waitqueue_head(&p->wait);
-		memlist_init(&p->list);
+		set_page_count(p, 0);		//设置页面引用计数
+		SetPageReserved(p);		//设置页面为reserved模式
+		init_waitqueue_head(&p->wait);	//初始化等待队列
+		memlist_init(&p->list);		//链表初始化
 	}
 
-	offset = lmem_map - mem_map;	
+	offset = lmem_map - mem_map;
 	for (j = 0; j < MAX_NR_ZONES; j++) {
 		zone_t *zone = pgdat->node_zones + j;
 		unsigned long mask;
@@ -862,7 +864,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		zone->name = zone_names[j];
 		zone->lock = SPIN_LOCK_UNLOCKED;
 		zone->zone_pgdat = pgdat;
-		zone->free_pages = 0;
+		zone->free_pages = 0;			//此时全部初始化为0
 		zone->inactive_clean_pages = 0;
 		zone->inactive_dirty_pages = 0;
 		memlist_init(&zone->inactive_clean_list);
@@ -870,7 +872,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 			continue;
 
 		zone->offset = offset;
-		cumulative += size;
+		cumulative += size;	//局部变量，没有用到
 		mask = (realsize / zone_balance_ratio[j]);
 		if (mask < zone_balance_min[j])
 			mask = zone_balance_min[j];
@@ -906,15 +908,16 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 			}
 		}
 
-		offset += size;
+		offset += size;		//偏移量累加
 		mask = -1;
 		for (i = 0; i < MAX_ORDER; i++) {
 			unsigned long bitmap_size;
 
+			//构造free_area{}
 			memlist_init(&zone->free_area[i].free_list);
 			mask += mask;
 			size = (size + ~mask) & mask;
-			bitmap_size = size >> i;
+			bitmap_size = size >> i;	//位图是整个zone的位图
 			bitmap_size = (bitmap_size + 7) >> 3;
 			bitmap_size = LONG_ALIGN(bitmap_size);
 			zone->free_area[i].map = 
@@ -940,4 +943,5 @@ static int __init setup_mem_frac(char *str)
 	return 1;
 }
 
+//内核命令行参数解析，"memfrac=" 之后的字符串通过setup_mem_frac() 函数来解析
 __setup("memfrac=", setup_mem_frac);

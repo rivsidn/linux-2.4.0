@@ -55,6 +55,7 @@ extern initcall_t __initcall_start, __initcall_end;
 
 /*
  * Used for kernel command line parameter setup
+ * 用于内核命令行参数解析
  */
 struct kernel_param {
 	const char *str;

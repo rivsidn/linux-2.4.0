@@ -9,7 +9,6 @@
 #include <linux/mmzone.h>
 #include <linux/spinlock.h>
 
-//TODO: next...
 int numnodes = 1;	/* Initialized for UMA platforms */
 
 static bootmem_data_t contig_bootmem_data;
@@ -67,6 +66,7 @@ void __init free_area_init_node(int nid, pg_data_t *pgdat, struct page *pmap,
 	int i, size = 0;
 	struct page *discard;
 
+	//mem_map 初始化
 	if (mem_map == (mem_map_t *)NULL)
 		mem_map = (mem_map_t *)PAGE_OFFSET;
 
@@ -77,6 +77,7 @@ void __init free_area_init_node(int nid, pg_data_t *pgdat, struct page *pmap,
 	/*
 	 * Get space for the valid bitmap.
 	 */
+	/* 申请有效位图的空间 */
 	for (i = 0; i < MAX_NR_ZONES; i++)
 		size += zones_size[i];
 	size = LONG_ALIGN((size + 7) >> 3);

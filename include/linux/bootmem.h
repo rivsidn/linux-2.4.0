@@ -21,6 +21,7 @@ extern unsigned long min_low_pfn;
  * node_bootmem_map is a map pointer - the bits represent all physical 
  * memory pages (including holes) on the node.
  */
+/* node_bootmem_map 是一个位图的指针- 这些位图表示节点中所有的物理页面(包括空洞) */
 typedef struct bootmem_data {
 	unsigned long node_boot_start;
 	unsigned long node_low_pfn;
