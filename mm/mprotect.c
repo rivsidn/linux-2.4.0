@@ -3,6 +3,9 @@
  *
  *  (C) Copyright 1994 Linus Torvalds
  */
+/*
+ * 实现了sys_mprotect() 系统调用是一个相对独立的文件
+ */
 #include <linux/slab.h>
 #include <linux/smp_lock.h>
 #include <linux/shm.h>
@@ -39,7 +42,7 @@ static inline void change_pte_range(pmd_t * pmd, unsigned long address,
 			 * into place.
 			 */
 			entry = ptep_get_and_clear(pte);
-			set_pte(pte, pte_modify(entry, newprot));
+			set_pte(pte, pte_modify(entry, newprot));	//改变页表项
 		}
 		address += PAGE_SIZE;
 		pte++;
@@ -91,6 +94,7 @@ static void change_protection(unsigned long start, unsigned long end, pgprot_t n
 	return;
 }
 
+//整个vma{} 都需要重新设置
 static inline int mprotect_fixup_all(struct vm_area_struct * vma,
 	int newflags, pgprot_t prot)
 {
@@ -101,16 +105,18 @@ static inline int mprotect_fixup_all(struct vm_area_struct * vma,
 	return 0;
 }
 
+//vma{} 中从[vma->start, end) 需要重新设置，其他部分保持不变
 static inline int mprotect_fixup_start(struct vm_area_struct * vma,
 	unsigned long end,
 	int newflags, pgprot_t prot)
 {
 	struct vm_area_struct * n;
 
+	//申请一个vm_area_struct{} 结构体
 	n = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 	if (!n)
 		return -ENOMEM;
-	*n = *vma;
+	*n = *vma;		//结构体内容拷贝
 	n->vm_end = end;
 	n->vm_flags = newflags;
 	n->vm_raend = 0;
@@ -121,14 +127,15 @@ static inline int mprotect_fixup_start(struct vm_area_struct * vma,
 		n->vm_ops->open(n);
 	lock_vma_mappings(vma);
 	spin_lock(&vma->vm_mm->page_table_lock);
-	vma->vm_pgoff += (end - vma->vm_start) >> PAGE_SHIFT;
+	vma->vm_pgoff += (end - vma->vm_start) >> PAGE_SHIFT;	//偏移量
 	vma->vm_start = end;
-	__insert_vm_struct(current->mm, n);
+	__insert_vm_struct(current->mm, n);	//插入
 	spin_unlock(&vma->vm_mm->page_table_lock);
 	unlock_vma_mappings(vma);
 	return 0;
 }
 
+//vma{} 中从[start, vma->end) 需要重新设置，其他部分保持不变
 static inline int mprotect_fixup_end(struct vm_area_struct * vma,
 	unsigned long start,
 	int newflags, pgprot_t prot)
@@ -157,6 +164,7 @@ static inline int mprotect_fixup_end(struct vm_area_struct * vma,
 	return 0;
 }
 
+//vma{} 中一部分需要重新设置标识位，其他部分不需要变化
 static inline int mprotect_fixup_middle(struct vm_area_struct * vma,
 	unsigned long start, unsigned long end,
 	int newflags, pgprot_t prot)
@@ -213,10 +221,11 @@ static int mprotect_fixup(struct vm_area_struct * vma,
 			error = mprotect_fixup_all(vma, newflags, newprot);
 		else
 			error = mprotect_fixup_start(vma, end, newflags, newprot);
-	} else if (end == vma->vm_end)
+	} else if (end == vma->vm_end) {
 		error = mprotect_fixup_end(vma, start, newflags, newprot);
-	else
+	} else {
 		error = mprotect_fixup_middle(vma, start, end, newflags, newprot);
+	}
 
 	if (error)
 		return error;
@@ -261,13 +270,13 @@ asmlinkage long sys_mprotect(unsigned long start, size_t len, unsigned long prot
 		unsigned int newflags;
 
 		/* Here we know that  vma->vm_start <= nstart < vma->vm_end. */
-		/* TODO: next... */
 		newflags = prot | (vma->vm_flags & ~(PROT_READ | PROT_WRITE | PROT_EXEC));
 		if ((newflags & ~(newflags >> 4)) & 0xf) {
 			error = -EACCES;
 			break;
 		}
 
+		//全部覆盖，结束
 		if (vma->vm_end >= end) {
 			error = mprotect_fixup(vma, nstart, end, newflags);
 			break;

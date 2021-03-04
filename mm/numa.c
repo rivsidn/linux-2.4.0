@@ -9,6 +9,7 @@
 #include <linux/mmzone.h>
 #include <linux/spinlock.h>
 
+//TODO: next...
 int numnodes = 1;	/* Initialized for UMA platforms */
 
 static bootmem_data_t contig_bootmem_data;
