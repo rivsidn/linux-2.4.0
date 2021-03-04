@@ -597,6 +597,7 @@ unsigned int nr_free_pages (void)
 	pg_data_t *pgdat = pgdat_list;
 
 	sum = 0;
+	//统计所有存储节点中空闲的页面数量
 	while (pgdat) {
 		for (zone = pgdat->node_zones; zone < pgdat->node_zones + MAX_NR_ZONES; zone++)
 			sum += zone->free_pages;
@@ -625,6 +626,9 @@ unsigned int nr_inactive_clean_pages (void)
 
 /*
  * Amount of free RAM allocatable as buffer memory:
+ */
+/*
+ * TODO: next...
  */
 unsigned int nr_free_buffer_pages (void)
 {
@@ -657,6 +661,7 @@ unsigned int nr_free_highpages (void)
 	pg_data_t *pgdat = pgdat_list;
 	unsigned int pages = 0;
 
+	//统计所有存储节点中ZONE_HIGHMEM 空闲的页面数
 	while (pgdat) {
 		pages += pgdat->node_zones[ZONE_HIGHMEM].free_pages;
 		pgdat = pgdat->node_next;
@@ -680,14 +685,15 @@ void show_free_areas_core(pg_data_t *pgdat)
 		nr_free_highpages() << (PAGE_SHIFT-10));
 
 	printk("( Active: %d, inactive_dirty: %d, inactive_clean: %d, free: %d (%d %d %d) )\n",
-		nr_active_pages,
-		nr_inactive_dirty_pages,
-		nr_inactive_clean_pages(),
+		nr_active_pages,		//全局
+		nr_inactive_dirty_pages,	//全局
+		nr_inactive_clean_pages(),	//每个zone自己维护
 		nr_free_pages(),
 		freepages.min,
 		freepages.low,
 		freepages.high);
 
+	//分别显示存储节点中的每个zone
 	for (type = 0; type < MAX_NR_ZONES; type++) {
 		struct list_head *head, *curr;
 		zone_t *zone = pgdat->node_zones + type;
@@ -696,6 +702,7 @@ void show_free_areas_core(pg_data_t *pgdat)
 		total = 0;
 		if (zone->size) {
 			spin_lock_irqsave(&zone->lock, flags);
+			//按照order顺序显示zone中的每个free_area
 		 	for (order = 0; order < MAX_ORDER; order++) {
 				head = &(zone->free_area + order)->free_list;
 				curr = head;
