@@ -100,7 +100,7 @@ static void __free_pages_ok (struct page *page, unsigned long order)
 	if (page_idx & ~mask)
 		BUG();
 	index = page_idx >> (1 + order);	//page 在area->map 中的位图
-						//此处 (index+1) 的理解是，必定不存在两个相同的初始页位于
+						//此处 (index+1) 的理解是，必定不存在两个相同的页位于
 						//同一个位图下，如果存在则需要升入(order+1)中
 	area = zone->free_area + order;
 
@@ -108,12 +108,13 @@ static void __free_pages_ok (struct page *page, unsigned long order)
 
 	zone->free_pages -= mask;		//-mask = (1+~mask)
 
-	//TODO: next...
 	while (mask + (1 << (MAX_ORDER-1))) {
 		struct page *buddy1, *buddy2;
 
 		if (area >= zone->free_area + MAX_ORDER)
 			BUG();
+		//如果之前没有设置则跳出循环
+		//否则将两个buddy合并，移至上层
 		if (!test_and_change_bit(index, area->map))
 			/*
 			 * the buddy page is still allocated.
@@ -149,8 +150,6 @@ static void __free_pages_ok (struct page *page, unsigned long order)
 		memory_pressure--;
 }
 
-//TODO: 为什么这个地方的MARK_USED() 需要(1+order)？？？
-//内存页面在zone 中是如何组织到一起的？还没搞清楚
 #define MARK_USED(index, order, area) \
 	change_bit((index) >> (1+(order)), (area)->map)
 
