@@ -16,6 +16,9 @@
  * But read and write are not supported (yet)
  *
  */
+/*
+ * TODO: 该文件跟文件系统关联密切，等读过文件系统相关内容之后再来读这部分。
+ */
 
 #include <linux/module.h>
 #include <linux/init.h>
@@ -832,7 +835,7 @@ struct file *shmem_file_setup(char * name, loff_t size)
 
 	error = -ENOSPC;
 	inode = shmem_get_inode(root->d_sb, S_IFREG | S_IRWXUGO, 0);
-	if (!inode) 
+	if (!inode)
 		goto close_file;
 
 	d_instantiate(dentry, inode);
@@ -851,6 +854,7 @@ put_dentry:
 out:
 	return ERR_PTR(error);	
 }
+
 /*
  * shmem_zero_setup - setup a shared anonymous mapping
  *
@@ -860,7 +864,7 @@ int shmem_zero_setup(struct vm_area_struct *vma)
 {
 	struct file *file;
 	loff_t size = vma->vm_end - vma->vm_start;
-	
+
 	file = shmem_file_setup("dev/zero", size);
 	if (IS_ERR(file))
 		return PTR_ERR(file);
