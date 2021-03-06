@@ -28,7 +28,7 @@ typedef struct zone_struct {
 	 */
 	spinlock_t		lock;
 	unsigned long		offset;		//起始页面号在mem_map中下标
-	unsigned long		free_pages;
+	unsigned long		free_pages;	//剩余页面数
 	unsigned long		inactive_clean_pages;
 	unsigned long		inactive_dirty_pages;
 	unsigned long		pages_min, pages_low, pages_high;
@@ -37,7 +37,7 @@ typedef struct zone_struct {
 	 * free areas of different sizes
 	 */
 	struct list_head	inactive_clean_list;
-	free_area_t		free_area[MAX_ORDER];
+	free_area_t		free_area[MAX_ORDER];	//空闲页面队列
 
 	/*
 	 * rarely used fields:
@@ -71,7 +71,7 @@ typedef struct zone_struct {
  * footprint of this construct is very small.
  */
 typedef struct zonelist_struct {
-	zone_t * zones [MAX_NR_ZONES+1]; // NULL delimited
+	zone_t * zones [MAX_NR_ZONES+1];	//NULL delimited
 	int gfp_mask;
 } zonelist_t;
 

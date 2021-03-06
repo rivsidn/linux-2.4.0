@@ -91,7 +91,7 @@ static void __free_pages_ok (struct page *page, unsigned long order)
 
 	page->flags &= ~((1<<PG_referenced) | (1<<PG_dirty));
 	page->age = PAGE_AGE_START;
-	
+
 	zone = page->zone;
 
 	mask = (~0UL) << order;
@@ -99,14 +99,16 @@ static void __free_pages_ok (struct page *page, unsigned long order)
 	page_idx = page - base;			//page 在zone 中的偏移量
 	if (page_idx & ~mask)
 		BUG();
-	index = page_idx >> (1 + order);	//page 在area->map 中偏移量
-						//TODO: 这个偏移量是如何获取到的还没有很理解
+	index = page_idx >> (1 + order);	//page 在area->map 中的位图
+						//此处 (index+1) 的理解是，必定不存在两个相同的初始页位于
+						//同一个位图下，如果存在则需要升入(order+1)中
 	area = zone->free_area + order;
 
 	spin_lock_irqsave(&zone->lock, flags);
 
 	zone->free_pages -= mask;		//-mask = (1+~mask)
 
+	//TODO: next...
 	while (mask + (1 << (MAX_ORDER-1))) {
 		struct page *buddy1, *buddy2;
 
@@ -315,12 +317,18 @@ struct page * __alloc_pages(zonelist_t *zonelist, unsigned long order)
 	 * If we are about to get low on free pages and we also have
 	 * an inactive page shortage, wake up kswapd.
 	 */
+	/*
+	 * inactive_page 少了，需要唤醒kswapd.
+	 */
 	if (inactive_shortage() > inactive_target / 2 && free_shortage())
 		wakeup_kswapd(0);
 	/*
 	 * If we are about to get low on free pages and cleaning
 	 * the inactive_dirty pages would fix the situation,
 	 * wake up bdflush.
+	 */
+	/*
+	 * free page 少了需要唤醒bdflush.
 	 */
 	else if (free_shortage() && nr_inactive_dirty_pages > free_shortage()
 			&& nr_inactive_dirty_pages >= freepages.high)
@@ -341,7 +349,6 @@ try_again:
 		if (!z->size)
 			BUG();
 
-		//TODO: 需要理清除这里的限制条件
 		if (z->free_pages >= z->pages_low) {
 			page = rmqueue(z, order);
 			if (page)
@@ -549,12 +556,14 @@ unsigned long __get_free_pages(int gfp_mask, unsigned long order)
 {
 	struct page * page;
 
+	//申请页面，如果申请到了则返回页面的虚拟地址
 	page = alloc_pages(gfp_mask, order);
 	if (!page)
 		return 0;
 	return (unsigned long) page_address(page);
 }
 
+//返回一个清空了的页面
 unsigned long get_zeroed_page(int gfp_mask)
 {
 	struct page * page;
@@ -626,9 +635,6 @@ unsigned int nr_inactive_clean_pages (void)
 
 /*
  * Amount of free RAM allocatable as buffer memory:
- */
-/*
- * TODO: next...
  */
 unsigned int nr_free_buffer_pages (void)
 {
