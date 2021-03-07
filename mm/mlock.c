@@ -12,6 +12,7 @@
 #include <asm/uaccess.h>
 #include <asm/pgtable.h>
 
+//这个地方的处理方式跟mprotect.c 基本一致
 static inline int mlock_fixup_all(struct vm_area_struct * vma, int newflags)
 {
 	spin_lock(&vma->vm_mm->page_table_lock);
