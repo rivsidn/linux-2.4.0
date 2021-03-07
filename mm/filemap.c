@@ -2595,6 +2595,7 @@ fail_write:
 	goto unlock;
 }
 
+//TODO: next...
 void __init page_cache_init(unsigned long mempages)
 {
 	unsigned long htable_size, order;

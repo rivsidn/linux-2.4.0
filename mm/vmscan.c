@@ -348,6 +348,7 @@ static int swap_out(unsigned int priority, int gfp_mask)
 				if (mm->swap_cnt < SWAP_MIN)
 					mm->swap_cnt = SWAP_MIN;
 			}
+			//寻找最优的mm_struct{}
 			if (mm->swap_cnt > max_cnt) {
 				max_cnt = mm->swap_cnt;
 				best = mm;
@@ -372,6 +373,7 @@ static int swap_out(unsigned int priority, int gfp_mask)
 			}
 			break;
 		} else {
+			//找到了，开始扫描
 			__ret = swap_out_mm(best, gfp_mask);
 			mmput(best);
 			break;
@@ -764,11 +766,10 @@ int refill_inactive_scan(unsigned int priority, int oneshot)
 
 		/* Do aging on the pages. */
 		if (PageTestandClearReferenced(page)) {
-			//如果被访问了，增加page 的寿命
-			age_page_up_nolock(page);
+			age_page_up_nolock(page);	//如果最近被访问了，增加页面的寿命
 			page_active = 1;
 		} else {
-			age_page_down_ageonly(page);
+			age_page_down_ageonly(page);	//减少页面的寿命
 			/*
 			 * Since we don't hold a reference on the page
 			 * ourselves, we have to do our test a bit more
@@ -804,7 +805,7 @@ int refill_inactive_scan(unsigned int priority, int oneshot)
 	}
 	spin_unlock(&pagemap_lru_lock);
 
-	return ret;
+	return ret;	//成功将页面从从active移动到inactive_dirty中返回1
 }
 
 /*
@@ -896,7 +897,6 @@ static int refill_inactive(unsigned int gfp_mask, int user)
 	/* 内存少的时候减少SLAB缓存 */
 	kmem_cache_reap(gfp_mask);
 
-	//TODO: next...
 	priority = 6;
 	do {
 		made_progress = 0;
@@ -907,6 +907,7 @@ static int refill_inactive(unsigned int gfp_mask, int user)
 			schedule();
 		}
 		//从active 中找出能转移到 inactive 状态的页面
+		//只找到一个页面就退出
 		while (refill_inactive_scan(priority, 1)) {
 			made_progress = 1;
 			if (--count <= 0)
@@ -951,13 +952,14 @@ static int refill_inactive(unsigned int gfp_mask, int user)
 	} while (priority >= 0);
 
 	/* Always end on a refill_inactive.., may sleep... */
+	/* 循环扫描，直到成功，可能会休眠 */
 	while (refill_inactive_scan(0, 1)) {
 		if (--count <= 0)
 			goto done;
 	}
 
 done:
-	return (count < start_count);
+	return (count < start_count);	//成功将页面从active链表移动到inactive_dirty返回true
 }
 
 static int do_try_to_free_pages(unsigned int gfp_mask, int user)
@@ -1019,6 +1021,9 @@ struct task_struct *kswapd_task;
  *
  * If there are applications that are active memory-allocators
  * (most normal use), this basically shouldn't matter.
+ */
+/*
+ * 页面交换守护进程
  */
 int kswapd(void *unused)
 {
