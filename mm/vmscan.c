@@ -389,6 +389,10 @@ static int swap_out(unsigned int priority, int gfp_mask)
  * The tests look impressive, but most of the time we'll grab
  * the first page of the list and exit successfully.
  */
+/*
+ * 从inactive_clean 中申请一个页面，将页面放到zone的free_area 中需要
+ * 调用__free_page()
+ */
 struct page * reclaim_page(zone_t * zone)
 {
 	struct page * page = NULL;
@@ -400,6 +404,9 @@ struct page * reclaim_page(zone_t * zone)
 	 * but we have to grab the pagecache_lock before the pagemap_lru_lock
 	 * to avoid deadlocks and most of the time we'll succeed anyway.
 	 */
+	/*
+	 * 遍历zone inactive_clean_list 中的页面
+	 */
 	spin_lock(&pagecache_lock);
 	spin_lock(&pagemap_lru_lock);
 	maxscan = zone->inactive_clean_pages;
@@ -408,6 +415,7 @@ struct page * reclaim_page(zone_t * zone)
 		page = list_entry(page_lru, struct page, lru);
 
 		/* Wrong page on list?! (list corruption, should not happen) */
+		/* 类似代码有利于排错 */
 		if (!PageInactiveClean(page)) {
 			printk("VM: reclaim_page, wrong page on list.\n");
 			list_del(page_lru);
@@ -415,6 +423,7 @@ struct page * reclaim_page(zone_t * zone)
 			continue;
 		}
 
+		//TODO: next...
 		/* Page is or was in use?  Move it to the active list. */
 		if (PageTestandClearReferenced(page) || page->age > 0 ||
 				(!page->buffers && page_count(page) > 1)) {
@@ -1154,15 +1163,22 @@ int kreclaimd(void *unused)
 		 * We sleep until someone wakes us up from
 		 * page_alloc.c::__alloc_pages().
 		 */
+		/*
+		 * 等待直到被唤醒
+		 */
 		interruptible_sleep_on(&kreclaimd_wait);
 
 		/*
 		 * Move some pages from the inactive_clean lists to
 		 * the free lists, if it is needed.
 		 */
+		/*
+		 * 遍历所有的存储节点
+		 */
 		pgdat = pgdat_list;
 		do {
 			int i;
+			//遍历所有存储节点中的zone
 			for(i = 0; i < MAX_NR_ZONES; i++) {
 				zone_t *zone = pgdat->node_zones + i;
 				if (!zone->size)
@@ -1173,7 +1189,7 @@ int kreclaimd(void *unused)
 					page = reclaim_page(zone);
 					if (!page)
 						break;
-					__free_page(page);
+					__free_page(page);	//将page放回到zone中的free_area{}中
 				}
 			}
 			pgdat = pgdat->node_next;
