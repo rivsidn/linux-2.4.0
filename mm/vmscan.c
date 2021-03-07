@@ -423,8 +423,8 @@ struct page * reclaim_page(zone_t * zone)
 			continue;
 		}
 
-		//TODO: next...
 		/* Page is or was in use?  Move it to the active list. */
+		/* TODO: 此处为什么要清空引用 */
 		if (PageTestandClearReferenced(page) || page->age > 0 ||
 				(!page->buffers && page_count(page) > 1)) {
 			del_page_from_inactive_clean_list(page);
@@ -494,6 +494,7 @@ out:
  * go out to Matthew Dillon.
  */
 /*
+ * 清空dirty_inactive 页面，将页面移动到inactive_clean 链表中。
  * page_cluster 在 swap_setup() 中根据内存大小设置。
  */
 #define MAX_LAUNDER 		(4 * (1 << page_cluster))
@@ -526,7 +527,7 @@ dirty_page_rescan:
 		/* Wrong page on list?! (list corruption, should not happen) */
 		if (!PageInactiveDirty(page)) {
 			printk("VM: page_launder, wrong page on list.\n");
-			list_del(page_lru);
+			list_del(page_lru);		//所以此时的页面不在任何list链表中
 			nr_inactive_dirty_pages--;
 			page->zone->inactive_dirty_pages--;
 			continue;
@@ -564,6 +565,7 @@ dirty_page_rescan:
 				goto page_active;
 
 			/* First time through? Move it to the back of the list */
+			/* 第一次时仅将页面移到链表头 */
 			if (!launder_loop) {
 				list_del(page_lru);
 				list_add(page_lru, &inactive_dirty_list);
@@ -577,7 +579,7 @@ dirty_page_rescan:
 			spin_unlock(&pagemap_lru_lock);
 
 			//将页面中内容同步到磁盘
-			//TODO: 写成功之后为什么没有从inactive_dirty_list中移除
+			//但是写成功之后没有将页面从inactive_dirty_list 中移除
 			result = writepage(page);
 			page_cache_release(page);
 
@@ -615,12 +617,13 @@ dirty_page_rescan:
 			spin_unlock(&pagemap_lru_lock);
 
 			/* Will we do (asynchronous) IO? */
+			/* 我们需要作异步I/O？ */
 			if (launder_loop && maxlaunder == 0 && sync)
-				wait = 2;	/* Synchrounous IO */
+				wait = 2;	/* Synchrounous IO(同步IO) */
 			else if (launder_loop && maxlaunder-- > 0)
-				wait = 1;	/* Async IO */
+				wait = 1;	/* Async IO(异步IO) */
 			else
-				wait = 0;	/* No IO */
+				wait = 0;	/* No IO(不执行IO操作) */
 
 			/* Try to free the page buffers. */
 			clearedbuf = try_to_free_buffers(page, wait);
@@ -637,7 +640,6 @@ dirty_page_rescan:
 				add_page_to_inactive_dirty_list(page);
 
 			/* The page was only in the buffer cache. */
-			/* TODO: 什么意思？？？*/
 			} else if (!page->mapping) {
 				atomic_dec(&buffermem_pages);
 				freed_page = 1;
@@ -655,7 +657,7 @@ dirty_page_rescan:
 
 			/*
 			 * Unlock the page and drop the extra reference.
-			 * We can only do it here because we ar accessing
+			 * We can only do it here because we are accessing
 			 * the page struct above.
 			 */
 			UnlockPage(page);
@@ -664,6 +666,9 @@ dirty_page_rescan:
 			/* 
 			 * If we're freeing buffer cache pages, stop when
 			 * we've got enough free memory.
+			 */
+			/*
+			 * 当有足够页面的时候停止
 			 */
 			if (freed_page && !free_shortage())
 				break;
@@ -685,6 +690,11 @@ page_active:
 			 * OK, we don't know what to do with the page.
 			 * It's no use keeping it here, so we move it to
 			 * the active list.
+			 */
+			/*
+			 * 我们并不知道该怎么处理这个页面。
+			 * 将它放在这里并没有什么意义，所以我们将它移动到
+			 * active_list 中。
 			 */
 			del_page_from_inactive_dirty_list(page);
 			add_page_to_active_list(page);
@@ -717,6 +727,7 @@ page_active:
 	}
 
 	/* Return the number of pages moved to the inactive_clean list. */
+	/* 返回我们移动到inactive_clean 的页面数 */
 	return cleaned_pages;
 }
 
@@ -808,14 +819,18 @@ int free_shortage(void)
 	int freetarget = freepages.high + inactive_target / 3;
 
 	/* Are we low on free pages globally? */
+	/* 全局范围内缺少free页面 */
 	if (freeable < freetarget)
 		return freetarget - freeable;
 
 	/* If not, are we very low on any particular zone? */
+	/* 如果不是，是否在某一个zone上页面缺少的很严重 */
 	do {
 		int i;
+		//遍历存储节点中的所有zone
 		for(i = 0; i < MAX_NR_ZONES; i++) {
 			zone_t *zone = pgdat->node_zones+ i;
+			//只统计缺少的zone
 			if (zone->size && (zone->inactive_clean_pages +
 					zone->free_pages < zone->pages_min+1)) {
 				/* + 1 to have overlap with alloc_pages() !! */
@@ -824,7 +839,7 @@ int free_shortage(void)
 				sum -= zone->inactive_clean_pages;
 			}
 		}
-		pgdat = pgdat->node_next;
+		pgdat = pgdat->node_next;	//遍历所有的存储节点
 	} while (pgdat);
 
 	return sum;
@@ -865,6 +880,9 @@ int inactive_shortage(void)
  * really care about latency. In that case we don't try
  * to free too many pages.
  */
+/*
+ * 填充不活跃页面
+ */
 static int refill_inactive(unsigned int gfp_mask, int user)
 {
 	int priority, count, start_count, made_progress;
@@ -875,8 +893,10 @@ static int refill_inactive(unsigned int gfp_mask, int user)
 	start_count = count;
 
 	/* Always trim SLAB caches when memory gets low. */
+	/* 内存少的时候减少SLAB缓存 */
 	kmem_cache_reap(gfp_mask);
 
+	//TODO: next...
 	priority = 6;
 	do {
 		made_progress = 0;
@@ -951,6 +971,12 @@ static int do_try_to_free_pages(unsigned int gfp_mask, int user)
 	 * Usually bdflush will have pre-cleaned the pages
 	 * before we get around to moving them to the other
 	 * list, so this is a relatively cheap operation.
+	 */
+	/*
+	 * 如果我们缺少free页面，将页面从inactive_dirty 移动到
+	 * inactive_clean 链表中。
+	 * 通常bdflush 会在我们移动之前就提前将页面清理干净，所
+	 * 以通常这个操作不会太费劲。
 	 */
 	if (free_shortage() || nr_inactive_dirty_pages > nr_free_pages() +
 			nr_inactive_clean_pages())
@@ -1096,7 +1122,7 @@ void wakeup_kswapd(int block)
 
 	//不阻塞当前进程，唤醒，退出
 	if (!block) {
-		if (waitqueue_active(&kswapd_wait))
+		if (waitqueue_active(&kswapd_wait))	//等待队列不为空
 			wake_up(&kswapd_wait);
 		return;
 	}
@@ -1203,6 +1229,7 @@ static int __init kswapd_init(void)
 	swap_setup();
 	//创建两个内核线程
 	kernel_thread(kswapd, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
+	//kreclaimd() 寻找inactive_clean 中的页面，将页面放入free_area 中
 	kernel_thread(kreclaimd, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	return 0;
 }

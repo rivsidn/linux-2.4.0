@@ -2351,6 +2351,9 @@ static void sync_page_buffers(struct buffer_head *bh, int wait)
  *       obtain a reference to a buffer head within a page.  So we must
  *	 lock out all of these paths to cleanly toss the page.
  */
+/*
+ * 检查是不是该页面上所有的buffers 都是没用的，如果是的话，将页面释放。
+ */
 int try_to_free_buffers(struct page * page, int wait)
 {
 	struct buffer_head * tmp, * bh = page->buffers;
@@ -2590,6 +2593,7 @@ static int flush_dirty_buffers(int check_flushtime)
 
 struct task_struct *bdflush_tsk = 0;
 
+//block 是否阻塞当前进程
 void wakeup_bdflush(int block)
 {
 	if (current != bdflush_tsk) {

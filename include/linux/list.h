@@ -44,6 +44,7 @@ static __inline__ void __list_add(struct list_head * new,
 
 /**
  * list_add - add a new entry
+ *          - 头插
  * @new: new entry to be added
  * @head: list head to add it after
  *
