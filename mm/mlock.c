@@ -290,6 +290,8 @@ out:
 	return ret;
 }
 
+//TODO: next...
+//内存锁定
 asmlinkage long sys_munlockall(void)
 {
 	int ret;
