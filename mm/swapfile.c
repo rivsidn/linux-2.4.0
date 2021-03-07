@@ -145,8 +145,6 @@ bad_count:
 /*
  * Caller has made sure that the swapdevice corresponding to entry
  * is still around or has not been recycled.
- *
- * 释放一个磁盘页面
  */
 void __swap_free(swp_entry_t entry, unsigned short count)
 {
@@ -836,6 +834,9 @@ void si_swapinfo(struct sysinfo *val)
  * Note: if swap_map[] reaches SWAP_MAP_MAX the entries are treated as
  * "permanent", but will be reclaimed by the next swapoff.
  */
+/*
+ * 确保该swap entry 当前仍然是有效的并且增加他的引用计数
+ */
 int swap_duplicate(swp_entry_t entry)
 {
 	struct swap_info_struct * p;
@@ -856,6 +857,7 @@ int swap_duplicate(swp_entry_t entry)
 		goto bad_unused;
 	/*
 	 * Entry is valid, so increment the map count.
+	 * 当前该表项仍然是有效的，所以增加map的引用计数.
 	 */
 	swap_device_lock(p);
 	if (p->swap_map[offset] < SWAP_MAP_MAX)

@@ -17,6 +17,7 @@
 
 #include <asm/pgtable.h>
 
+//内存页面写到磁盘
 static int swap_writepage(struct page *page)
 {
 	rw_swap_page(WRITE, page, 0);
@@ -147,7 +148,7 @@ void free_page_and_swap_cache(struct page *page)
 		}
 		UnlockPage(page);
 	}
-	page_cache_release(page);
+	page_cache_release(page);	//__free_page()
 }
 
 

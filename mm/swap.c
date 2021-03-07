@@ -296,10 +296,6 @@ void recalculate_vm_stats(void)
 }
 
 /*
- * TODO: next...
- */
-
-/*
  * Perform any setup for the swap system
  *
  * 由于磁盘寻道比较费时间，所以每次都多读几个页面，称为“预读”；
