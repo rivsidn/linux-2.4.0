@@ -408,9 +408,9 @@ struct inode {
 	gid_t			i_gid;
 	kdev_t			i_rdev;
 	loff_t			i_size;
-	time_t			i_atime;
-	time_t			i_mtime;
-	time_t			i_ctime;
+	time_t			i_atime;	//访问时间
+	time_t			i_mtime;	//内容修改时间
+	time_t			i_ctime;	//属性改变时间
 	unsigned long		i_blksize;
 	unsigned long		i_blocks;
 	unsigned long		i_version;

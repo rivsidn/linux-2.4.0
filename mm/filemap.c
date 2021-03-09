@@ -2427,6 +2427,7 @@ static inline void remove_suid(struct inode *inode)
 {
 	unsigned int mode;
 
+	/* 写法很帅 */
 	/* set S_IGID if S_IXGRP is set, and always set S_ISUID */
 	mode = (inode->i_mode & S_IXGRP)*(S_ISGID/S_IXGRP) | S_ISUID;
 
@@ -2453,6 +2454,9 @@ static inline void remove_suid(struct inode *inode)
  * file system has to do this all by itself, unfortunately.
  *							okir@monad.swb.de
  */
+/*
+ * 通过页面缓存写文件
+ */
 ssize_t
 generic_file_write(struct file *file,const char *buf,size_t count,loff_t *ppos)
 {
@@ -2467,7 +2471,7 @@ generic_file_write(struct file *file,const char *buf,size_t count,loff_t *ppos)
 
 	cached_page = NULL;
 
-	down(&inode->i_sem);
+	down(&inode->i_sem);	//获取信号量
 
 	pos = *ppos;
 	err = -EINVAL;
@@ -2490,16 +2494,18 @@ generic_file_write(struct file *file,const char *buf,size_t count,loff_t *ppos)
 	 */
 	err = -EFBIG;
 	if (limit != RLIM_INFINITY) {
+		//已经超过限制
 		if (pos >= limit) {
 			send_sig(SIGXFSZ, current, 0);
 			goto out;
 		}
+		//本次操作会超过限制
 		if (count > limit - pos) {
 			send_sig(SIGXFSZ, current, 0);
 			count = limit - pos;
 		}
 	}
-
+ 
 	status  = 0;
 	if (count) {
 		remove_suid(inode);
@@ -2507,6 +2513,7 @@ generic_file_write(struct file *file,const char *buf,size_t count,loff_t *ppos)
 		mark_inode_dirty_sync(inode);
 	}
 
+	//TODO: next...
 	while (count) {
 		unsigned long bytes, index, offset;
 		char *kaddr;
@@ -2595,14 +2602,13 @@ fail_write:
 	goto unlock;
 }
 
-//TODO: next...
 void __init page_cache_init(unsigned long mempages)
 {
 	unsigned long htable_size, order;
 
 	htable_size = mempages;
 	htable_size *= sizeof(struct page *);
-	for(order = 0; (PAGE_SIZE << order) < htable_size; order++)
+	for (order = 0; (PAGE_SIZE << order) < htable_size; order++)
 		;
 
 	do {
