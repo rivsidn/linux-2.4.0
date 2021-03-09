@@ -22,8 +22,11 @@
 #define MS_INVALIDATE	2		/* invalidate the caches */
 #define MS_SYNC		4		/* synchronous memory sync */
 
+/* 2.4 代码中就只有两种标识位 */
 #define MCL_CURRENT	1		/* lock all current mappings */
+					/* 锁定所有当前映射 */
 #define MCL_FUTURE	2		/* lock all future mappings */
+					/* 锁定所有未来的映射 */
 
 #define MADV_NORMAL	0x0		/* default page-in behavior */
 #define MADV_RANDOM	0x1		/* page-in minimum required */

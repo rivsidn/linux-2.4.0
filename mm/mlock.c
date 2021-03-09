@@ -115,6 +115,7 @@ static inline int mlock_fixup_middle(struct vm_area_struct * vma,
 	return 0;
 }
 
+//修改vma的状态标识位
 static int mlock_fixup(struct vm_area_struct * vma, 
 	unsigned long start, unsigned long end, unsigned int newflags)
 {
@@ -136,6 +137,7 @@ static int mlock_fixup(struct vm_area_struct * vma,
 	}
 	if (!retval) {
 		/* keep track of amount of locked VM */
+		/* 跟踪锁定的虚拟内存总量 */
 		pages = (end - start) >> PAGE_SHIFT;
 		if (newflags & VM_LOCKED) {
 			pages = -pages;
@@ -185,6 +187,7 @@ static int do_mlock(unsigned long start, size_t len, int on)
 			break;
 		nstart = tmp;
 		vma = next;
+		//必须要保证连续
 		if (!vma || vma->vm_start != nstart) {
 			error = -ENOMEM;
 			break;
@@ -242,6 +245,7 @@ static int do_mlockall(int flags)
 	unsigned int def_flags;
 	struct vm_area_struct * vma;
 
+	//权限检查
 	if (!capable(CAP_IPC_LOCK))
 		return -EPERM;
 
@@ -291,8 +295,6 @@ out:
 	return ret;
 }
 
-//TODO: next...
-//内存锁定
 asmlinkage long sys_munlockall(void)
 {
 	int ret;
