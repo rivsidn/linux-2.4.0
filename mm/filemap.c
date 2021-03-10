@@ -2513,7 +2513,6 @@ generic_file_write(struct file *file,const char *buf,size_t count,loff_t *ppos)
 		mark_inode_dirty_sync(inode);
 	}
 
-	//TODO: next...
 	while (count) {
 		unsigned long bytes, index, offset;
 		char *kaddr;
@@ -2522,6 +2521,9 @@ generic_file_write(struct file *file,const char *buf,size_t count,loff_t *ppos)
 		/*
 		 * Try to find the page in the cache. If it isn't there,
 		 * allocate a free page.
+		 */
+		/*
+		 * 缓存中查找页面，如果找不到则申请一个空闲页面
 		 */
 		offset = (pos & (PAGE_CACHE_SIZE -1)); /* Within page */
 		index = pos >> PAGE_CACHE_SHIFT;
@@ -2537,11 +2539,15 @@ generic_file_write(struct file *file,const char *buf,size_t count,loff_t *ppos)
 		 * same page as we're writing to, without it being marked
 		 * up-to-date.
 		 */
+		/*
+		 * 访问用户页面，将页面读入到内存中
+		 */
 		{ volatile unsigned char dummy;
 			__get_user(dummy, buf);
 			__get_user(dummy, buf+bytes-1);
 		}
 
+		/* TODO: next... */
 		status = -ENOMEM;	/* we'll assign it later anyway */
 		page = __grab_cache_page(mapping, index, &cached_page);
 		if (!page)
