@@ -352,6 +352,7 @@ struct iattr {
 struct page;
 struct address_space;
 
+//磁盘交互函数
 struct address_space_operations {
 	int (*writepage)(struct page *);
 	int (*readpage)(struct file *, struct page *);

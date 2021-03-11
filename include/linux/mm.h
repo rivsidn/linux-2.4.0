@@ -122,6 +122,9 @@ extern pgprot_t protection_map[16];
  * unmapping it (needed to keep files on disk up-to-date etc), pointer
  * to the functions called when a no-page or a wp-page exception occurs. 
  */
+/*
+ * 虚拟内存操作函数
+ */
 struct vm_operations_struct {
 	void (*open)(struct vm_area_struct * area);
 	void (*close)(struct vm_area_struct * area);

@@ -419,12 +419,16 @@ int generic_buffer_fdatasync(struct inode *inode, unsigned long start_idx, unsig
  *      @mapping: address space structure to write
  *
  */
+/*
+ *	遍历给定地址范围内的脏页面，调用writepage()函数
+ */
 void filemap_fdatasync(struct address_space * mapping)
 {
 	int (*writepage)(struct page *) = mapping->a_ops->writepage;
 
 	spin_lock(&pagecache_lock);
 
+	//遍历所有的脏页面
         while (!list_empty(&mapping->dirty_pages)) {
 		struct page *page = list_entry(mapping->dirty_pages.next, struct page, list);
 
@@ -457,6 +461,9 @@ void filemap_fdatasync(struct address_space * mapping)
  * 
  *      @mapping: address space structure to wait for
  *
+ */
+/*
+ *	遍历给定地址范围内的locked页面，等待他们操作完毕
  */
 void filemap_fdatawait(struct address_space * mapping)
 {
@@ -1741,16 +1748,13 @@ int generic_file_mmap(struct file * file, struct vm_area_struct * vma)
 		return -EACCES;
 	if (!inode->i_mapping->a_ops->readpage)
 		return -ENOEXEC;
-	UPDATE_ATIME(inode);
+	UPDATE_ATIME(inode);	//更新访问时间
 	vma->vm_ops = ops;
 	return 0;
 }
 
 /*
  * The msync() system call.
- */
-/*
- * TODO: next...
  */
 static int msync_interval(struct vm_area_struct * vma,
 	unsigned long start, unsigned long end, int flags)
@@ -1760,6 +1764,7 @@ static int msync_interval(struct vm_area_struct * vma,
 		int error;
 		error = filemap_sync(vma, start, end-start, flags);
 
+		//遍历所有脏页面，写到磁盘，并等待执行结束
 		if (!error && (flags & MS_SYNC)) {
 			struct inode * inode = file->f_dentry->d_inode;
 			down(&inode->i_sem);
