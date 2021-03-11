@@ -512,6 +512,9 @@ void add_to_page_cache_locked(struct page * page, struct address_space *mapping,
  * This adds a page to the page cache, starting out as locked,
  * owned by us, but unreferenced, not uptodate and with no errors.
  */
+/*
+ * 将页面添加到页缓存中
+ */
 static inline void __add_to_page_cache(struct page * page,
 	struct address_space *mapping, unsigned long offset,
 	struct page **hash)
@@ -525,9 +528,9 @@ static inline void __add_to_page_cache(struct page * page,
 	page->flags = flags | (1 << PG_locked);
 	page_cache_get(page);
 	page->index = offset;
-	add_page_to_inode_queue(mapping, page);
-	add_page_to_hash_queue(page, hash);
-	lru_cache_add(page);
+	add_page_to_inode_queue(mapping, page);	//添加到mapping中
+	add_page_to_hash_queue(page, hash);	//添加到hash表中
+	lru_cache_add(page);			//添加到active list中
 }
 
 void add_to_page_cache(struct page * page, struct address_space * mapping, unsigned long offset)
@@ -545,6 +548,7 @@ static int add_to_page_cache_unique(struct page * page,
 	struct page *alias;
 
 	spin_lock(&pagecache_lock);
+	//加锁之后再找一遍
 	alias = __find_page_nolock(mapping, offset, *hash);
 
 	err = 1;
@@ -594,6 +598,9 @@ static inline int page_cache_read(struct file * file, unsigned long offset)
 /*
  * Read in an entire cluster at once.  A cluster is usually a 64k-
  * aligned block that includes the page requested in "offset."
+ */
+/*
+ * 读取页面到内存中
  */
 static int read_cluster_nonblocking(struct file * file, unsigned long offset,
 	unsigned long filesize)
@@ -1742,7 +1749,9 @@ int generic_file_mmap(struct file * file, struct vm_area_struct * vma)
 /*
  * The msync() system call.
  */
-
+/*
+ * TODO: next...
+ */
 static int msync_interval(struct vm_area_struct * vma,
 	unsigned long start, unsigned long end, int flags)
 {
@@ -1765,6 +1774,7 @@ static int msync_interval(struct vm_area_struct * vma,
 	return 0;
 }
 
+//同步文件与内存
 asmlinkage long sys_msync(unsigned long start, size_t len, int flags)
 {
 	unsigned long end;
@@ -1827,10 +1837,10 @@ static inline void setup_read_behavior(struct vm_area_struct * vma,
 	VM_ClearReadHint(vma);
 	switch(behavior) {
 		case MADV_SEQUENTIAL:
-			vma->vm_flags |= VM_SEQ_READ;
+			vma->vm_flags |= VM_SEQ_READ;	//顺序读
 			break;
 		case MADV_RANDOM:
-			vma->vm_flags |= VM_RAND_READ;
+			vma->vm_flags |= VM_RAND_READ;	//随机读
 			break;
 		default:
 			break;
@@ -1961,6 +1971,9 @@ static long madvise_behavior(struct vm_area_struct * vma,
  * Schedule all required I/O operations, then run the disk queue
  * to make sure they are started.  Do not wait for completion.
  */
+/*
+ * 该部分地址可能会被访问，所以最好提前读到内存中
+ */
 static long madvise_willneed(struct vm_area_struct * vma,
 	unsigned long start, unsigned long end)
 {
@@ -2044,6 +2057,7 @@ static long madvise_dontneed(struct vm_area_struct * vma,
 	return 0;
 }
 
+//此时的start，end都在vma 范围内
 static long madvise_vma(struct vm_area_struct * vma, unsigned long start,
 	unsigned long end, int behavior)
 {
@@ -2106,6 +2120,9 @@ static long madvise_vma(struct vm_area_struct * vma, unsigned long start,
  *  -EBADF  - map exists, but area maps something that isn't a file.
  *  -EAGAIN - a kernel resource was temporarily unavailable.
  */
+/*
+ * 应用层程序提供给内核的内存使用建议
+ */
 asmlinkage long sys_madvise(unsigned long start, size_t len, int behavior)
 {
 	unsigned long end;
@@ -2113,7 +2130,7 @@ asmlinkage long sys_madvise(unsigned long start, size_t len, int behavior)
 	int unmapped_error = 0;
 	int error = -EINVAL;
 
-	down(&current->mm->mmap_sem);
+	down(&current->mm->mmap_sem);	//获取信号量
 
 	if (start & ~PAGE_MASK)
 		goto out;
@@ -2164,7 +2181,7 @@ asmlinkage long sys_madvise(unsigned long start, size_t len, int behavior)
 	}
 
 out:
-	up(&current->mm->mmap_sem);
+	up(&current->mm->mmap_sem);	//释放信号量
 	return error;
 }
 
@@ -2173,6 +2190,9 @@ out:
  * For now, simply check to see if the page is in the page cache,
  * and is up to date; i.e. that no page-in operation would be required
  * at this time if an application were to map and access this page.
+ */
+/*
+ * TODO: 所有虚拟内存的页面都能通过这种方式找到么？
  */
 static unsigned char mincore_page(struct vm_area_struct * vma,
 	unsigned long pgoff)
@@ -2190,6 +2210,7 @@ static unsigned char mincore_page(struct vm_area_struct * vma,
 	return present;
 }
 
+/* 此时的start，end都在vma{} 内 */
 static long mincore_vma(struct vm_area_struct * vma,
 	unsigned long start, unsigned long end, unsigned char * vec)
 {
@@ -2200,9 +2221,11 @@ static long mincore_vma(struct vm_area_struct * vma,
 	if (!vma->vm_file)
 		return error;
 
+	//start的页面偏移
 	start = ((start - vma->vm_start) >> PAGE_SHIFT) + vma->vm_pgoff;
 	if (end > vma->vm_end)
 		end = vma->vm_end;
+	//end的页面偏移
 	end = ((end - vma->vm_start) >> PAGE_SHIFT) + vma->vm_pgoff;
 
 	error = -EAGAIN;
@@ -2222,12 +2245,14 @@ static long mincore_vma(struct vm_area_struct * vma,
 		while (j < thispiece)
 			tmp[j++] = mincore_page(vma, start++);
 
+		//(to, from, n)
 		if (copy_to_user(vec + PAGE_SIZE * i, tmp, thispiece)) {
 			error = -EFAULT;
 			break;
 		}
 	}
 
+	//释放页面
 	free_page((unsigned long) tmp);
 	return error;
 }
@@ -2257,6 +2282,9 @@ static long mincore_vma(struct vm_area_struct * vma,
  *		mapped
  *  -EAGAIN - A kernel resource was temporarily unavailable.
  */
+/*
+ * 获取指定内存地址范围在内存中的页面数
+ */
 asmlinkage long sys_mincore(unsigned long start, size_t len,
 	unsigned char * vec)
 {
@@ -2266,9 +2294,9 @@ asmlinkage long sys_mincore(unsigned long start, size_t len,
 	int unmapped_error = 0;
 	long error = -EINVAL;
 
-	down(&current->mm->mmap_sem);
+	down(&current->mm->mmap_sem);	//获取信号量
 
-	if (start & ~PAGE_CACHE_MASK)
+	if (start & ~PAGE_CACHE_MASK)	//是否页面对齐
 		goto out;
 	len = (len + ~PAGE_CACHE_MASK) & PAGE_CACHE_MASK;
 	end = start + len;
@@ -2282,6 +2310,10 @@ asmlinkage long sys_mincore(unsigned long start, size_t len,
 	/*
 	 * If the interval [start,end) covers some unmapped address
 	 * ranges, just ignore them, but return -ENOMEM at the end.
+	 */
+	/*
+	 * 如果地址范围内有某些没有映射的地址，忽略它们并在最后返
+	 * 回-ENOMEM错误。
 	 */
 	vma = find_vma(current->mm, start);
 	for (;;) {
@@ -2318,7 +2350,7 @@ asmlinkage long sys_mincore(unsigned long start, size_t len,
 	}
 
 out:
-	up(&current->mm->mmap_sem);
+	up(&current->mm->mmap_sem);	//释放信号量
 	return error;
 }
 
@@ -2358,6 +2390,9 @@ repeat:
  * Read into the page cache. If a page already exists,
  * and Page_Uptodate() is not set, try to fill the page.
  */
+/*
+ * 读取到页面缓存
+ */
 struct page *read_cache_page(struct address_space *mapping,
 				unsigned long index,
 				int (*filler)(void *,struct page*),
@@ -2371,7 +2406,7 @@ retry:
 	if (IS_ERR(page) || Page_Uptodate(page))
 		goto out;
 
-	lock_page(page);
+	lock_page(page);	//TODO: 此处锁定了，但是没配对的释放
 	if (!page->mapping) {
 		UnlockPage(page);
 		page_cache_release(page);
@@ -2395,6 +2430,7 @@ static inline struct page * __grab_cache_page(struct address_space *mapping,
 {
 	struct page *page, **hash = page_hash(mapping, index);
 repeat:
+	//查找缓存页面
 	page = __find_lock_page(mapping, index, hash);
 	if (!page) {
 		if (!*cached_page) {
@@ -2547,7 +2583,6 @@ generic_file_write(struct file *file,const char *buf,size_t count,loff_t *ppos)
 			__get_user(dummy, buf+bytes-1);
 		}
 
-		/* TODO: next... */
 		status = -ENOMEM;	/* we'll assign it later anyway */
 		page = __grab_cache_page(mapping, index, &cached_page);
 		if (!page)

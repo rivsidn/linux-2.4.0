@@ -308,7 +308,7 @@ void write_inode_now(struct inode *inode, int sync)
  * This can be called by file_write functions for files which have the
  * O_SYNC flag set, to flush dirty writes to disk.  
  */
-
+/* 将所有修改过的数据刷新到磁盘上 */
 int generic_osync_inode(struct inode *inode, int datasync)
 {
 	int err;
