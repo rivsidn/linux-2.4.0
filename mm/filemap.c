@@ -690,6 +690,7 @@ void lock_page(struct page *page)
  * a rather lightweight function, finding and getting a reference to a
  * hashed page atomically, waiting for it if it's locked.
  */
+/* 一个轻量级的查找函数，查找并获取一个页面的引用 */
 struct page * __find_get_page(struct address_space *mapping,
 			      unsigned long offset, struct page **hash)
 {
@@ -1457,6 +1458,9 @@ static void nopage_sequential_readahead(struct vm_area_struct * vma,
  * it in the page cache, and handles the special cases reasonably without
  * having a lot of duplicated code.
  */
+/*
+ * 映射的内存触发缺页异常的时候调用
+ */
 struct page * filemap_nopage(struct vm_area_struct * area,
 	unsigned long address, int no_share)
 {
@@ -1467,6 +1471,7 @@ struct page * filemap_nopage(struct vm_area_struct * area,
 	struct page *page, **hash, *old_page;
 	unsigned long size, pgoff;
 
+	//获取地址所在的页号
 	pgoff = ((address - area->vm_start) >> PAGE_CACHE_SHIFT) + area->vm_pgoff;
 
 retry_all:
@@ -1474,6 +1479,7 @@ retry_all:
 	 * An external ptracer can access pages that normally aren't
 	 * accessible..
 	 */
+	/* 调试进程能够访问正常进程不能访问的页面 */
 	size = (inode->i_size + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
 	if ((pgoff >= size) && (area->vm_mm == current->mm))
 		return NULL;
@@ -1491,6 +1497,7 @@ retry_find:
 	 * Ok, found a page in the page cache, now we need to check
 	 * that it's up-to-date.
 	 */
+	/* 页面缓存中找到了一个页面，看看该页面是不是干净的 */
 	if (!Page_Uptodate(page))
 		goto page_not_uptodate;
 
@@ -1498,12 +1505,17 @@ success:
  	/*
 	 * Try read-ahead for sequential areas.
 	 */
+	/* 如果找到了，看看页面的策略，尝试预读 */
 	if (VM_SequentialReadHint(area))
 		nopage_sequential_readahead(area, pgoff, size);
 
 	/*
 	 * Found the page and have a reference on it, need to check sharing
 	 * and possibly copy it over to another page..
+	 */
+	/*
+	 * 找到了这个页面而且此时有引用，需要检查是否共享，必要的时候将它拷
+	 * 贝到别的页面。
 	 */
 	old_page = page;
 	if (no_share) {
@@ -1529,6 +1541,7 @@ no_cached_page:
 	 * Otherwise, we're off the end of a privately mapped file,
 	 * so we need to map a zero page.
 	 */
+	//TODO: next...
 	if ((pgoff < size) && !VM_RandomReadHint(area))
 		error = read_cluster_nonblocking(file, pgoff, size);
 	else
