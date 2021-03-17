@@ -1319,6 +1319,8 @@ static int file_send_actor(read_descriptor_t * desc, struct page *page, unsigned
 	return written;
 }
 
+//不同文件描述符之间传递数据
+//offset 指向的是从in_fd中开始读数据的偏移量
 asmlinkage ssize_t sys_sendfile(int out_fd, int in_fd, off_t *offset, size_t count)
 {
 	ssize_t retval;
@@ -1327,12 +1329,13 @@ asmlinkage ssize_t sys_sendfile(int out_fd, int in_fd, off_t *offset, size_t cou
 
 	/*
 	 * Get input file, and verify that it is ok..
+	 * 获取输入文件，并检查是否正常
 	 */
 	retval = -EBADF;
 	in_file = fget(in_fd);
 	if (!in_file)
 		goto out;
-	if (!(in_file->f_mode & FMODE_READ))
+	if (!(in_file->f_mode & FMODE_READ))	//是否可读
 		goto fput_in;
 	retval = -EINVAL;
 	in_inode = in_file->f_dentry->d_inode;
@@ -1346,6 +1349,7 @@ asmlinkage ssize_t sys_sendfile(int out_fd, int in_fd, off_t *offset, size_t cou
 
 	/*
 	 * Get output file, and verify that it is ok..
+	 * 获取输出文件，并检查是否正常
 	 */
 	retval = -EBADF;
 	out_file = fget(out_fd);
@@ -1361,6 +1365,7 @@ asmlinkage ssize_t sys_sendfile(int out_fd, int in_fd, off_t *offset, size_t cou
 	if (retval)
 		goto fput_out;
 
+	//TODO: next...
 	retval = 0;
 	if (count) {
 		read_descriptor_t desc;
@@ -1409,6 +1414,7 @@ static void nopage_sequential_readahead(struct vm_area_struct * vma,
 	ra_window = CLUSTER_OFFSET(ra_window + CLUSTER_PAGES - 1);
 
 	/* vm_raend is zero if we haven't read ahead in this area yet.  */
+	/* vm_raend 为0 表示该区域中没有预读 */
 	if (vma->vm_raend == 0)
 		vma->vm_raend = vma->vm_pgoff + ra_window;
 
@@ -1541,7 +1547,6 @@ no_cached_page:
 	 * Otherwise, we're off the end of a privately mapped file,
 	 * so we need to map a zero page.
 	 */
-	//TODO: next...
 	if ((pgoff < size) && !VM_RandomReadHint(area))
 		error = read_cluster_nonblocking(file, pgoff, size);
 	else

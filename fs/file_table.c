@@ -122,6 +122,7 @@ void fput(struct file * file)
 	}
 }
 
+//通过fd获取file{}结构体
 struct file * fget(unsigned int fd)
 {
 	struct file * file;

@@ -40,6 +40,7 @@ static inline struct file * fcheck_files(struct files_struct *files, unsigned in
 
 /*
  * Check whether the specified fd has an open file.
+ * 检查当前的fd 是否有对应的file{} 结构体并返回
  */
 static inline struct file * fcheck(unsigned int fd)
 {

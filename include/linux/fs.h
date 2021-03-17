@@ -511,7 +511,7 @@ struct file {
 	struct file_operations	*f_op;
 	atomic_t		f_count;
 	unsigned int 		f_flags;
-	mode_t			f_mode;
+	mode_t			f_mode;		//权限信息
 	loff_t			f_pos;
 	unsigned long 		f_reada, f_ramax, f_raend, f_ralen, f_rawin;
 	struct fown_struct	f_owner;
