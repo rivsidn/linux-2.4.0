@@ -815,6 +815,7 @@ static unsigned long total_ramax;
 static unsigned long total_ralen;
 static unsigned long total_rawin;
 
+//TODO: next...
 static void profile_readahead(int async, struct file *filp)
 {
 	unsigned long flags;
@@ -911,7 +912,7 @@ static void profile_readahead(int async, struct file *filp)
  *   2*(MAX_READAHEAD + PAGE_CACHE_SIZE) = 156K if CONFIG_READA_SMALL is undefined,
  *   64k if defined (4K page size assumed).
  */
-
+/* 获取最大预读的个数 */
 static inline int get_max_readahead(struct inode * inode)
 {
 	if (!inode->i_dev || !max_readahead[MAJOR(inode->i_dev)])
@@ -1143,7 +1144,7 @@ page_ok:
 		 * "pos" here (the actor routine has to update the user buffer
 		 * pointers and the remaining count).
 		 */
-		nr = actor(desc, page, offset, nr);
+		nr = actor(desc, page, offset, nr);	//循环调用actor函数
 		offset += nr;
 		index += offset >> PAGE_CACHE_SHIFT;
 		offset &= ~PAGE_CACHE_MASK;
@@ -1298,15 +1299,15 @@ static int file_send_actor(read_descriptor_t * desc, struct page *page, unsigned
 	char *kaddr;
 	ssize_t written;
 	unsigned long count = desc->count;
-	struct file *file = (struct file *) desc->buf;
+	struct file *file = (struct file *) desc->buf;	//指向写入的文件
 	mm_segment_t old_fs;
 
 	if (size > count)
 		size = count;
 	old_fs = get_fs();
-	set_fs(KERNEL_DS);
+	set_fs(KERNEL_DS);	//设置内核数据段
 
-	kaddr = kmap(page);
+	kaddr = kmap(page);	//页映射
 	written = file->f_op->write(file, kaddr + offset, size, &file->f_pos);
 	kunmap(page);
 	set_fs(old_fs);
@@ -1365,7 +1366,6 @@ asmlinkage ssize_t sys_sendfile(int out_fd, int in_fd, off_t *offset, size_t cou
 	if (retval)
 		goto fput_out;
 
-	//TODO: next...
 	retval = 0;
 	if (count) {
 		read_descriptor_t desc;
@@ -1374,7 +1374,7 @@ asmlinkage ssize_t sys_sendfile(int out_fd, int in_fd, off_t *offset, size_t cou
 		retval = -EFAULT;
 		ppos = &in_file->f_pos;
 		if (offset) {
-			if (get_user(pos, offset))
+			if (get_user(pos, offset))	//获取用户态指针的内容
 				goto fput_out;
 			ppos = &pos;
 		}
@@ -1386,10 +1386,10 @@ asmlinkage ssize_t sys_sendfile(int out_fd, int in_fd, off_t *offset, size_t cou
 		do_generic_file_read(in_file, ppos, &desc, file_send_actor);
 
 		retval = desc.written;
-		if (!retval)
+		if (!retval)	//异常
 			retval = desc.error;
 		if (offset)
-			put_user(pos, offset);
+			put_user(pos, offset);		//将内容写回到用户态
 	}
 
 fput_out:
