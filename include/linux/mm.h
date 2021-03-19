@@ -191,7 +191,6 @@ typedef struct page {
 #define ClearPageDirty(page)	clear_bit(PG_dirty, &(page)->flags)
 #define PageLocked(page)	test_bit(PG_locked, &(page)->flags)
 #define LockPage(page)		set_bit(PG_locked, &(page)->flags)
-//成功返回0；失败返回1
 #define TryLockPage(page)	test_and_set_bit(PG_locked, &(page)->flags)
 
 extern void __set_page_dirty(struct page *);

@@ -368,6 +368,7 @@ static int do_buffer_fdatasync(struct list_head *head, unsigned long start, unsi
 		curr = curr->next;
 		if (!page->buffers)
 			continue;
+		//TODO: next...
 		if (page->index >= end)
 			continue;
 		if (page->index < start)
@@ -519,9 +520,7 @@ void add_to_page_cache_locked(struct page * page, struct address_space *mapping,
  * This adds a page to the page cache, starting out as locked,
  * owned by us, but unreferenced, not uptodate and with no errors.
  */
-/*
- * 将页面添加到页缓存中
- */
+/* 添加页面到缓存 */
 static inline void __add_to_page_cache(struct page * page,
 	struct address_space *mapping, unsigned long offset,
 	struct page **hash)
@@ -572,7 +571,10 @@ static int add_to_page_cache_unique(struct page * page,
  * This adds the requested page to the page cache if it isn't already there,
  * and schedules an I/O to read in its contents from disk.
  */
-static inline int page_cache_read(struct file * file, unsigned long offset) 
+/*
+ * 参数为文件、文件中偏移量
+ */
+static inline int page_cache_read(struct file * file, unsigned long offset)
 {
 	struct inode *inode = file->f_dentry->d_inode;
 	struct address_space *mapping = inode->i_mapping;
@@ -580,12 +582,13 @@ static inline int page_cache_read(struct file * file, unsigned long offset)
 	struct page *page; 
 
 	spin_lock(&pagecache_lock);
-	page = __find_page_nolock(mapping, offset, *hash); 
+	//查找对应mapping中的页面缓存
+	page = __find_page_nolock(mapping, offset, *hash);
 	spin_unlock(&pagecache_lock);
 	if (page)
 		return 0;
 
-	page = page_cache_alloc();
+	page = page_cache_alloc();	//申请一个内存页面
 	if (!page)
 		return -ENOMEM;
 
@@ -606,13 +609,10 @@ static inline int page_cache_read(struct file * file, unsigned long offset)
  * Read in an entire cluster at once.  A cluster is usually a 64k-
  * aligned block that includes the page requested in "offset."
  */
-/*
- * 读取页面到内存中
- */
 static int read_cluster_nonblocking(struct file * file, unsigned long offset,
 	unsigned long filesize)
 {
-	unsigned long pages = CLUSTER_PAGES;
+	unsigned long pages = CLUSTER_PAGES;	//预读页面的数量
 
 	offset = CLUSTER_OFFSET(offset);
 	while ((pages-- > 0) && (offset < filesize)) {
@@ -631,6 +631,9 @@ static int read_cluster_nonblocking(struct file * file, unsigned long offset,
  * This must be called with the caller "holding" the page,
  * ie with increased "page->count" so that the page won't
  * go away during the wait..
+ */
+/*
+ * 等待队列解锁
  */
 void ___wait_on_page(struct page *page)
 {
@@ -659,7 +662,7 @@ static void __lock_page(struct page *page)
 	struct task_struct *tsk = current;
 	DECLARE_WAITQUEUE(wait, tsk);
 
-	add_wait_queue_exclusive(&page->wait, &wait);
+	add_wait_queue_exclusive(&page->wait, &wait);	//加入到等待队列
 	for (;;) {
 		sync_page(page);
 		set_task_state(tsk, TASK_UNINTERRUPTIBLE);
@@ -672,7 +675,7 @@ static void __lock_page(struct page *page)
 			break;
 	}
 	tsk->state = TASK_RUNNING;
-	remove_wait_queue(&page->wait, &wait);
+	remove_wait_queue(&page->wait, &wait);		//从等待队列中移除
 }
 	
 
@@ -789,7 +792,7 @@ static void drop_behind(struct file * file, unsigned long index)
 		page = __find_page_nolock(mapping, index, *hash);
 		if (!page)
 			break;
-		deactivate_page(page);
+		deactivate_page(page);	//将页面移动到inactive表中
 	}
 	spin_unlock(&pagecache_lock);
 }
@@ -815,7 +818,6 @@ static unsigned long total_ramax;
 static unsigned long total_ralen;
 static unsigned long total_rawin;
 
-//TODO: next...
 static void profile_readahead(int async, struct file *filp)
 {
 	unsigned long flags;
