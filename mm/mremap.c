@@ -163,6 +163,7 @@ static inline unsigned long move_vma(struct vm_area_struct * vma,
  * MREMAP_FIXED option added 5-Dec-1999 by Benjamin LaHaise
  * This option implies MREMAP_MAYMOVE.
  */
+//TODO: next...
 unsigned long do_mremap(unsigned long addr,
 	unsigned long old_len, unsigned long new_len,
 	unsigned long flags, unsigned long new_addr)
@@ -170,6 +171,7 @@ unsigned long do_mremap(unsigned long addr,
 	struct vm_area_struct *vma;
 	unsigned long ret = -EINVAL;
 
+	//参数检查，如果除了这两个参数之外还设置了其他参数则返回错误
 	if (flags & ~(MREMAP_FIXED | MREMAP_MAYMOVE))
 		goto out;
 
@@ -183,7 +185,7 @@ unsigned long do_mremap(unsigned long addr,
 	if (flags & MREMAP_FIXED) {
 		if (new_addr & ~PAGE_MASK)
 			goto out;
-		if (!(flags & MREMAP_MAYMOVE))
+		if (!(flags & MREMAP_MAYMOVE))		//两个参数必须一起使用
 			goto out;
 
 		if (new_len > TASK_SIZE || new_addr > TASK_SIZE - new_len)
@@ -292,8 +294,8 @@ asmlinkage unsigned long sys_mremap(unsigned long addr,
 {
 	unsigned long ret;
 
-	down(&current->mm->mmap_sem);
+	down(&current->mm->mmap_sem);	//获取信号量
 	ret = do_mremap(addr, old_len, new_len, flags, new_addr);
-	up(&current->mm->mmap_sem);
+	up(&current->mm->mmap_sem);	//释放信号量
 	return ret;
 }
