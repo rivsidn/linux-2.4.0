@@ -229,10 +229,12 @@ struct buffer_head {
 	kdev_t b_rdev;			/* Real device */
 	unsigned long b_state;		/* buffer state bitmap (see above) */
 	unsigned long b_flushtime;	/* Time when (dirty) buffer should be written */
+					/* 刷新时间 */
 
 	struct buffer_head *b_next_free;/* lru/free list linkage */
 	struct buffer_head *b_prev_free;/* doubly linked list of buffers */
 	struct buffer_head *b_this_page;/* circular list of buffers in one page */
+					/* 在某一页上的buffer的循环链表 */
 	struct buffer_head *b_reqnext;	/* request queue */
 
 	struct buffer_head **b_pprev;	/* doubly linked list of hash-queue */
@@ -375,7 +377,9 @@ struct address_space {
 	unsigned long		nrpages;	/* number of total pages */
 						/* 页面数量 */
 	struct address_space_operations *a_ops;	/* methods */
+						/* 方法 */
 	struct inode		*host;		/* owner: inode, block_device */
+						/* 对应的文件inode */
 	struct vm_area_struct	*i_mmap;	/* list of private mappings */
 						/* 私有映射链表 */
 	struct vm_area_struct	*i_mmap_shared; /* list of shared mappings */

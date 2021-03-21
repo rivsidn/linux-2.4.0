@@ -142,6 +142,7 @@ void __mark_inode_dirty(struct inode *inode, int flags)
 			/* Only add valid (ie hashed) inodes to the dirty list */
 			if (!list_empty(&inode->i_hash)) {
 				list_del(&inode->i_list);
+				//添加到超级块中
 				list_add(&inode->i_list, &sb->s_dirty);
 			}
 		}

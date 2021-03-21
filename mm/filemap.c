@@ -55,6 +55,7 @@ spinlock_t pagemap_lru_lock = SPIN_LOCK_UNLOCKED;
 #define CLUSTER_PAGES		(1 << page_cluster)
 #define CLUSTER_OFFSET(x)	(((x) >> page_cluster) << page_cluster)
 
+//添加到hash 表中
 static void add_page_to_hash_queue(struct page * page, struct page **p)
 {
 	struct page *next = *p;
@@ -74,7 +75,7 @@ static inline void add_page_to_inode_queue(struct address_space *mapping, struct
 	struct list_head *head = &mapping->clean_pages;
 
 	mapping->nrpages++;
-	list_add(&page->list, head);
+	list_add(&page->list, head);	//此处用的是page->list
 	page->mapping = mapping;
 }
 
@@ -122,6 +123,7 @@ void remove_inode_page(struct page *page)
 	spin_unlock(&pagecache_lock);
 }
 
+//页面同步
 static inline int sync_page(struct page *page)
 {
 	struct address_space *mapping = page->mapping;
@@ -159,7 +161,7 @@ void invalidate_inode_pages(struct inode * inode)
 	struct list_head *head, *curr;
 	struct page * page;
 
-	head = &inode->i_mapping->clean_pages;
+	head = &inode->i_mapping->clean_pages;	//只扫描干净页面
 
 	spin_lock(&pagecache_lock);
 	spin_lock(&pagemap_lru_lock);
@@ -183,8 +185,8 @@ void invalidate_inode_pages(struct inode * inode)
 
 		__lru_cache_del(page);
 		__remove_inode_page(page);
-		UnlockPage(page);
-		page_cache_release(page);
+		UnlockPage(page);		//唤醒所有等待该页面的进程
+		page_cache_release(page);	//释放页面
 	}
 
 	spin_unlock(&pagemap_lru_lock);
@@ -337,7 +339,7 @@ static int writeout_one_page(struct page *page)
 
 		bh->b_flushtime = jiffies;
 		ll_rw_block(WRITE, 1, &bh);	
-	} while ((bh = bh->b_this_page) != head);
+	} while ((bh = bh->b_this_page) != head);	//遍历该页上的所有buffer
 	return 0;
 }
 
@@ -368,7 +370,6 @@ static int do_buffer_fdatasync(struct list_head *head, unsigned long start, unsi
 		curr = curr->next;
 		if (!page->buffers)
 			continue;
-		//TODO: next...
 		if (page->index >= end)
 			continue;
 		if (page->index < start)
