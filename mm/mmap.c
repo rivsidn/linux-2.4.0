@@ -187,7 +187,7 @@ static inline unsigned long vm_flags(unsigned long prot, unsigned long flags)
 #undef _trans
 }
 
-//TODO: next...
+//映射文件到内存中
 unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned long len,
 	unsigned long prot, unsigned long flags, unsigned long pgoff)
 {
@@ -202,6 +202,7 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 	if ((len = PAGE_ALIGN(len)) == 0)
 		return addr;
 
+	//地址在虚拟内存范围内
 	if (len > TASK_SIZE || addr > TASK_SIZE-len)
 		return -EINVAL;
 
@@ -217,13 +218,18 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 	if (mm->def_flags & VM_LOCKED) {
 		unsigned long locked = mm->locked_vm << PAGE_SHIFT;
 		locked += len;
+		//检查是否在限制范围内
 		if (locked > current->rlim[RLIMIT_MEMLOCK].rlim_cur)
 			return -EAGAIN;
 	}
 
-	/* Do simple checking here so the lower-level routines won't have
+	/*
+	 * Do simple checking here so the lower-level routines won't have
 	 * to. we assume access permissions have been handled by the open
 	 * of the memory object, so we don't do any here.
+	 */
+	/*
+	 * 做简单的权限检查，所以下层的函数不需要再做。
 	 */
 	if (file != NULL) {
 		switch (flags & MAP_TYPE) {
