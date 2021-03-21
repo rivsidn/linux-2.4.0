@@ -385,6 +385,7 @@ struct address_space {
 	struct vm_area_struct	*i_mmap_shared; /* list of shared mappings */
 						/* 共享映射链表 */
 	spinlock_t		i_shared_lock;  /* and spinlock protecting it */
+						/* 自旋锁 */
 };
 
 struct block_device {

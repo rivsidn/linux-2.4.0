@@ -217,7 +217,7 @@ struct mm_struct {
 	int map_count;				/* number of VMAs */
 						/* 进程中有几个虚存空间 */
 	struct semaphore mmap_sem;
-	spinlock_t page_table_lock;
+	spinlock_t page_table_lock;		/* 自旋锁 */
 
 	struct list_head mmlist;		/* List of all active mm's */
 

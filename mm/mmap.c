@@ -67,6 +67,7 @@ int vm_enough_memory(long pages)
 }
 
 /* Remove one vm structure from the inode's i_mapping address space. */
+/* 从inode 映射中将一个vm 结构体移除 */
 static inline void __remove_shared_vm_struct(struct vm_area_struct *vma)
 {
 	struct file * file = vma->vm_file;
@@ -781,6 +782,7 @@ asmlinkage long sys_munmap(unsigned long addr, size_t len)
  *  anonymous maps.  eventually we may be able to do some
  *  brk-specific accounting here.
  */
+/* 这实际上是一个简单的"do_mmap"，仅处理简单的匿名映射 */
 unsigned long do_brk(unsigned long addr, unsigned long len)
 {
 	struct mm_struct * mm = current->mm;
@@ -794,6 +796,7 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
 	/*
 	 * mlock MCL_FUTURE?
 	 */
+	//TODO: next...
 	if (mm->def_flags & VM_LOCKED) {
 		unsigned long locked = mm->locked_vm << PAGE_SHIFT;
 		locked += len;
@@ -865,6 +868,7 @@ out:
 }
 
 /* Build the AVL tree corresponding to the VMA list. */
+/* 通过VMA 链表建立AVL 树 */
 void build_mmap_avl(struct mm_struct * mm)
 {
 	struct vm_area_struct * vma;
@@ -875,6 +879,7 @@ void build_mmap_avl(struct mm_struct * mm)
 }
 
 /* Release all mmaps. */
+/* 释放所有的映射 */
 void exit_mmap(struct mm_struct * mm)
 {
 	struct vm_area_struct * mpnt;
@@ -903,7 +908,7 @@ void exit_mmap(struct mm_struct * mm)
 		zap_page_range(mm, start, size);
 		if (mpnt->vm_file)
 			fput(mpnt->vm_file);
-		kmem_cache_free(vm_area_cachep, mpnt);
+		kmem_cache_free(vm_area_cachep, mpnt);	//内存释放
 		mpnt = next;
 	}
 
@@ -923,11 +928,12 @@ void __insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vmp)
 	struct vm_area_struct **pprev;
 	struct file * file;
 
-	if (!mm->mmap_avl) {
+	//1. vma{} 插入到mm_struct{} 结构体中
+	if (!mm->mmap_avl) {	//此时还没建立二叉平衡树
 		pprev = &mm->mmap;
 		while (*pprev && (*pprev)->vm_start <= vmp->vm_start)
 			pprev = &(*pprev)->vm_next;
-	} else {
+	} else {		//插入到二叉平衡树中
 		struct vm_area_struct *prev, *next;
 		avl_insert_neighbours(vmp, &mm->mmap_avl, &prev, &next);
 		pprev = (prev ? &prev->vm_next : &mm->mmap);
@@ -942,6 +948,7 @@ void __insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vmp)
 	if (mm->map_count >= AVL_MIN_MAP_COUNT && !mm->mmap_avl)
 		build_mmap_avl(mm);
 
+	//2. 插入到映射表中
 	file = vmp->vm_file;
 	if (file) {
 		struct inode * inode = file->f_dentry->d_inode;
@@ -966,6 +973,7 @@ void __insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vmp)
 //将vmp插入到虚拟映射中
 void insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vmp)
 {
+	//锁定vma{}对应的mapping
 	lock_vma_mappings(vmp);
 	spin_lock(&current->mm->page_table_lock);
 	__insert_vm_struct(mm, vmp);
