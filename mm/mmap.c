@@ -187,6 +187,7 @@ static inline unsigned long vm_flags(unsigned long prot, unsigned long flags)
 #undef _trans
 }
 
+//TODO: next...
 unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned long len,
 	unsigned long prot, unsigned long flags, unsigned long pgoff)
 {
@@ -377,6 +378,9 @@ free_vma:
  * For mmap() without MAP_FIXED and shmat() with addr=0.
  * Return value 0 means ENOMEM.
  */
+/*
+ * 从addr 开始，寻找一段len 长没有映射的地址，返回起始addr
+ */
 #ifndef HAVE_ARCH_UNMAPPED_AREA
 unsigned long get_unmapped_area(unsigned long addr, unsigned long len)
 {
@@ -545,7 +549,6 @@ struct vm_area_struct * find_extend_vma(struct mm_struct * mm, unsigned long add
  * allocate a new one, and the return indicates whether the old
  * area was reused.
  */
-//TODO: next...
 static struct vm_area_struct * unmap_fixup(struct mm_struct *mm, 
 	struct vm_area_struct *area, unsigned long addr, size_t len, 
 	struct vm_area_struct *extra)
@@ -558,6 +561,7 @@ static struct vm_area_struct * unmap_fixup(struct mm_struct *mm,
 		area->vm_mm->locked_vm -= len >> PAGE_SHIFT;
 
 	/* Unmapping the whole area. */
+	/* 取消映射整个area */
 	if (addr == area->vm_start && end == area->vm_end) {
 		if (area->vm_ops && area->vm_ops->close)
 			area->vm_ops->close(area);

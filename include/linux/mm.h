@@ -442,9 +442,9 @@ static inline unsigned long do_mmap(struct file *file, unsigned long addr,
 	unsigned long flag, unsigned long offset)
 {
 	unsigned long ret = -EINVAL;
-	if ((offset + PAGE_ALIGN(len)) < offset)
+	if ((offset + PAGE_ALIGN(len)) < offset)	//越界
 		goto out;
-	if (!(offset & ~PAGE_MASK))
+	if (!(offset & ~PAGE_MASK))			//必须要对齐
 		ret = do_mmap_pgoff(file, addr, len, prot, flag, offset >> PAGE_SHIFT);
 out:
 	return ret;
