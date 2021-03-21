@@ -41,7 +41,7 @@ int sysctl_overcommit_memory;
 /* Check that a process has enough memory to allocate a
  * new virtual mapping.
  */
-/* 检查该进程是否有足够的内存申请一个新的虚拟映射 */
+/* 检查该进程是否有足够的内存 */
 int vm_enough_memory(long pages)
 {
 	/* Stupid algorithm to decide if we have enough memory: while
@@ -125,7 +125,7 @@ asmlinkage unsigned long sys_brk(unsigned long brk)
 	unsigned long newbrk, oldbrk;
 	struct mm_struct *mm = current->mm;
 
-	down(&mm->mmap_sem);
+	down(&mm->mmap_sem);	//获取信号量
 
 	if (brk < mm->end_code)
 		goto out;
@@ -135,12 +135,14 @@ asmlinkage unsigned long sys_brk(unsigned long brk)
 		goto set_brk;
 
 	/* Always allow shrinking brk. */
+	/* 缩小 */
 	if (brk <= mm->brk) {
 		if (!do_munmap(mm, newbrk, oldbrk-newbrk))
 			goto set_brk;
 		goto out;
 	}
 
+	/* 增加 */
 	/* Check against rlimit.. */
 	rlim = current->rlim[RLIMIT_DATA].rlim_cur;
 	if (rlim < RLIM_INFINITY && brk - mm->start_data > rlim)
@@ -161,7 +163,7 @@ set_brk:
 	mm->brk = brk;
 out:
 	retval = mm->brk;
-	up(&mm->mmap_sem);
+	up(&mm->mmap_sem);	//释放信号量
 	return retval;
 }
 
@@ -277,7 +279,7 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 		return -ENOMEM;
 
 	vma->vm_mm = mm;
-	vma->vm_start = addr;
+	vma->vm_start = addr;	//设置对应的虚拟地址
 	vma->vm_end = addr + len;
 	vma->vm_flags = vm_flags(prot,flags) | mm->def_flags;
 
@@ -309,13 +311,13 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 	}
 	vma->vm_page_prot = protection_map[vma->vm_flags & 0x0f];
 	vma->vm_ops = NULL;
-	vma->vm_pgoff = pgoff;
+	vma->vm_pgoff = pgoff;		//TODO: 该函数需要看到文件系统相关内容之后才能了解
 	vma->vm_file = NULL;
 	vma->vm_private_data = NULL;
 
 	/* Clear old maps */
 	error = -ENOMEM;
-	if (do_munmap(mm, addr, len))
+	if (do_munmap(mm, addr, len))		//清空之前的映射
 		goto free_vma;
 
 	/* Check against address space limit. */
