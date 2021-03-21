@@ -231,6 +231,7 @@ extern inline void flush_tlb_pgtables(struct mm_struct *mm,
 				      unsigned long start, unsigned long end)
 {
 	/* i386 does not keep any page table caches in TLB */
+	/* i386 没在TLB中保存任何的页表缓存 */
 }
 
 #endif /* _I386_PGALLOC_H */

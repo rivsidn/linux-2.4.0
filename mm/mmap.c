@@ -41,6 +41,7 @@ int sysctl_overcommit_memory;
 /* Check that a process has enough memory to allocate a
  * new virtual mapping.
  */
+/* 检查该进程是否有足够的内存申请一个新的虚拟映射 */
 int vm_enough_memory(long pages)
 {
 	/* Stupid algorithm to decide if we have enough memory: while
@@ -445,12 +446,14 @@ struct vm_area_struct * find_vma(struct mm_struct * mm, unsigned long addr)
 }
 
 /* Same as find_vma, but also return a pointer to the previous VMA in *pprev. */
+/* 跟find_vma相同，但是依旧返回一个之前VMA 的指针 */
 struct vm_area_struct * find_vma_prev(struct mm_struct * mm, unsigned long addr,
 				      struct vm_area_struct **pprev)
 {
 	if (mm) {
 		if (!mm->mmap_avl) {
 			/* Go through the linear list. */
+			/* 没有AVL树，查找线性链表 */
 			struct vm_area_struct * prev = NULL;
 			struct vm_area_struct * vma = mm->mmap;
 			while (vma && vma->vm_end <= addr) {
@@ -461,6 +464,7 @@ struct vm_area_struct * find_vma_prev(struct mm_struct * mm, unsigned long addr,
 			return vma;
 		} else {
 			/* Go through the AVL tree quickly. */
+			/* 遍历AVL树 */
 			struct vm_area_struct * vma = NULL;
 			struct vm_area_struct * last_turn_right = NULL;
 			struct vm_area_struct * prev = NULL;
@@ -541,6 +545,7 @@ struct vm_area_struct * find_extend_vma(struct mm_struct * mm, unsigned long add
  * allocate a new one, and the return indicates whether the old
  * area was reused.
  */
+//TODO: next...
 static struct vm_area_struct * unmap_fixup(struct mm_struct *mm, 
 	struct vm_area_struct *area, unsigned long addr, size_t len, 
 	struct vm_area_struct *extra)
@@ -621,6 +626,10 @@ static struct vm_area_struct * unmap_fixup(struct mm_struct *mm,
  * "prev", if it exists, points to a vma before the one
  * we just free'd - but there's no telling how much before.
  */
+/*
+ * 在mm_struct{} 结构体内，从prev开始，查找并释放在[start,end)范围内
+ * 的页。
+ */
 static void free_pgtables(struct mm_struct * mm, struct vm_area_struct *prev,
 	unsigned long start, unsigned long end)
 {
@@ -628,6 +637,7 @@ static void free_pgtables(struct mm_struct * mm, struct vm_area_struct *prev,
 	unsigned long last = end + PGDIR_SIZE - 1;
 	unsigned long start_index, end_index;
 
+	//TODO: 这部分暂时没看明白
 	if (!prev) {
 		prev = mm->mmap;
 		if (!prev)
@@ -658,6 +668,9 @@ no_mmaps:
 	 * If the PGD bits are not consecutive in the virtual address, the
 	 * old method of shifting the VA >> by PGDIR_SHIFT doesn't work.
 	 */
+	/*
+	 * 如果在虚拟地址中并不是连续不断，老的方法并不适用。
+	 */
 	start_index = pgd_index(first);
 	end_index = pgd_index(last);
 	if (end_index > start_index) {
@@ -675,6 +688,8 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
 {
 	struct vm_area_struct *mpnt, *prev, **npp, *free, *extra;
 
+	//安全检查：
+	//地址必须要页面对齐；地址必须要在虚拟地址范围内；结束地址必须要在虚拟地址范围内
 	if ((addr & ~PAGE_MASK) || addr > TASK_SIZE || len > TASK_SIZE-addr)
 		return -EINVAL;
 
@@ -691,10 +706,12 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
 		return 0;
 	/* we have  addr < mpnt->vm_end  */
 
+	//没在范围内直接返回
 	if (mpnt->vm_start >= addr+len)
 		return 0;
 
 	/* If we'll make "hole", check the vm areas limit */
+	/* 如果会要弄成一个洞，检查虚拟映射的限制 */
 	if ((mpnt->vm_start < addr && mpnt->vm_end > addr+len)
 	    && mm->map_count >= MAX_MAP_COUNT)
 		return -ENOMEM;
@@ -703,6 +720,7 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
 	 * We may need one additional vma to fix up the mappings ... 
 	 * and this is the last chance for an easy error exit.
 	 */
+	/* 申请一个新的虚拟映射 */
 	extra = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 	if (!extra)
 		return -ENOMEM;
@@ -712,10 +730,10 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
 	spin_lock(&mm->page_table_lock);
 	for ( ; mpnt && mpnt->vm_start < addr+len; mpnt = *npp) {
 		*npp = mpnt->vm_next;
-		mpnt->vm_next = free;
+		mpnt->vm_next = free;	//将要移除的放到free链表中
 		free = mpnt;
 		if (mm->mmap_avl)
-			avl_remove(mpnt, &mm->mmap_avl);
+			avl_remove(mpnt, &mm->mmap_avl);	//移除
 	}
 	mm->mmap_cache = NULL;	/* Kill the cache. */
 	spin_unlock(&mm->page_table_lock);
@@ -751,6 +769,7 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
 
 		/*
 		 * Fix the mapping, and free the old area if it wasn't reused.
+		 * 修复映射，如果老的没复用的话设置老的area
 		 */
 		extra = unmap_fixup(mm, mpnt, st, size, extra);
 		if (file)
@@ -758,6 +777,7 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
 	}
 
 	/* Release the extra vma struct if it wasn't used */
+	/* 如果没有用到，在此处释放 */
 	if (extra)
 		kmem_cache_free(vm_area_cachep, extra);
 
@@ -771,6 +791,7 @@ asmlinkage long sys_munmap(unsigned long addr, size_t len)
 	int ret;
 	struct mm_struct *mm = current->mm;
 
+	//来自用户态的请求，所以此处可以休眠，用信号量不存在问题
 	down(&mm->mmap_sem);
 	ret = do_munmap(mm, addr, len);
 	up(&mm->mmap_sem);
@@ -796,10 +817,10 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
 	/*
 	 * mlock MCL_FUTURE?
 	 */
-	//TODO: next...
 	if (mm->def_flags & VM_LOCKED) {
 		unsigned long locked = mm->locked_vm << PAGE_SHIFT;
 		locked += len;
+		//判断限制的内存大小是否已经超过限制
 		if (locked > current->rlim[RLIMIT_MEMLOCK].rlim_cur)
 			return -EAGAIN;
 	}
@@ -807,16 +828,17 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
 	/*
 	 * Clear old maps.  this also does some error checking for us
 	 */
+	/* 清除老的映射 */
 	retval = do_munmap(mm, addr, len);
 	if (retval != 0)
 		return retval;
 
 	/* Check against address space limits *after* clearing old maps... */
 	if ((mm->total_vm << PAGE_SHIFT) + len
-	    > current->rlim[RLIMIT_AS].rlim_cur)
+	    > current->rlim[RLIMIT_AS].rlim_cur)	//此处的限制都是以字节为单位
 		return -ENOMEM;
 
-	if (mm->map_count > MAX_MAP_COUNT)
+	if (mm->map_count > MAX_MAP_COUNT)		//映射的最大数量
 		return -ENOMEM;
 
 	if (!vm_enough_memory(len >> PAGE_SHIFT))
@@ -829,6 +851,7 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
 	
 
 	/* Can we just expand an old anonymous mapping? */
+	/* 是否能拓展之前的匿名映射 */
 	if (addr) {
 		struct vm_area_struct * vma = find_vma(mm, addr-1);
 		if (vma && vma->vm_end == addr && !vma->vm_file && 
@@ -841,6 +864,7 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
 
 	/*
 	 * create a vma struct for an anonymous mapping
+	 * 创立一个新的匿名映射
 	 */
 	vma = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 	if (!vma)

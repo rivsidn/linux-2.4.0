@@ -441,7 +441,7 @@ struct inode {
 	unsigned int		i_flags;
 	unsigned char		i_sock;
 
-	atomic_t		i_writecount;
+	atomic_t		i_writecount;	//？？？
 	unsigned int		i_attr_flags;
 	__u32			i_generation;
 	union {

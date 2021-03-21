@@ -126,6 +126,9 @@ int check_pgt_cache(void)
  * This function clears all user-level page tables of a process - this
  * is needed by execve(), so that old pages aren't in the way.
  */
+/*
+ * 传入参数，first 全局页表的偏移地址，nr 全局页表的数量
+ */
 void clear_page_tables(struct mm_struct *mm, unsigned long first, int nr)
 {
 	pgd_t * page_dir = mm->pgd;
