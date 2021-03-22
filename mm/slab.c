@@ -1977,6 +1977,9 @@ int slabinfo_read_proc (char *page, char **start, off_t off,
  * @count: data len
  * @data: unused
  */
+/*
+ * TODO: next...
+ */
 int slabinfo_write_proc (struct file *file, const char *buffer,
 				unsigned long count, void *data)
 {
