@@ -129,6 +129,7 @@ static inline unsigned long move_vma(struct vm_area_struct * vma,
 {
 	struct vm_area_struct * new_vma;
 
+	//申请一个新的vma结构体
 	new_vma = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 	if (new_vma) {
 		if (!move_page_tables(current->mm, new_addr, addr, old_len)) {
@@ -163,7 +164,6 @@ static inline unsigned long move_vma(struct vm_area_struct * vma,
  * MREMAP_FIXED option added 5-Dec-1999 by Benjamin LaHaise
  * This option implies MREMAP_MAYMOVE.
  */
-//TODO: next...
 unsigned long do_mremap(unsigned long addr,
 	unsigned long old_len, unsigned long new_len,
 	unsigned long flags, unsigned long new_addr)
@@ -232,6 +232,7 @@ unsigned long do_mremap(unsigned long addr,
 		unsigned long locked = current->mm->locked_vm << PAGE_SHIFT;
 		locked += new_len - old_len;
 		ret = -EAGAIN;
+		//检查是否超过限制
 		if (locked > current->rlim[RLIMIT_MEMLOCK].rlim_cur)
 			goto out;
 	}
