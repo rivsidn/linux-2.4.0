@@ -10,6 +10,7 @@
  
 #ifdef CONFIG_SMP
 #define NR_CPUS	32		/* Max processors that can be running in SMP */
+				/* SMP 下最大可运行的处理器个数 */
 #else
 #define NR_CPUS 1
 #endif

@@ -214,8 +214,8 @@ struct kmem_cache_s {
 	unsigned long		failures;
 
 /* 3) cache creation/removal */
-	char			name[CACHE_NAMELEN];
-	struct list_head	next;
+	char			name[CACHE_NAMELEN];	/* 名称 */
+	struct list_head	next;			/* 所有kmem_cache_t串到一个链表中 */
 #ifdef CONFIG_SMP
 /* 4) per-cpu data */
 	cpucache_t		*cpudata[NR_CPUS];
@@ -344,6 +344,7 @@ static cache_sizes_t cache_sizes[] = {
 };
 
 /* internal cache of cache description objs */
+/* 缓存描述符结构体的内部缓存 */
 static kmem_cache_t cache_cache = {
 	slabs:		LIST_HEAD_INIT(cache_cache.slabs),
 	firstnotfull:	&cache_cache.slabs,
@@ -859,7 +860,7 @@ static void do_ccupdate_local(void *info)
 {
 	ccupdate_struct_t *new = (ccupdate_struct_t *)info;
 	cpucache_t *old = cc_data(new->cachep);
-	
+
 	cc_data(new->cachep) = new->new[smp_processor_id()];
 	new->new[smp_processor_id()] = old;
 }
@@ -1448,15 +1449,16 @@ moveslab_free:
 }
 
 #ifdef CONFIG_SMP
-static inline void __free_block (kmem_cache_t* cachep,
-							void** objpp, int len)
+static inline void __free_block (kmem_cache_t* cachep, void** objpp, int len)
 {
+	//释放所有的节点
 	for ( ; len > 0; len--, objpp++)
 		kmem_cache_free_one(cachep, *objpp);
 }
 
 static void free_block (kmem_cache_t* cachep, void** objpp, int len)
 {
+	//由自旋锁保护
 	spin_lock(&cachep->spinlock);
 	__free_block(cachep, objpp, len);
 	spin_unlock(&cachep->spinlock);
@@ -1605,6 +1607,12 @@ kmem_cache_t * kmem_find_general_cachep (size_t size, int gfpflags)
 #ifdef CONFIG_SMP
 
 /* called with cache_chain_sem acquired.  */
+/*
+ * 调用的时候需要获取cache_chain_sem 信号量
+ * limit: 最大被缓存的数量
+ * batchcount: On SMP systems, this specifies the number of objects to
+ * 	transfer at one time when refilling the available object list.
+ */
 static int kmem_tune_cpucache (kmem_cache_t* cachep, int limit, int batchcount)
 {
 	ccupdate_struct_t new;
@@ -1626,7 +1634,7 @@ static int kmem_tune_cpucache (kmem_cache_t* cachep, int limit, int batchcount)
 	if (limit) {
 		for (i = 0; i< smp_num_cpus; i++) {
 			cpucache_t* ccnew;
-
+			//此处申请了limit 个空指针
 			ccnew = kmalloc(sizeof(void*)*limit+
 					sizeof(cpucache_t), GFP_KERNEL);
 			if (!ccnew)
@@ -1637,17 +1645,18 @@ static int kmem_tune_cpucache (kmem_cache_t* cachep, int limit, int batchcount)
 		}
 	}
 	new.cachep = cachep;
-	spin_lock_irq(&cachep->spinlock);
+	spin_lock_irq(&cachep->spinlock);	//获取自旋锁
 	cachep->batchcount = batchcount;
-	spin_unlock_irq(&cachep->spinlock);
+	spin_unlock_irq(&cachep->spinlock);	//释放自旋锁
 
+	//所有的cpu 都调用该函数
 	smp_call_function_all_cpus(do_ccupdate_local, (void *)&new);
 
 	for (i = 0; i < smp_num_cpus; i++) {
 		cpucache_t* ccold = new.new[cpu_logical_map(i)];
 		if (!ccold)
 			continue;
-		local_irq_disable();
+		local_irq_disable();	//关闭本地中断
 		free_block(cachep, cc_entry(ccold), ccold->avail);
 		local_irq_enable();
 		kfree(ccold);
@@ -1680,6 +1689,7 @@ static void enable_cpucache (kmem_cache_t *cachep)
 					cachep->name, -err);
 }
 
+//TODO: next...
 static void enable_all_cpucaches (void)
 {
 	struct list_head* p;
@@ -1700,6 +1710,7 @@ static void enable_all_cpucaches (void)
 
 /**
  * kmem_cache_reap - Reclaim memory from caches.
+ *                 - caches中回收内存
  * @gfp_mask: the type of memory required.
  *
  * Called from try_to_free_page().
@@ -1714,9 +1725,9 @@ void kmem_cache_reap (int gfp_mask)
 	unsigned int scan;
 
 	if (gfp_mask & __GFP_WAIT)
-		down(&cache_chain_sem);
+		down(&cache_chain_sem);			//获取信号量
 	else
-		if (down_trylock(&cache_chain_sem))
+		if (down_trylock(&cache_chain_sem))	//尝试获取信号量，获取不到则返回
 			return;
 
 	scan = REAP_SCANLEN;
@@ -1732,7 +1743,7 @@ void kmem_cache_reap (int gfp_mask)
 		/* It's safe to test this without holding the cache-lock. */
 		if (searchp->flags & SLAB_NO_REAP)
 			goto next;
-		spin_lock_irq(&searchp->spinlock);
+		spin_lock_irq(&searchp->spinlock);	//加锁
 		if (searchp->growing)
 			goto next_unlock;
 		if (searchp->dflags & DFLGS_GROWN) {
@@ -1764,6 +1775,10 @@ void kmem_cache_reap (int gfp_mask)
 		 * more than one page per slab (as it can be difficult
 		 * to get high orders from gfp()).
 		 */
+		/*
+		 * TODO: next...
+		 * 先弄明白slab 的代码结构
+		 */
 		pages = full_free * (1<<searchp->gfporder);
 		if (searchp->ctor)
 			pages = (pages*4+1)/5;
@@ -1780,7 +1795,7 @@ void kmem_cache_reap (int gfp_mask)
 			}
 		}
 next_unlock:
-		spin_unlock_irq(&searchp->spinlock);
+		spin_unlock_irq(&searchp->spinlock);	//解锁
 next:
 		searchp = list_entry(searchp->next.next,kmem_cache_t,next);
 	} while (--scan && searchp != clock_searchp);
@@ -1841,6 +1856,7 @@ out:
 		}				\
 	} while (0)
 
+/* TODO: 阅读proc 文件系统的时候看 */
 static int proc_getdata (char*page, char**start, off_t off, int count)
 {
 	struct list_head *p;
@@ -1957,6 +1973,9 @@ got_data:
  * num-pages-per-slab
  * + further values on SMP and with statistics enabled
  */
+/*
+ * TODO: 如果此处超过了一个page该如何处理
+ */
 int slabinfo_read_proc (char *page, char **start, off_t off,
 				 int count, int *eof, void *data)
 {
@@ -1976,9 +1995,6 @@ int slabinfo_read_proc (char *page, char **start, off_t off,
  * @buffer: user buffer
  * @count: data len
  * @data: unused
- */
-/*
- * TODO: next...
  */
 int slabinfo_write_proc (struct file *file, const char *buffer,
 				unsigned long count, void *data)
@@ -2004,7 +2020,7 @@ int slabinfo_write_proc (struct file *file, const char *buffer,
 	batchcount = simple_strtol(tmp, &tmp, 10);
 
 	/* Find the cache in the chain of caches. */
-	down(&cache_chain_sem);
+	down(&cache_chain_sem);		//获取信号量
 	res = -EINVAL;
 	list_for_each(p,&cache_chain) {
 		kmem_cache_t *cachep = list_entry(p, kmem_cache_t, next);
@@ -2014,7 +2030,7 @@ int slabinfo_write_proc (struct file *file, const char *buffer,
 			break;
 		}
 	}
-	up(&cache_chain_sem);
+	up(&cache_chain_sem);		//释放信号量
 	if (res >= 0)
 		res = count;
 	return res;
