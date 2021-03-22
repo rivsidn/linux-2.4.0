@@ -36,7 +36,7 @@
 static int rw_swap_page_base(int rw, swp_entry_t entry, struct page *page, int wait)
 {
 	unsigned long offset;
-	int zones[PAGE_SIZE/512];
+	int zones[PAGE_SIZE/512];	//512是磁盘块大小
 	int zones_used;
 	kdev_t dev = 0;
 	int block_size;
@@ -75,12 +75,12 @@ static int rw_swap_page_base(int rw, swp_entry_t entry, struct page *page, int w
 		return 0;
 	}
  	if (!wait) {
- 		SetPageDecrAfter(page);
- 		atomic_inc(&nr_async_pages);
- 	}
+		SetPageDecrAfter(page);
+		atomic_inc(&nr_async_pages);
+	}
 
- 	/* block_size == PAGE_SIZE/zones_used */
- 	brw_page(rw, page, dev, zones, block_size);
+	/* block_size == PAGE_SIZE/zones_used */
+	brw_page(rw, page, dev, zones, block_size);	//具体的操作函数
 
  	/* Note! For consistency we do all of the logic,
  	 * decrementing the page count, and unlocking the page in the
@@ -130,7 +130,7 @@ void rw_swap_page(int rw, struct page *page, int wait)
 void rw_swap_page_nolock(int rw, swp_entry_t entry, char *buf, int wait)
 {
 	struct page *page = virt_to_page(buf);
-	
+
 	if (!PageLocked(page))
 		PAGE_BUG(page);
 	if (PageSwapCache(page))
