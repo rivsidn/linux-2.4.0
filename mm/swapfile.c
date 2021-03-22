@@ -801,6 +801,7 @@ out:
 	return error;
 }
 
+//获取系统信息
 void si_swapinfo(struct sysinfo *val)
 {
 	unsigned int i;

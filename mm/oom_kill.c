@@ -29,6 +29,9 @@
  * 
  * A very rough approximation to the sqrt() function.
  */
+/*
+ * TODO: 计算开根号，没看该函数
+ */
 static unsigned int int_sqrt(unsigned int x)
 {
 	unsigned int out = x;
@@ -54,7 +57,9 @@ static unsigned int int_sqrt(unsigned int x)
  *    algorithm has been meticulously tuned to meet the priniciple
  *    of least surprise ... (be careful when you change it)
  */
-
+/*
+ * TODO: 没看该函数
+ */
 static int badness(struct task_struct *p)
 {
 	int points, cpu_time, run_time;
@@ -121,7 +126,7 @@ static struct task_struct * select_bad_process(void)
 	struct task_struct *p = NULL;
 	struct task_struct *chosen = NULL;
 
-	read_lock(&tasklist_lock);
+	read_lock(&tasklist_lock);	//遍历进程时需要加锁
 	for_each_task(p) {
 		if (p->pid) {
 			int points = badness(p);
@@ -137,7 +142,7 @@ static struct task_struct * select_bad_process(void)
 
 /**
  * oom_kill - kill the "best" process when we run out of memory
- *          - 杀进程
+ *          - 杀死我们认为最合适的进程
  *
  * If we run out of memory, we have the choice between either
  * killing a random task (bad), letting the system crash (worse)
@@ -150,7 +155,7 @@ static struct task_struct * select_bad_process(void)
  */
 void oom_kill(void)
 {
-
+	//选中需要终止的进程
 	struct task_struct *p = select_bad_process();
 
 	/* Found nothing?!?! Either we hang forever, or we panic. */
@@ -169,7 +174,7 @@ void oom_kill(void)
 
 	/* This process has hardware access, be more careful. */
 	if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_RAWIO)) {
-		force_sig(SIGTERM, p);
+		force_sig(SIGTERM, p);	//TODO: 这两个信号的差异？？？
 	} else {
 		force_sig(SIGKILL, p);
 	}
