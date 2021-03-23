@@ -142,6 +142,7 @@ static unsigned long offslab_limit;
  * for a slab, or allocated from an general cache.
  * Slabs are chained into one ordered list: fully used, partial, then fully
  * free slabs.
+ * Slabs 串联在固定顺序的链表中: 全部用完了，用了部分，全部空闲。
  */
 typedef struct slab_s {
 	struct list_head	list;
@@ -181,6 +182,7 @@ typedef struct cpucache_s {
 struct kmem_cache_s {
 /* 1) each alloc & free */
 	/* full, partial first, then free */
+	/* 全部用了、只用了部分、全部空闲 */
 	struct list_head	slabs;
 	struct list_head	*firstnotfull;
 	unsigned int		objsize;
@@ -1218,13 +1220,15 @@ static inline void * kmem_cache_alloc_one_tail (kmem_cache_t *cachep,
 	STATS_INC_ACTIVE(cachep);
 	STATS_SET_HIGH(cachep);
 
-	/* get obj pointer */
+	/* get obj pointer(slab中申请一个obj) */
+	//TODO: next...
 	slabp->inuse++;
 	objp = slabp->s_mem + slabp->free*cachep->objsize;
 	slabp->free=slab_bufctl(slabp)[slabp->free];
 
 	if (slabp->free == BUFCTL_END)
 		/* slab now full: move to next slab for next alloc */
+		/* 全部使用了，指向下一个slab */
 		cachep->firstnotfull = slabp->list.next;
 #if DEBUG
 	if (cachep->flags & SLAB_POISON)
@@ -1275,6 +1279,7 @@ void* kmem_cache_alloc_batch(kmem_cache_t* cachep, int flags)
 		struct list_head *p = cachep->firstnotfull;
 		slab_t *slabp;
 
+		//cache中不存在空闲的slab了
 		if (p == &cachep->slabs)
 			break;
 		slabp = list_entry(p,slab_t, list);
@@ -1303,10 +1308,10 @@ try_again:
 
 		if (cc) {
 			if (cc->avail) {
-				STATS_INC_ALLOCHIT(cachep);
+				STATS_INC_ALLOCHIT(cachep);	//申请命中
 				objp = cc_entry(cc)[--cc->avail];
 			} else {
-				STATS_INC_ALLOCMISS(cachep);
+				STATS_INC_ALLOCMISS(cachep);	//申请miss
 				objp = kmem_cache_alloc_batch(cachep,flags);
 				if (!objp)
 					goto alloc_new_slab_nolock;
@@ -1467,7 +1472,7 @@ static void free_block (kmem_cache_t* cachep, void** objpp, int len)
 
 /*
  * __kmem_cache_free
- * called with disabled ints
+ * called with disabled ints (调用该函数时候需要禁止中断)
  */
 static inline void __kmem_cache_free (kmem_cache_t *cachep, void* objp)
 {
@@ -1512,11 +1517,15 @@ void * kmem_cache_alloc (kmem_cache_t *cachep, int flags)
 
 /**
  * kmalloc - allocate memory
+ *         - 申请内存
  * @size: how many bytes of memory are required.
+ *      : 需要申请的内存大小
  * @flags: the type of memory to allocate.
  *
  * kmalloc is the normal method of allocating memory
  * in the kernel.  The @flags argument may be one of:
+ * kmalloc() 是内核中标准的内存申请方式，flag参数可以
+ * 是下边的几种:
  *
  * %GFP_BUFFER - XXX
  *
@@ -1535,6 +1544,7 @@ void * kmalloc (size_t size, int flags)
 {
 	cache_sizes_t *csizep = cache_sizes;
 
+	//遍历，找到满足条件的大小，申请
 	for (; csizep->cs_size; csizep++) {
 		if (size > csizep->cs_size)
 			continue;
@@ -1569,10 +1579,12 @@ void kmem_cache_free (kmem_cache_t *cachep, void *objp)
 
 /**
  * kfree - free previously allocated memory
+ *       - 释放之前申请的内存
  * @objp: pointer returned by kmalloc.
  *
  * Don't free memory not originally allocated by kmalloc()
  * or you will run into trouble.
+ * 不要释放之前不是通过kamlloc() 申请的内存，否则会出现异常
  */
 void kfree (const void *objp)
 {
@@ -1689,11 +1701,11 @@ static void enable_cpucache (kmem_cache_t *cachep)
 					cachep->name, -err);
 }
 
-//TODO: next...
 static void enable_all_cpucaches (void)
 {
 	struct list_head* p;
 
+	//获取信号量并遍历所有cache
 	down(&cache_chain_sem);
 
 	p = &cache_cache.next;
@@ -1714,6 +1726,10 @@ static void enable_all_cpucaches (void)
  * @gfp_mask: the type of memory required.
  *
  * Called from try_to_free_page().
+ */
+/*
+ * TODO: next...
+ * 这个函数还没看明白
  */
 void kmem_cache_reap (int gfp_mask)
 {
