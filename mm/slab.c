@@ -1005,6 +1005,10 @@ static inline slab_t * kmem_cache_slabmgmt (kmem_cache_t *cachep,
 	
 	if (OFF_SLAB(cachep)) {
 		/* Slab management obj is off-slab. */
+		/*
+		 * slab与对应的objs是分开管理的，给对应的内存分配一个
+		 * 对应的slab 。
+		 */
 		slabp = kmem_cache_alloc(cachep->slabp_cache, local_flags);
 		if (!slabp)
 			return NULL;
@@ -1013,13 +1017,16 @@ static inline slab_t * kmem_cache_slabmgmt (kmem_cache_t *cachep,
 			slabp = objp
 		 * if you enable OPTIMIZE
 		 */
+		/*
+		 * slab与对应的objs是在一起管理的
+		 */
 		slabp = objp+colour_off;
 		colour_off += L1_CACHE_ALIGN(cachep->num *
 				sizeof(kmem_bufctl_t) + sizeof(slab_t));
 	}
 	slabp->inuse = 0;
-	slabp->colouroff = colour_off;
-	slabp->s_mem = objp+colour_off;
+	slabp->colouroff = colour_off;		//偏移量
+	slabp->s_mem = objp+colour_off;		//实际可用的内存地址
 
 	return slabp;
 }
@@ -1030,6 +1037,7 @@ static inline void kmem_cache_init_objs (kmem_cache_t * cachep,
 	int i;
 
 	for (i = 0; i < cachep->num; i++) {
+		//对于该slab中所有的obj
 		void* objp = slabp->s_mem+cachep->objsize*i;
 #if DEBUG
 		if (cachep->flags & SLAB_RED_ZONE) {
@@ -1063,8 +1071,8 @@ static inline void kmem_cache_init_objs (kmem_cache_t * cachep,
 #endif
 		slab_bufctl(slabp)[i] = i+1;
 	}
-	slab_bufctl(slabp)[i-1] = BUFCTL_END;
-	slabp->free = 0;
+	slab_bufctl(slabp)[i-1] = BUFCTL_END;	//最后一个指向BUFCTL_END
+	slabp->free = 0;			//从头开始往下分配
 }
 
 /*
@@ -1143,7 +1151,6 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 		goto failed;
 
 	/* Get slab management. */
-	//TODO: next...
 	if (!(slabp = kmem_cache_slabmgmt(cachep, objp, offset, local_flags)))
 		goto opps1;
 
@@ -1151,9 +1158,10 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 	i = 1 << cachep->gfporder;
 	page = virt_to_page(objp);
 	do {
+		//只设置了page->list 的指针
 		SET_PAGE_CACHE(page, cachep);
 		SET_PAGE_SLAB(page, slabp);
-		PageSetSlab(page);
+		PageSetSlab(page);		//设置标识位
 		page++;
 	} while (--i);
 
@@ -1163,7 +1171,7 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 	cachep->growing--;
 
 	/* Make slab active. */
-	list_add_tail(&slabp->list,&cachep->slabs);
+	list_add_tail(&slabp->list,&cachep->slabs);	//新申请的是空闲的，加到末尾
 	if (cachep->firstnotfull == &cachep->slabs)
 		cachep->firstnotfull = &slabp->list;
 	STATS_INC_GROWN(cachep);
@@ -1171,6 +1179,7 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 
 	spin_unlock_irqrestore(&cachep->spinlock, save_flags);
 	return 1;
+	//TODO: next...
 opps1:
 	kmem_freepages(cachep, objp);
 failed:
