@@ -244,6 +244,7 @@ struct kmem_cache_s {
 
 /* c_dflags (dynamic flags). Need to hold the spinlock to access this member */
 #define	DFLGS_GROWN	0x000001UL	/* don't reap a recently grown */
+					/* 不要回收最近增长的缓存 */
 
 #define	OFF_SLAB(x)	((x)->flags & CFLGS_OFF_SLAB)
 #define	OPTIMIZE(x)	((x)->flags & CFLGS_OPTIMIZE)
@@ -1070,6 +1071,10 @@ static inline void kmem_cache_init_objs (kmem_cache_t * cachep,
  * Grow (by 1) the number of slabs within a cache.  This is called by
  * kmem_cache_alloc() when there are no active objs left in a cache.
  */
+/*
+ * 结构体的大小关系为 cache-->slab-->obj，该函数意思是在cache 中增加
+ * 一个slab.
+ */
 static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 {
 	slab_t	*slabp;
@@ -1094,6 +1099,7 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 	 * in kmem_cache_alloc(). If a caller is seriously mis-behaving they
 	 * will eventually be caught here (where it matters).
 	 */
+	/* 中断中必须要保持原子操作 */
 	if (in_interrupt() && (flags & SLAB_LEVEL_MASK) != SLAB_ATOMIC)
 		BUG();
 
@@ -1103,10 +1109,12 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 		/*
 		 * Not allowed to sleep.  Need to tell a constructor about
 		 * this - it might need to know...
+		 * 需要通知构造器不能够引起休眠.
 		 */
 		ctor_flags |= SLAB_CTOR_ATOMIC;
 
 	/* About to mess with non-constant members - lock. */
+	/* 关闭本地中断，加锁 */
 	spin_lock_irqsave(&cachep->spinlock, save_flags);
 
 	/* Get colour for the slab, and cal the next value. */
@@ -1118,6 +1126,7 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 	cachep->dflags |= DFLGS_GROWN;
 
 	cachep->growing++;
+	/* 解锁，开启本地中断 */
 	spin_unlock_irqrestore(&cachep->spinlock, save_flags);
 
 	/* A series of memory allocations for a new slab.
@@ -1129,11 +1138,12 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 	 * growing value will be seen.
 	 */
 
-	/* Get mem for the objs. */
+	/* Get mem for the objs(获取内存). */
 	if (!(objp = kmem_getpages(cachep, flags)))
 		goto failed;
 
 	/* Get slab management. */
+	//TODO: next...
 	if (!(slabp = kmem_cache_slabmgmt(cachep, objp, offset, local_flags)))
 		goto opps1;
 
@@ -1221,7 +1231,12 @@ static inline void * kmem_cache_alloc_one_tail (kmem_cache_t *cachep,
 	STATS_SET_HIGH(cachep);
 
 	/* get obj pointer(slab中申请一个obj) */
-	//TODO: next...
+	/*
+	 * 每一个slab_t 结构体后边紧跟着的是一个数组链表，通过
+	 * slab_bufctl(slabp)[slabp->free] 可以查找下一个free的偏移量，
+	 * slabp->s_mem + slabp->free*cachep->objsize 为空闲的obj，当
+	 * 该slab 已经不存在空闲obj的时候，此时的slabp->free 为 BUFCTL_END.
+	 */
 	slabp->inuse++;
 	objp = slabp->s_mem + slabp->free*cachep->objsize;
 	slabp->free=slab_bufctl(slabp)[slabp->free];
