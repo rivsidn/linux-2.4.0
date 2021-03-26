@@ -246,6 +246,7 @@ struct kmem_cache_s {
 #define	DFLGS_GROWN	0x000001UL	/* don't reap a recently grown */
 					/* 不要回收最近增长的缓存 */
 
+//slab跟内存不在一起管理
 #define	OFF_SLAB(x)	((x)->flags & CFLGS_OFF_SLAB)
 #define	OPTIMIZE(x)	((x)->flags & CFLGS_OPTIMIZE)
 #define	GROWN(x)	((x)->dlags & DFLGS_GROWN)
@@ -508,9 +509,10 @@ static inline void kmem_freepages (kmem_cache_t *cachep, void *addr)
 	 * vm_scan(). Shouldn't be a worry.
 	 */
 	while (i--) {
-		PageClearSlab(page);
+		PageClearSlab(page);	//清空标识位
 		page++;
 	}
+	//释放页面
 	free_pages((unsigned long)addr, cachep->gfporder);
 }
 
@@ -565,6 +567,7 @@ static void kmem_slab_destroy (kmem_cache_t *cachep, slab_t *slabp)
 				objp += BYTES_PER_WORD;
 			}
 #endif
+			//调用析构函数
 			if (cachep->dtor)
 				(cachep->dtor)(objp, cachep, 0);
 #if DEBUG
@@ -578,8 +581,10 @@ static void kmem_slab_destroy (kmem_cache_t *cachep, slab_t *slabp)
 		}
 	}
 
+	//释放管理的内存
 	kmem_freepages(cachep, slabp->s_mem-slabp->colouroff);
 	if (OFF_SLAB(cachep))
+		//释放对应的slab内存，此时slabp 也是一个kmem_cache
 		kmem_cache_free(cachep->slabp_cache, slabp);
 }
 
@@ -861,6 +866,7 @@ typedef struct ccupdate_struct_s
 
 static void do_ccupdate_local(void *info)
 {
+	//cpucache_t{} 替换
 	ccupdate_struct_t *new = (ccupdate_struct_t *)info;
 	cpucache_t *old = cc_data(new->cachep);
 
@@ -879,20 +885,22 @@ static void drain_cpu_caches(kmem_cache_t *cachep)
 
 	new.cachep = cachep;
 
-	down(&cache_chain_sem);
+	down(&cache_chain_sem);	//获取信号量
 	smp_call_function_all_cpus(do_ccupdate_local, (void *)&new);
 
+	//替换之后清空
 	for (i = 0; i < smp_num_cpus; i++) {
 		cpucache_t* ccold = new.new[cpu_logical_map(i)];
 		if (!ccold || (ccold->avail == 0))
 			continue;
 		local_irq_disable();
+		//释放
 		free_block(cachep, cc_entry(ccold), ccold->avail);
 		local_irq_enable();
 		ccold->avail = 0;
 	}
 	smp_call_function_all_cpus(do_ccupdate_local, (void *)&new);
-	up(&cache_chain_sem);
+	up(&cache_chain_sem);	//释放信号量
 }
 
 #else
@@ -965,6 +973,7 @@ int kmem_cache_shrink(kmem_cache_t *cachep)
  */
 int kmem_cache_destroy (kmem_cache_t * cachep)
 {
+	//安全检查
 	if (!cachep || in_interrupt() || cachep->growing)
 		BUG();
 
@@ -974,14 +983,14 @@ int kmem_cache_destroy (kmem_cache_t * cachep)
 	if (clock_searchp == cachep)
 		clock_searchp = list_entry(cachep->next.next,
 						kmem_cache_t, next);
-	list_del(&cachep->next);
+	list_del(&cachep->next); //删除
 	up(&cache_chain_sem);
 
 	if (__kmem_cache_shrink(cachep)) {
 		printk(KERN_ERR "kmem_cache_destroy: Can't free all objects %p\n",
 		       cachep);
 		down(&cache_chain_sem);
-		list_add(&cachep->next,&cache_chain);
+		list_add(&cachep->next,&cache_chain);	//没法删除，添加回来
 		up(&cache_chain_sem);
 		return 1;
 	}
@@ -1179,7 +1188,6 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 
 	spin_unlock_irqrestore(&cachep->spinlock, save_flags);
 	return 1;
-	//TODO: next...
 opps1:
 	kmem_freepages(cachep, objp);
 failed:
@@ -1506,6 +1514,8 @@ static inline void __kmem_cache_free (kmem_cache_t *cachep, void* objp)
 	CHECK_PAGE(virt_to_page(objp));
 	if (cc) {
 		int batchcount;
+		//缓存小于limit时，不立即释放，放入到缓存中；
+		//否则释放batchcount，将最近要释放的放入到缓存中。
 		if (cc->avail < cc->limit) {
 			STATS_INC_FREEHIT(cachep);
 			cc_entry(cc)[cc->avail++] = objp;
@@ -1514,14 +1524,14 @@ static inline void __kmem_cache_free (kmem_cache_t *cachep, void* objp)
 		STATS_INC_FREEMISS(cachep);
 		batchcount = cachep->batchcount;
 		cc->avail -= batchcount;
-		free_block(cachep,
-					&cc_entry(cc)[cc->avail],batchcount);
+		free_block(cachep, &cc_entry(cc)[cc->avail], batchcount);
 		cc_entry(cc)[cc->avail++] = objp;
 		return;
 	} else {
 		free_block(cachep, &objp, 1);
 	}
 #else
+	//TODO: next...
 	kmem_cache_free_one(cachep, objp);
 #endif
 }
