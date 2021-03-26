@@ -427,6 +427,7 @@ void __init kmem_cache_init(void)
 /* Initialisation - setup remaining internal and general caches.
  * Called after the gfp() functions have been enabled, and before smp_init().
  */
+//TODO: next...
 void __init kmem_cache_sizes_init(void)
 {
 	cache_sizes_t *sizes = cache_sizes;
@@ -826,6 +827,7 @@ opps:
 /*
  * This check if the kmem_cache_t pointer is chained in the cache_cache
  * list. -arca
+ * 检查kmem_cache_t 指针是否在cache_cache 链表中.
  */
 static int is_chained_kmem_cache(kmem_cache_t * cachep)
 {
@@ -1440,19 +1442,23 @@ static inline void kmem_cache_free_one(kmem_cache_t *cachep, void *objp)
 #endif
 	{
 		unsigned int objnr = (objp-slabp->s_mem)/cachep->objsize;
-
+		//释放之后添加到空闲链表中
 		slab_bufctl(slabp)[objnr] = slabp->free;
 		slabp->free = objnr;
 	}
 	STATS_DEC_ACTIVE(cachep);
 	
 	/* fixup slab chain */
-	if (slabp->inuse-- == cachep->num)
+	if (slabp->inuse-- == cachep->num)	//删除之前是满的
 		goto moveslab_partial;
-	if (!slabp->inuse)
+	if (!slabp->inuse)			//删除之后是空的
 		goto moveslab_free;
 	return;
-
+	/*
+	 * 由于slab在cache中按照: 全部满、部分空闲、全部空闲.
+	 * 的顺序排列，当一个slab删除一个obj的时候，如果状态变
+	 * 化了，需要调整slab 在cache 中的位置.
+	 */
 moveslab_partial:
     	/* was full.
 	 * Even if the page is now empty, we can set c_firstnotfull to
@@ -1478,7 +1484,9 @@ moveslab_free:
 		struct list_head *t = cachep->firstnotfull->prev;
 
 		list_del(&slabp->list);
+		//添加到cachep 最后
 		list_add_tail(&slabp->list, &cachep->slabs);
+		//如果此时firstnotfull 指向的是该slab 需要调整
 		if (cachep->firstnotfull == &slabp->list)
 			cachep->firstnotfull = t->next;
 		return;
@@ -1531,7 +1539,6 @@ static inline void __kmem_cache_free (kmem_cache_t *cachep, void* objp)
 		free_block(cachep, &objp, 1);
 	}
 #else
-	//TODO: next...
 	kmem_cache_free_one(cachep, objp);
 #endif
 }
