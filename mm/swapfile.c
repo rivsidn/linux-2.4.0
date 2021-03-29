@@ -30,7 +30,6 @@ struct swap_info_struct swap_info[MAX_SWAPFILES];
 
 #define SWAPFILE_CLUSTER 256
 
-//TODO: next...
 static inline int scan_swap_map(struct swap_info_struct *si, unsigned short count)
 {
 	unsigned long offset;
