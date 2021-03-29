@@ -680,6 +680,7 @@ out:
 		goto retry;
 }
 
+//TODO: 磁盘交换页面部分调用到了该函数，该函数是做什么用的？
 void set_blocksize(kdev_t dev, int size)
 {
 	extern int *blksize_size[];

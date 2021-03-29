@@ -30,6 +30,7 @@ struct swap_info_struct swap_info[MAX_SWAPFILES];
 
 #define SWAPFILE_CLUSTER 256
 
+//TODO: next...
 static inline int scan_swap_map(struct swap_info_struct *si, unsigned short count)
 {
 	unsigned long offset;
@@ -40,7 +41,8 @@ static inline int scan_swap_map(struct swap_info_struct *si, unsigned short coun
 	 * first-free allocation, starting a new cluster.  This
 	 * prevents us from scattering swap pages all over the entire
 	 * swap partition, so that we reduce overall disk seek times
-	 * between swap pages.  -- sct */
+	 * between swap pages.  -- sct
+	 */
 	if (si->cluster_nr) {
 		while (si->cluster_next <= si->highest_bit) {
 			offset = si->cluster_next++;
@@ -348,6 +350,7 @@ static int try_to_unuse(unsigned int type)
 	while (1) {
 		/*
 		 * Find a swap page in use and read it in.
+		 * 查找一个交换页面并读入到内存
 		 */
 		swap_device_lock(si);
 		for (i = 1; i < si->max ; i++) {
@@ -494,8 +497,10 @@ out:
 	return err;
 }
 
+//获取磁盘交换信息
 int get_swaparea_info(char *buf)
 {
+	//此处的page就是获取路径的时候用于缓存
 	char * page = (char *) __get_free_page(GFP_KERNEL);
 	struct swap_info_struct *ptr = swap_info;
 	int i, j, len = 0, usedswap;
@@ -503,6 +508,8 @@ int get_swaparea_info(char *buf)
 	if (!page)
 		return -ENOMEM;
 
+	//输出表头
+	//文件名、类型、大小、使用、优先级
 	len += sprintf(buf, "Filename\t\t\tType\t\tSize\tUsed\tPriority\n");
 	for (i = 0 ; i < nr_swapfiles ; i++, ptr++) {
 		if (ptr->flags & SWP_USED) {
@@ -533,6 +540,7 @@ int get_swaparea_info(char *buf)
 	return len;
 }
 
+//检测设备是否用于页面交换
 int is_swap_partition(kdev_t dev) {
 	struct swap_info_struct *ptr = swap_info;
 	int i;
@@ -550,7 +558,7 @@ int is_swap_partition(kdev_t dev) {
  *
  * The swapon system call
  *
- * 开启磁盘页面交换
+ * 系统调用，开启磁盘交换
  */
 asmlinkage long sys_swapon(const char * specialfile, int swap_flags)
 {
@@ -572,12 +580,14 @@ asmlinkage long sys_swapon(const char * specialfile, int swap_flags)
 		return -EPERM;
 	lock_kernel();
 	p = swap_info;
+	//遍历当前已经存在过的磁盘交换文件，看是否有释放的
 	for (type = 0 ; type < nr_swapfiles ; type++,p++)
 		if (!(p->flags & SWP_USED))
 			break;
 	error = -EPERM;
 	if (type >= MAX_SWAPFILES)
 		goto out;
+	//nr_swapfiles 的值是当前存在的最大磁盘交换文件下标+1
 	if (type >= nr_swapfiles)
 		nr_swapfiles = type+1;
 	p->flags = SWP_USED;
@@ -606,13 +616,13 @@ asmlinkage long sys_swapon(const char * specialfile, int swap_flags)
 	swap_inode = nd.dentry->d_inode;
 	error = -EINVAL;
 
-	if (S_ISBLK(swap_inode->i_mode)) {
+	if (S_ISBLK(swap_inode->i_mode)) {	//块文件
 		kdev_t dev = swap_inode->i_rdev;
 		struct block_device_operations *bdops;
 
 		p->swap_device = dev;
 		set_blocksize(dev, PAGE_SIZE);
-		
+
 		bdev = swap_inode->i_bdev;
 		bdops = devfs_get_ops(devfs_get_handle_from_inode(swap_inode));
 		if (bdops) bdev->bd_op = bdops;
@@ -636,11 +646,12 @@ asmlinkage long sys_swapon(const char * specialfile, int swap_flags)
 		if (blk_size[MAJOR(dev)])
 			swapfilesize = blk_size[MAJOR(dev)][MINOR(dev)]
 				>> (PAGE_SHIFT - 10);
-	} else if (S_ISREG(swap_inode->i_mode)) {
+	} else if (S_ISREG(swap_inode->i_mode)) {	//普通文件
 		error = -EBUSY;
 		for (i = 0 ; i < nr_swapfiles ; i++) {
 			if (i == type || !swap_info[i].swap_file)
 				continue;
+			//检测是否有重复
 			if (swap_inode == swap_info[i].swap_file->d_inode)
 				goto bad_swap;
 		}
@@ -658,6 +669,7 @@ asmlinkage long sys_swapon(const char * specialfile, int swap_flags)
 	lock_page(virt_to_page(swap_header));
 	rw_swap_page_nolock(READ, SWP_ENTRY(type,0), (char *) swap_header, 1);
 
+	//TODO: 这些标识位是什么时候设置的？
 	if (!memcmp("SWAP-SPACE",swap_header->magic.magic,10))
 		swap_header_version = 1;
 	else if (!memcmp("SWAPSPACE2",swap_header->magic.magic,10))
@@ -667,7 +679,7 @@ asmlinkage long sys_swapon(const char * specialfile, int swap_flags)
 		error = -EINVAL;
 		goto bad_swap;
 	}
-	
+
 	switch (swap_header_version) {
 	case 1:
 		memset(((char *) swap_header)+PAGE_SIZE-10,0,10);
@@ -698,8 +710,11 @@ asmlinkage long sys_swapon(const char * specialfile, int swap_flags)
 		break;
 
 	case 2:
-		/* Check the swap header's sub-version and the size of
-                   the swap file and bad block lists */
+		/*
+		 * Check the swap header's sub-version and the size of
+                 * the swap file and bad block lists
+		 * 检查子版本号，交换文件大小和坏块链
+		 */
 		if (swap_header->info.version != 1) {
 			printk(KERN_WARNING
 			       "Unable to handle swap header version %d\n",
@@ -801,7 +816,7 @@ out:
 	return error;
 }
 
-//获取系统信息
+//获取系统中的磁盘交换信息
 void si_swapinfo(struct sysinfo *val)
 {
 	unsigned int i;
@@ -817,9 +832,9 @@ void si_swapinfo(struct sysinfo *val)
 				case SWAP_MAP_BAD:
 					continue;
 				case 0:
-					freeswap++;
+					freeswap++;	//空闲
 				default:
-					totalswap++;
+					totalswap++;	//总量
 			}
 		}
 	}
@@ -889,6 +904,9 @@ bad_unused:
 /*
  * Page lock needs to be held in all cases to prevent races with
  * swap file deletion.
+ * 不论何时都需要获取到锁以防止交换设备被删除.
+ * 此时的页面是已经被交换到磁盘设备上的页面，通过page对应的index获取到
+ * 对应的磁盘设备和对应的磁盘内交换页面，最终返回磁盘中交换页面的数值.
  */
 int swap_count(struct page *page)
 {
@@ -972,6 +990,11 @@ void get_swaphandle_info(swp_entry_t entry, unsigned long *offset,
  * Kernel_lock protects against swap device deletion. Grab an extra
  * reference on the swaphandle so that it dos not become unused.
  */
+/*
+ * 预读时调用
+ * offset 为输出参数，返回预读的起始位置
+ * ret 返回预读的页面数
+ */
 int valid_swaphandles(swp_entry_t entry, unsigned long *offset)
 {
 	int ret = 0, i = 1 << page_cluster;
@@ -983,7 +1006,7 @@ int valid_swaphandles(swp_entry_t entry, unsigned long *offset)
 	//offset 向下沿page_cluster 对齐
 	toff = *offset = (*offset >> page_cluster) << page_cluster;
 
-	swap_device_lock(swapdev);
+	swap_device_lock(swapdev);	//锁定设备
 	do {
 		/* Don't read-ahead past the end of the swap area */
 		if (toff >= swapdev->max)
@@ -997,6 +1020,6 @@ int valid_swaphandles(swp_entry_t entry, unsigned long *offset)
 		toff++;
 		ret++;
 	} while (--i);
-	swap_device_unlock(swapdev);
+	swap_device_unlock(swapdev);	//设备解锁
 	return ret;
 }

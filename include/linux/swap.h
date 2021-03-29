@@ -5,7 +5,8 @@
 #include <asm/page.h>
 
 #define SWAP_FLAG_PREFER	0x8000	/* set if swap priority specified */
-#define SWAP_FLAG_PRIO_MASK	0x7fff
+					/* 如果指定了优先级，需要设置该标识位 */
+#define SWAP_FLAG_PRIO_MASK	0x7fff	/* 优先级掩码 */
 #define SWAP_FLAG_PRIO_SHIFT	0
 
 #define MAX_SWAPFILES 8
@@ -49,9 +50,9 @@ union swap_header {
 //用于磁盘交换的文件
 struct swap_info_struct {
 	unsigned int flags;
-	kdev_t swap_device;
+	kdev_t swap_device;		/* 对应设备 */
 	spinlock_t sdev_lock;
-	struct dentry * swap_file;
+	struct dentry * swap_file;	/* 对应文件 */
 	struct vfsmount *swap_vfsmnt;
 	unsigned short * swap_map;	/* 下标表示物理页面的位置，数值表示是否分配 */
 	//供页面交换使用的页面范围
