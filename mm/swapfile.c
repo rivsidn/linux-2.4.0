@@ -54,6 +54,7 @@ static inline int scan_swap_map(struct swap_info_struct *si, unsigned short coun
 	si->cluster_nr = SWAPFILE_CLUSTER;
 
 	/* try to find an empty (even not aligned) cluster. */
+	/* 尽量去找个空的集群 */
 	offset = si->lowest_bit;
  check_next_cluster:
 	if (offset+SWAPFILE_CLUSTER-1 <= si->highest_bit)
@@ -65,8 +66,10 @@ static inline int scan_swap_map(struct swap_info_struct *si, unsigned short coun
 				offset = nr+1;
 				goto check_next_cluster;
 			}
-		/* We found a completly empty cluster, so start
+		/*
+		 * We found a completly empty cluster, so start
 		 * using it.
+		 * 找到了一个完全为空的集群，所以开始使用它。
 		 */
 		goto got_page;
 	}
@@ -380,6 +383,7 @@ static int try_to_unuse(unsigned int type)
 			swap_free(entry);
   			return -ENOMEM;
 		}
+		//如果是磁盘交换页面，从磁盘交换页面中删除
 		if (PageSwapCache(page))
 			delete_from_swap_cache(page);
 		read_lock(&tasklist_lock);
@@ -401,7 +405,7 @@ static int try_to_unuse(unsigned int type)
 				printk("VM: Undead swap entry %08lx\n", 
 								entry.val);
 			nr_swap_pages++;
-			si->swap_map[i] = 0;
+			si->swap_map[i] = 0;	//TODO: 为什么可以这么处理？这部分代码没看懂
 		}
 		swap_device_unlock(si);
 		swap_list_unlock();
@@ -415,7 +419,7 @@ asmlinkage long sys_swapoff(const char * specialfile)
 	struct nameidata nd;
 	int i, type, prev;
 	int err;
-	
+
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
 
@@ -446,11 +450,13 @@ asmlinkage long sys_swapoff(const char * specialfile)
 		goto out_dput;
 	}
 
+	//位于链表头
 	if (prev < 0) {
 		swap_list.head = p->next;
 	} else {
 		swap_info[prev].next = p->next;
 	}
+	//如果此时要删除的恰好是缓存，则更新缓存
 	if (type == swap_list.next) {
 		/* just pick something that's safe... */
 		swap_list.next = swap_list.head;
@@ -461,9 +467,10 @@ asmlinkage long sys_swapoff(const char * specialfile)
 	err = try_to_unuse(type);
 	if (err) {
 		/* re-insert swap space back into swap_list */
+		/* 删除失败，重新加回到swap_list中 */
 		swap_list_lock();
 		for (prev = -1, i = swap_list.head; i >= 0; prev = i, i = swap_info[i].next)
-			if (p->prio >= swap_info[i].prio)
+			if (p->prio >= swap_info[i].prio)	//按照优先级从高到底顺序添加
 				break;
 		p->next = i;
 		if (prev < 0)
@@ -496,7 +503,7 @@ out:
 	return err;
 }
 
-//获取磁盘交换信息
+//获取磁盘交换信息，用于/proc 文件显示
 int get_swaparea_info(char *buf)
 {
 	//此处的page就是获取路径的时候用于缓存

@@ -12,10 +12,10 @@
 #define VM_ALLOC	0x00000002	/* vmalloc() */
 
 struct vm_struct {
-	unsigned long flags;
-	void * addr;
-	unsigned long size;
-	struct vm_struct * next;
+	unsigned long flags;		//标示位
+	void * addr;			//起始地址
+	unsigned long size;		//长度
+	struct vm_struct * next;	//下一个指针
 };
 
 extern struct vm_struct * get_vm_area (unsigned long size, unsigned long flags);

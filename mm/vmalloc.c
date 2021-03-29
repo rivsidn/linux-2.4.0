@@ -255,13 +255,14 @@ long vread(char *buf, char *addr, unsigned long count)
 	char *vaddr, *buf_start = buf;
 	unsigned long n;
 
-	/* Don't allow overflow */
+	/* Don't allow overflow(不允许溢出) */
 	if ((unsigned long) addr + count < count)
 		count = -(unsigned long) addr;
 
 	read_lock(&vmlist_lock);
-	for (tmp = vmlist; tmp; tmp = tmp->next) {
+	for (tmp = vmlist; tmp; tmp = tmp->next) {	//遍历链表
 		vaddr = (char *) tmp->addr;
+		//TODO: next...
 		if (addr >= vaddr + tmp->size - PAGE_SIZE)
 			continue;
 		while (addr < vaddr) {
