@@ -328,6 +328,7 @@ typedef struct cache_sizes {
 	kmem_cache_t	*cs_dmacachep;
 } cache_sizes_t;
 
+//仅仅初始化了大小，没有初始化缓存指针
 static cache_sizes_t cache_sizes[] = {
 #if PAGE_SIZE == 4096
 	{    32,	NULL, NULL},
@@ -383,6 +384,7 @@ static void kmem_cache_estimate (unsigned long gfporder, size_t size,
 		 int flags, size_t *left_over, unsigned int *num)
 {
 	int i;
+	//cache中的slab占用多少个页面
 	size_t wastage = PAGE_SIZE<<gfporder;
 	size_t extra = 0;
 	size_t base = 0;
@@ -392,14 +394,17 @@ static void kmem_cache_estimate (unsigned long gfporder, size_t size,
 		extra = sizeof(kmem_bufctl_t);
 	}
 	i = 0;
+	//可容纳范围之内累加
 	while (i*size + L1_CACHE_ALIGN(base+i*extra) <= wastage)
 		i++;
 	if (i > 0)
 		i--;
 
+	//不能超过最大限度，在数组链表中标识结束
 	if (i > SLAB_LIMIT)
 		i = SLAB_LIMIT;
 
+	//返回值，能创建多少个obj，会剩余多少内存
 	*num = i;
 	wastage -= i*size;
 	wastage -= L1_CACHE_ALIGN(base+i*extra);
@@ -427,7 +432,6 @@ void __init kmem_cache_init(void)
 /* Initialisation - setup remaining internal and general caches.
  * Called after the gfp() functions have been enabled, and before smp_init().
  */
-//TODO: next...
 void __init kmem_cache_sizes_init(void)
 {
 	cache_sizes_t *sizes = cache_sizes;
@@ -439,11 +443,16 @@ void __init kmem_cache_sizes_init(void)
 	if (num_physpages > (32 << 20) >> PAGE_SHIFT)
 		slab_break_gfp_order = BREAK_GFP_ORDER_HI;
 	do {
-		/* For performance, all the general caches are L1 aligned.
+		/*
+		 * For performance, all the general caches are L1 aligned.
 		 * This should be particularly beneficial on SMP boxes, as it
 		 * eliminates "false sharing".
 		 * Note for systems short on memory removing the alignment will
-		 * allow tighter packing of the smaller caches. */
+		 * allow tighter packing of the smaller caches.
+		 *
+		 * 为了优化性能，在所有的缓存中都开启了L1对齐，但是在内存量比较少
+		 * 的系统上，应该将该对其去掉，可以使内存更紧凑。
+		 */
 		sprintf(name,"size-%Zd",sizes->cs_size);
 		if (!(sizes->cs_cachep =
 			kmem_cache_create(name, sizes->cs_size,
