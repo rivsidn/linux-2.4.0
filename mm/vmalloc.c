@@ -142,10 +142,10 @@ inline int vmalloc_area_pages (unsigned long address, unsigned long size,
 
 	dir = pgd_offset_k(address);
 	flush_cache_all();
-	lock_kernel();
+	lock_kernel();		//锁定内核
 	do {
 		pmd_t *pmd;
-		
+
 		pmd = pmd_alloc_kernel(dir, address);
 		ret = -ENOMEM;
 		if (!pmd)
@@ -160,7 +160,7 @@ inline int vmalloc_area_pages (unsigned long address, unsigned long size,
 
 		ret = 0;
 	} while (address && (address < end));
-	unlock_kernel();
+	unlock_kernel();	//内核解锁
 	flush_tlb_all();
 	return ret;
 }
@@ -177,7 +177,7 @@ struct vm_struct * get_vm_area(unsigned long size, unsigned long flags)
 	area = (struct vm_struct *) kmalloc(sizeof(*area), GFP_KERNEL);
 	if (!area)
 		return NULL;
-	size += PAGE_SIZE;	//TODO: 这里为什么要这要做？
+	size += PAGE_SIZE;	//每次都多申请PAGE_SIZE 的内存
 	addr = VMALLOC_START;
 	write_lock(&vmlist_lock);
 	for (p = &vmlist; (tmp = *p) ; p = &tmp->next) {
@@ -189,7 +189,7 @@ struct vm_struct * get_vm_area(unsigned long size, unsigned long flags)
 		if (size + addr < (unsigned long) tmp->addr)
 			break;
 		addr = tmp->size + (unsigned long) tmp->addr;
-		if (addr > VMALLOC_END-size) {
+		if (addr > VMALLOC_END-size) {			//已经不存在size大小的剩余了
 			write_unlock(&vmlist_lock);
 			kfree(area);
 			return NULL;
@@ -198,7 +198,7 @@ struct vm_struct * get_vm_area(unsigned long size, unsigned long flags)
 	area->flags = flags;
 	area->addr = (void *)addr;
 	area->size = size;
-	area->next = *p;
+	area->next = *p;	//插入到链表中
 	*p = area;
 	write_unlock(&vmlist_lock);
 	return area;
@@ -249,6 +249,7 @@ void * __vmalloc (unsigned long size, int gfp_mask, pgprot_t prot)
 	return addr;
 }
 
+//TODO: 这个函数里的 PAGE_SIZE 该怎么理解？
 long vread(char *buf, char *addr, unsigned long count)
 {
 	struct vm_struct *tmp;
@@ -262,7 +263,6 @@ long vread(char *buf, char *addr, unsigned long count)
 	read_lock(&vmlist_lock);
 	for (tmp = vmlist; tmp; tmp = tmp->next) {	//遍历链表
 		vaddr = (char *) tmp->addr;
-		//TODO: next...
 		if (addr >= vaddr + tmp->size - PAGE_SIZE)
 			continue;
 		while (addr < vaddr) {

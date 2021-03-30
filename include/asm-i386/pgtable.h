@@ -135,6 +135,11 @@ extern unsigned long empty_zero_page[1024];
  * any out-of-bounds memory accesses will hopefully be caught.
  * The vmalloc() routines leaves a hole of 4kB between each vmalloced
  * area for the same reason. ;)
+ *
+ * 物理地址结束到内核虚拟地址开始之间有8M的空洞，我们希望通过这个空洞捕捉到
+ * 越界的内存访问；vmalloc() 申请的内存之间都留有4KB的空洞也是为了这个原因。
+ *
+ * TODO: 访问空洞时候被捕获的流程？
  */
 #define VMALLOC_OFFSET	(8*1024*1024)
 #define VMALLOC_START	(((unsigned long) high_memory + 2*VMALLOC_OFFSET-1) & \
