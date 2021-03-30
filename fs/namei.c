@@ -110,12 +110,15 @@ static inline int do_getname(const char *filename, char *page)
 	int retval;
 	unsigned long len = PATH_MAX + 1;
 
+	//如果filename在内核空间且当前进程不是内核线程，则返回错误
 	if ((unsigned long) filename >= TASK_SIZE) {
 		if (!segment_eq(get_fs(), KERNEL_DS))
 			return -EFAULT;
 	} else if (TASK_SIZE - (unsigned long) filename < PAGE_SIZE)
+		//调整长度防止越界
 		len = TASK_SIZE - (unsigned long) filename;
 
+	//将文件名拷贝到内核态
 	retval = strncpy_from_user((char *)page, filename, len);
 	if (retval > 0) {
 		if (retval < len)
@@ -131,13 +134,13 @@ char * getname(const char * filename)
 	char *tmp, *result;
 
 	result = ERR_PTR(-ENOMEM);
-	tmp = __getname();
+	tmp = __getname();		//获取缓存
 	if (tmp)  {
 		int retval = do_getname(filename, tmp);
 
 		result = tmp;
 		if (retval < 0) {
-			putname(tmp);
+			putname(tmp);	//释放缓存
 			result = ERR_PTR(retval);
 		}
 	}
@@ -180,6 +183,7 @@ int vfs_permission(struct inode * inode,int mask)
 	return -EACCES;
 }
 
+//测试访问权限
 int permission(struct inode * inode,int mask)
 {
 	if (inode->i_op && inode->i_op->permission) {
@@ -234,6 +238,7 @@ int deny_write_access(struct file * file)
 	return 0;
 }
 
+//TODO: next...
 void path_release(struct nameidata *nd)
 {
 	dput(nd->dentry);
