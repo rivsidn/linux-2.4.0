@@ -507,7 +507,6 @@ int path_walk(const char * name, struct nameidata *nd)
 			case 1:
 				continue;
 		}
-		//TODO: next...
 		/*
 		 * See if the low-level filesystem might want
 		 * to use its own hash..
@@ -518,6 +517,7 @@ int path_walk(const char * name, struct nameidata *nd)
 				break;
 		}
 		/* This does the actual lookups.. */
+		/* 执行真正的查询动作 */
 		dentry = cached_lookup(nd->dentry, &this, LOOKUP_CONTINUE);
 		if (!dentry) {
 			dentry = real_lookup(nd->dentry, &this, LOOKUP_CONTINUE);
@@ -526,6 +526,7 @@ int path_walk(const char * name, struct nameidata *nd)
 				break;
 		}
 		/* Check mountpoints.. */
+		/* 检查挂载点 */
 		while (d_mountpoint(dentry) && __follow_down(&nd->mnt, &dentry))
 			;
 
@@ -558,6 +559,7 @@ int path_walk(const char * name, struct nameidata *nd)
 			break;
 		continue;
 		/* here ends the main loop */
+		/* 此处主循环就结束了 */
 
 last_with_slashes:
 		lookup_flags |= LOOKUP_FOLLOW | LOOKUP_DIRECTORY;
@@ -640,6 +642,7 @@ return_err:
 /* returns 1 if everything is done */
 static int __emul_lookup_dentry(const char *name, struct nameidata *nd)
 {
+	//从nd 开始解析name，如果出错则直接返回
 	if (path_walk(name, nd))
 		return 0;
 
@@ -682,12 +685,12 @@ void set_fs_altroot(void)
 			dentry = nd.dentry;
 		}
 	}
-	write_lock(&current->fs->lock);
+	write_lock(&current->fs->lock);		//加锁
 	oldmnt = current->fs->altrootmnt;
 	olddentry = current->fs->altroot;
 	current->fs->altrootmnt = mnt;
 	current->fs->altroot = dentry;
-	write_unlock(&current->fs->lock);
+	write_unlock(&current->fs->lock);	//解锁
 	if (olddentry) {
 		dput(olddentry);
 		mntput(oldmnt);
@@ -698,22 +701,26 @@ void set_fs_altroot(void)
 static inline int
 walk_init_root(const char *name, struct nameidata *nd)
 {
-	read_lock(&current->fs->lock);
+	read_lock(&current->fs->lock);			//加锁
 	if (current->fs->altroot && !(nd->flags & LOOKUP_NOALT)) {
 		nd->mnt = mntget(current->fs->altrootmnt);
 		nd->dentry = dget(current->fs->altroot);
-		read_unlock(&current->fs->lock);
+		read_unlock(&current->fs->lock);	//解锁
 		if (__emul_lookup_dentry(name,nd))
 			return 0;
-		read_lock(&current->fs->lock);
+		read_lock(&current->fs->lock);		//加锁
 	}
 	nd->mnt = mntget(current->fs->rootmnt);
 	nd->dentry = dget(current->fs->root);
-	read_unlock(&current->fs->lock);
+	read_unlock(&current->fs->lock);		//解锁
 	return 1;
 }
 
 /* SMP-safe */
+/*
+ * 如果路径是'/'则从初始化成root，否则需要用当前路径.
+ * 路径查询过程中，先初始化nd，然后再查找.
+ */
 int path_init(const char *name, unsigned int flags, struct nameidata *nd)
 {
 	nd->last_type = LAST_ROOT; /* if there are only slashes... */
@@ -732,6 +739,9 @@ int path_init(const char *name, unsigned int flags, struct nameidata *nd)
  * needs parent already locked. Doesn't follow mounts.
  * SMP-safe.
  */
+/*
+ * 严格的查询. 不跟踪链接，只查询一个，需要父已经被锁定，不跟踪挂载.
+ */
 struct dentry * lookup_hash(struct qstr *name, struct dentry * base)
 {
 	struct dentry * dentry;
@@ -747,6 +757,7 @@ struct dentry * lookup_hash(struct qstr *name, struct dentry * base)
 	/*
 	 * See if the low-level filesystem might want
 	 * to use its own hash..
+	 * 检查底层文件系统是否用他们自己的hash函数
 	 */
 	if (base->d_op && base->d_op->d_hash) {
 		err = base->d_op->d_hash(base, name);
@@ -755,6 +766,7 @@ struct dentry * lookup_hash(struct qstr *name, struct dentry * base)
 			goto out;
 	}
 
+	//TODO: next...
 	dentry = cached_lookup(base, name, 0);
 	if (!dentry) {
 		struct dentry *new = d_alloc(base, name);

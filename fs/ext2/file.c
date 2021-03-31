@@ -108,6 +108,7 @@ struct file_operations ext2_file_operations = {
 	fsync:		ext2_sync_file,
 };
 
+/* 普通文件 */
 struct inode_operations ext2_file_inode_operations = {
 	truncate:	ext2_truncate,
 };

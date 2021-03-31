@@ -61,7 +61,7 @@ struct dentry {
 	unsigned int d_flags;
 	struct inode  * d_inode;	/* Where the name belongs to - NULL is negative */
 	struct dentry * d_parent;	/* parent directory */
-	struct list_head d_vfsmnt;
+	struct list_head d_vfsmnt;	/* 挂载到该文件下的文件系统 */
 	struct list_head d_hash;	/* lookup hash list */
 	struct list_head d_lru;		/* d_count = 0 LRU list */
 	struct list_head d_child;	/* child of parent list */
@@ -79,6 +79,7 @@ struct dentry {
 struct dentry_operations {
 	//重新验证
 	int (*d_revalidate)(struct dentry *, int);
+	//hash函数
 	int (*d_hash) (struct dentry *, struct qstr *);
 	int (*d_compare) (struct dentry *, struct qstr *, struct qstr *);
 	int (*d_delete)(struct dentry *);

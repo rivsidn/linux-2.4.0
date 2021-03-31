@@ -32,6 +32,7 @@ static int ext2_follow_link(struct dentry *dentry, struct nameidata *nd)
 	return vfs_follow_link(nd, s);
 }
 
+/* 链接文件 */
 struct inode_operations ext2_fast_symlink_inode_operations = {
 	readlink:	ext2_readlink,
 	follow_link:	ext2_follow_link,
