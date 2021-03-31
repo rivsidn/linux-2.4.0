@@ -17,11 +17,14 @@
 struct vfsmount
 {
 	struct dentry *mnt_mountpoint;	/* dentry of mountpoint */
+					/* 挂载点 */
 	struct dentry *mnt_root;	/* root of the mounted tree */
 	struct vfsmount *mnt_parent;	/* fs we are mounted on */
+					/* 挂载的文件系统 */
 	struct list_head mnt_instances;	/* other vfsmounts of the same fs */
 	struct list_head mnt_clash;	/* those who are mounted on (other */
 					/* instances) of the same dentry */
+					/* 挂载到同一目录下的文件系统通过该链表串到dentry->d_vfsmnt */
 	struct super_block *mnt_sb;	/* pointer to superblock */
 	struct list_head mnt_mounts;	/* list of children, anchored here */
 	struct list_head mnt_child;	/* and going through their mnt_child */

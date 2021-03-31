@@ -77,6 +77,7 @@ struct dentry {
 };
 
 struct dentry_operations {
+	//重新验证
 	int (*d_revalidate)(struct dentry *, int);
 	int (*d_hash) (struct dentry *, struct qstr *);
 	int (*d_compare) (struct dentry *, struct qstr *, struct qstr *);

@@ -238,7 +238,6 @@ int deny_write_access(struct file * file)
 	return 0;
 }
 
-//TODO: next...
 void path_release(struct nameidata *nd)
 {
 	dput(nd->dentry);
@@ -251,9 +250,12 @@ void path_release(struct nameidata *nd)
  */
 static struct dentry * cached_lookup(struct dentry * parent, struct qstr * name, int flags)
 {
+	//从parent中通过name查找一个dentry
 	struct dentry * dentry = d_lookup(parent, name);
 
+	//如果存在验证函数，则验证，无效释放返回null
 	if (dentry && dentry->d_op && dentry->d_op->d_revalidate) {
+		//TODO: 这个地方的返回值，看着有点奇怪
 		if (!dentry->d_op->d_revalidate(dentry, flags) && !d_invalidate(dentry)) {
 			dput(dentry);
 			dentry = NULL;
@@ -270,6 +272,12 @@ static struct dentry * cached_lookup(struct dentry * parent, struct qstr * name,
  * make sure that nobody added the entry to the dcache in the meantime..
  * SMP-safe
  */
+/*
+ * 该函数在所有都失败了之后才会被调用，此时我们需要到底层文件系统中
+ * 去查找我们该如何做.
+ * 我们会获取目录的信号量，获取到之后我能够确定查找过程中无法添加表项
+ * 到dcache中.
+ */
 static struct dentry * real_lookup(struct dentry * parent, struct qstr * name, int flags)
 {
 	struct dentry * result;
@@ -279,6 +287,8 @@ static struct dentry * real_lookup(struct dentry * parent, struct qstr * name, i
 	/*
 	 * First re-do the cached lookup just in case it was created
 	 * while we waited for the directory semaphore..
+	 *
+	 * 重新查询缓存，在我们等待信号的时候缓存可能被创建.
 	 *
 	 * FIXME! This could use version numbering or similar to
 	 * avoid unnecessary cache lookups.
@@ -291,6 +301,7 @@ static struct dentry * real_lookup(struct dentry * parent, struct qstr * name, i
 			lock_kernel();
 			result = dir->i_op->lookup(dir, dentry);
 			unlock_kernel();
+			//返回值不为空时表示出错
 			if (result)
 				dput(dentry);
 			else
@@ -317,6 +328,7 @@ static struct dentry * real_lookup(struct dentry * parent, struct qstr * name, i
 static inline int do_follow_link(struct dentry *dentry, struct nameidata *nd)
 {
 	int err;
+	//记录进程调用follow_link()的次数，如果大于等于8 次则表示成环
 	if (current->link_count >= 8)
 		goto loop;
 	current->link_count++;
@@ -333,15 +345,16 @@ static inline int __follow_up(struct vfsmount **mnt, struct dentry **base)
 {
 	struct vfsmount *parent;
 	struct dentry *dentry;
-	spin_lock(&dcache_lock);
+	spin_lock(&dcache_lock);		//获取锁
 	parent=(*mnt)->mnt_parent;
+	//没有parent返回 0
 	if (parent == *mnt) {
-		spin_unlock(&dcache_lock);
+		spin_unlock(&dcache_lock);	//释放锁
 		return 0;
 	}
 	mntget(parent);
 	dentry=dget((*mnt)->mnt_mountpoint);
-	spin_unlock(&dcache_lock);
+	spin_unlock(&dcache_lock);		//释放锁
 	dput(*base);
 	*base = dentry;
 	mntput(*mnt);
@@ -357,14 +370,15 @@ int follow_up(struct vfsmount **mnt, struct dentry **dentry)
 static inline int __follow_down(struct vfsmount **mnt, struct dentry **dentry)
 {
 	struct list_head *p;
-	spin_lock(&dcache_lock);
+	spin_lock(&dcache_lock);			//获取锁
 	p = (*dentry)->d_vfsmnt.next;
+	//遍历挂载在dentry中的所有文件系统
 	while (p != &(*dentry)->d_vfsmnt) {
 		struct vfsmount *tmp;
 		tmp = list_entry(p, struct vfsmount, mnt_clash);
 		if (tmp->mnt_parent == *mnt) {
 			*mnt = mntget(tmp);
-			spin_unlock(&dcache_lock);
+			spin_unlock(&dcache_lock);	//释放锁
 			mntput(tmp->mnt_parent);
 			/* tmp holds the mountpoint, so... */
 			dput(*dentry);
@@ -373,7 +387,7 @@ static inline int __follow_down(struct vfsmount **mnt, struct dentry **dentry)
 		}
 		p = p->next;
 	}
-	spin_unlock(&dcache_lock);
+	spin_unlock(&dcache_lock);			//释放锁
 	return 0;
 }
 
@@ -388,6 +402,7 @@ static inline void follow_dotdot(struct nameidata *nd)
 		struct vfsmount *parent;
 		struct dentry *dentry;
 		read_lock(&current->fs->lock);
+		//已经位于根节点了
 		if (nd->dentry == current->fs->root &&
 		    nd->mnt == current->fs->rootmnt)  {
 			read_unlock(&current->fs->lock);
@@ -395,6 +410,7 @@ static inline void follow_dotdot(struct nameidata *nd)
 		}
 		read_unlock(&current->fs->lock);
 		spin_lock(&dcache_lock);
+		//没有跨越文件系统时，获取parent就返回
 		if (nd->dentry != nd->mnt->mnt_root) {
 			dentry = dget(nd->dentry->d_parent);
 			spin_unlock(&dcache_lock);
@@ -402,6 +418,7 @@ static inline void follow_dotdot(struct nameidata *nd)
 			nd->dentry = dentry;
 			break;
 		}
+		//跨越了文件系统，但此时不存在parent了
 		parent=nd->mnt->mnt_parent;
 		if (parent == nd->mnt) {
 			spin_unlock(&dcache_lock);
@@ -417,7 +434,7 @@ static inline void follow_dotdot(struct nameidata *nd)
 	}
 }
 /*
- * Name resolution.
+ * Name resolution(文件名解析).
  *
  * This is the basic name resolution function, turning a pathname
  * into the final dentry.
@@ -434,7 +451,7 @@ int path_walk(const char * name, struct nameidata *nd)
 	while (*name=='/')
 		name++;
 	if (!*name)
-		goto return_base;
+		goto return_base;	//返回 0
 
 	inode = nd->dentry->d_inode;
 	if (current->link_count)
@@ -454,6 +471,7 @@ int path_walk(const char * name, struct nameidata *nd)
 		this.name = name;
 		c = *(const unsigned char *)name;
 
+		//通过name创建一个hash值
 		hash = init_name_hash();
 		do {
 			name++;
@@ -474,6 +492,8 @@ int path_walk(const char * name, struct nameidata *nd)
 		 * "." and ".." are special - ".." especially so because it has
 		 * to be able to know about the current root directory and
 		 * parent relationships.
+		 * 
+		 * "."和".."需要特殊处理
 		 */
 		if (this.name[0] == '.') switch (this.len) {
 			default:
@@ -487,6 +507,7 @@ int path_walk(const char * name, struct nameidata *nd)
 			case 1:
 				continue;
 		}
+		//TODO: next...
 		/*
 		 * See if the low-level filesystem might want
 		 * to use its own hash..

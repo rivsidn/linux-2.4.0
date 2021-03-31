@@ -126,6 +126,7 @@ void dput(struct dentry *dentry)
 		return;
 
 repeat:
+	//递减引用计数，如果不为0 则直接返回
 	if (!atomic_dec_and_lock(&dentry->d_count, &dcache_lock))
 		return;
 

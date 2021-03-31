@@ -160,6 +160,7 @@ failure:
 	return NULL;
 }
 
+//返回值不为NULL时全是错误
 static struct dentry *ext2_lookup(struct inode * dir, struct dentry *dentry)
 {
 	struct inode * inode;
@@ -810,6 +811,7 @@ end_rename:
 
 /*
  * directories can handle most operations...
+ * 目录可以处理大部分操作
  */
 struct inode_operations ext2_dir_inode_operations = {
 	create:		ext2_create,
