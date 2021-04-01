@@ -127,6 +127,7 @@ extern int leases_enable, dir_notify_enable, lease_break_time;
 #define S_APPEND	8	/* Append-only file */
 #define S_IMMUTABLE	16	/* Immutable file */
 #define S_DEAD		32	/* removed, but still open directory */
+				/* 已删除，但是还存在未关闭的目录 */
 
 /*
  * Note that nosuid etc flags are inode-specific: setting some file-system
@@ -628,8 +629,8 @@ struct nameidata {
 	struct dentry *dentry;
 	struct vfsmount *mnt;
 	struct qstr last;
-	unsigned int flags;
-	int last_type;
+	unsigned int flags;	//查询标识
+	int last_type;		//最后元素的类型
 };
 
 #define DQUOT_USR_ENABLED	0x01		/* User diskquotas enabled */
@@ -1146,8 +1147,8 @@ static inline long IS_ERR(const void *ptr)
  *  - ending slashes ok even for nonexistent files
  *  - internal "there are more path compnents" flag
  */
-#define LOOKUP_FOLLOW		(1)
-#define LOOKUP_DIRECTORY	(2)
+#define LOOKUP_FOLLOW		(1)	//跟踪链接
+#define LOOKUP_DIRECTORY	(2)	//最终为目录
 #define LOOKUP_CONTINUE		(4)
 #define LOOKUP_POSITIVE		(8)
 #define LOOKUP_PARENT		(16)

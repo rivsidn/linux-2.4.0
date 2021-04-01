@@ -31,6 +31,7 @@
 
 #include <asm/namei.h>
 
+//就是一个数组，通过(x)&O_ACCMODE 获取数组中的值
 #define ACC_MODE(x) ("\000\004\002\006"[(x)&O_ACCMODE])
 
 /* [Feb-1997 T. Schoebel-Theuer]
@@ -766,7 +767,6 @@ struct dentry * lookup_hash(struct qstr *name, struct dentry * base)
 			goto out;
 	}
 
-	//TODO: next...
 	dentry = cached_lookup(base, name, 0);
 	if (!dentry) {
 		struct dentry *new = d_alloc(base, name);
@@ -786,6 +786,7 @@ out:
 }
 
 /* SMP-safe */
+/* 只查询一步 */
 struct dentry * lookup_one(const char * name, struct dentry * base)
 {
 	unsigned long hash;
@@ -824,18 +825,23 @@ access:
  * that namei follows links, while lnamei does not.
  * SMP-safe
  */
+/*
+ * 大多数简单的命令行通过该函数获取对应name的inode；
+ * 该函数存在两个版本:namei/lnamei. 
+ * 区别是: namei 跟踪链接，lnamei不跟踪链接.
+ */
 int __user_walk(const char *name, unsigned flags, struct nameidata *nd)
 {
 	char *tmp;
 	int err;
 
-	tmp = getname(name);
+	tmp = getname(name);	//获取缓存，并将数据从用户态拷贝到内核态
 	err = PTR_ERR(tmp);
 	if (!IS_ERR(tmp)) {
 		err = 0;
-		if (path_init(tmp, flags, nd))
-			err = path_walk(tmp, nd);
-		putname(tmp);
+		if (path_init(tmp, flags, nd))		//初始化路径
+			err = path_walk(tmp, nd);	//路径查找
+		putname(tmp);	//释放缓存
 	}
 	return err;
 }
@@ -860,7 +866,7 @@ static inline int check_sticky(struct inode *dir, struct inode *inode)
  *  whether the type of victim is right.
  *  1. We can't do it if dir is read-only (done in permission())
  *  2. We should have write and exec permissions on dir
- *  3. We can't remove anything from append-only dir
+ *  3. We can't remove anything from append-only(只添加) dir
  *  4. We can't do anything with immutable dir (done in permission())
  *  5. If the sticky bit on dir is set we should either
  *	a. be owner of dir, or
@@ -871,12 +877,15 @@ static inline int check_sticky(struct inode *dir, struct inode *inode)
  *  7. If we were asked to remove a directory and victim isn't one - ENOTDIR.
  *  8. If we were asked to remove a non-directory and victim isn't one - EISDIR.
  *  9. We can't remove a root or mountpoint.
+ *
+ * 检查我们是否能否删除一个文件
  */
 static inline int may_delete(struct inode *dir,struct dentry *victim, int isdir)
 {
 	int error;
 	if (!victim->d_inode || victim->d_parent->d_inode != dir)
 		return -ENOENT;
+	//目录权限检测
 	error = permission(dir,MAY_WRITE | MAY_EXEC);
 	if (error)
 		return error;
@@ -916,6 +925,8 @@ static inline int may_create(struct inode *dir, struct dentry *child) {
  * reasons.
  *
  * O_DIRECTORY translates into forcing a directory lookup.
+ *
+ * 通过flag 创建查找的标识位
  */
 static inline int lookup_flags(unsigned int f)
 {
@@ -955,6 +966,7 @@ int vfs_create(struct inode *dir, struct dentry *dentry, int mode)
 	unlock_kernel();
 exit_lock:
 	up(&dir->i_zombie);
+	//如果有新文件创建，发送通知
 	if (!error)
 		inode_dir_notify(dir, DN_CREATE);
 	return error;
@@ -986,10 +998,11 @@ int open_namei(const char * pathname, int flag, int mode, struct nameidata *nd)
 
 	/*
 	 * The simplest case - just a plain lookup.
+	 * 最简单的情况，并不创建，仅仅是一个普通的查询
 	 */
 	if (!(flag & O_CREAT)) {
-		if (path_init(pathname, lookup_flags(flag), nd))
-			error = path_walk(pathname, nd);
+		if (path_init(pathname, lookup_flags(flag), nd))	//目录初始化
+			error = path_walk(pathname, nd);		//目录查询
 		if (error)
 			return error;
 		dentry = nd->dentry;
@@ -1010,24 +1023,25 @@ int open_namei(const char * pathname, int flag, int mode, struct nameidata *nd)
 	 * will not do.
 	 */
 	error = -EISDIR;
+	//如果最后一个元素不是正常的文件名且文件名最后不为0，错误退出
 	if (nd->last_type != LAST_NORM || nd->last.name[nd->last.len])
 		goto exit;
 
 	dir = nd->dentry;
-	down(&dir->d_inode->i_sem);
+	down(&dir->d_inode->i_sem);		//获取信号量
 	dentry = lookup_hash(&nd->last, nd->dentry);
 
 do_last:
 	error = PTR_ERR(dentry);
 	if (IS_ERR(dentry)) {
-		up(&dir->d_inode->i_sem);
+		up(&dir->d_inode->i_sem);	//释放信号量
 		goto exit;
 	}
 
 	/* Negative dentry, just create the file */
 	if (!dentry->d_inode) {
 		error = vfs_create(dir->d_inode, dentry, mode);
-		up(&dir->d_inode->i_sem);
+		up(&dir->d_inode->i_sem);	//释放信号量
 		dput(nd->dentry);
 		nd->dentry = dentry;
 		if (error)
@@ -1041,9 +1055,9 @@ do_last:
 	/*
 	 * It already exists.
 	 */
-	up(&dir->d_inode->i_sem);
+	up(&dir->d_inode->i_sem);		//释放信号量
 
-	error = -EEXIST;
+	error = -EEXIST;			//TODO: next...
 	if (flag & O_EXCL)
 		goto exit_dput;
 
@@ -1071,7 +1085,7 @@ ok:
 		goto exit;
 
 	error = -ELOOP;
-	if (S_ISLNK(inode->i_mode))
+	if (S_ISLNK(inode->i_mode))	//TODO: 链接文件为什么需要出错返回
 		goto exit;
 	
 	error = -EISDIR;
@@ -1125,6 +1139,7 @@ ok:
 
 		/*
 		 * Refuse to truncate files with mandatory locks held on them.
+		 * 拥有强制锁的文件不允许被截断
 		 */
 		error = locks_verify_locked(inode);
 		if (!error) {
@@ -1194,7 +1209,7 @@ static struct dentry *lookup_create(struct nameidata *nd, int is_dir)
 {
 	struct dentry *dentry;
 
-	down(&nd->dentry->d_inode->i_sem);
+	down(&nd->dentry->d_inode->i_sem);	//释放信号量
 	dentry = ERR_PTR(-EEXIST);
 	if (nd->last_type != LAST_NORM)
 		goto fail;
@@ -1211,6 +1226,7 @@ fail:
 	return dentry;
 }
 
+//TODO: next...
 int vfs_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev)
 {
 	int error = -EPERM;

@@ -61,6 +61,7 @@ struct dentry {
 	unsigned int d_flags;
 	struct inode  * d_inode;	/* Where the name belongs to - NULL is negative */
 	struct dentry * d_parent;	/* parent directory */
+					/* ROOT的d_parent 等于自己 */
 	struct list_head d_vfsmnt;	/* 挂载到该文件下的文件系统 */
 	struct list_head d_hash;	/* lookup hash list */
 	struct list_head d_lru;		/* d_count = 0 LRU list */

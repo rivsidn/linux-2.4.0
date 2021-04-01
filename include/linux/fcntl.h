@@ -18,6 +18,7 @@
 #define DN_ACCESS	0x00000001	/* File accessed */
 #define DN_MODIFY	0x00000002	/* File modified */
 #define DN_CREATE	0x00000004	/* File created */
+					/* 创建文件 */
 #define DN_DELETE	0x00000008	/* File removed */
 #define DN_RENAME	0x00000010	/* File renamed */
 #define DN_ATTRIB	0x00000020	/* File changed attibutes */
