@@ -1226,7 +1226,6 @@ fail:
 	return dentry;
 }
 
-//TODO: next...
 int vfs_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev)
 {
 	int error = -EPERM;
@@ -1234,6 +1233,7 @@ int vfs_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev)
 	mode &= ~current->fs->umask;
 
 	down(&dir->i_zombie);
+	//权限检测
 	if ((S_ISCHR(mode) || S_ISBLK(mode)) && !capable(CAP_MKNOD))
 		goto exit_lock;
 
@@ -1251,6 +1251,7 @@ int vfs_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev)
 	unlock_kernel();
 exit_lock:
 	up(&dir->i_zombie);
+	//有新文件创建, 发出通知
 	if (!error)
 		inode_dir_notify(dir, DN_CREATE);
 	return error;
@@ -1269,6 +1270,7 @@ asmlinkage long sys_mknod(const char * filename, int mode, dev_t dev)
 	if (IS_ERR(tmp))
 		return PTR_ERR(tmp);
 
+	//通过文件名查找父目录
 	if (path_init(tmp, LOOKUP_PARENT, &nd))
 		error = path_walk(tmp, &nd);
 	if (error)
@@ -1396,6 +1398,7 @@ int vfs_rmdir(struct inode *dir, struct dentry *dentry)
 
 	DQUOT_INIT(dir);
 
+	//获取信号量
 	double_down(&dir->i_zombie, &dentry->d_inode->i_zombie);
 	d_unhash(dentry);
 	if (IS_DEADDIR(dir))
@@ -1409,6 +1412,7 @@ int vfs_rmdir(struct inode *dir, struct dentry *dentry)
 		if (!error)
 			dentry->d_inode->i_flags |= S_DEAD;
 	}
+	//释放信号量
 	double_up(&dir->i_zombie, &dentry->d_inode->i_zombie);
 	if (!error) {
 		inode_dir_notify(dir, DN_DELETE);
@@ -1830,6 +1834,7 @@ int vfs_rename_other(struct inode *old_dir, struct dentry *old_dentry,
 	return 0;
 }
 
+//重命名
 int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	       struct inode *new_dir, struct dentry *new_dentry)
 {
@@ -2021,6 +2026,7 @@ sync_fail:
 	return (char*)page;
 }
 
+//TODO: next...
 int page_readlink(struct dentry *dentry, char *buffer, int buflen)
 {
 	struct page *page = NULL;
