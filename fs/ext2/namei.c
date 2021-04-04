@@ -618,6 +618,8 @@ end_unlink:
 	return retval;
 }
 
+/* 符号连接 */
+//TODO: next...
 static int ext2_symlink (struct inode * dir, struct dentry *dentry, const char * symname)
 {
 	struct inode * inode;

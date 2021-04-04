@@ -2026,7 +2026,6 @@ sync_fail:
 	return (char*)page;
 }
 
-//TODO: next...
 int page_readlink(struct dentry *dentry, char *buffer, int buflen)
 {
 	struct page *page = NULL;
