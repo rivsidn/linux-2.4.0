@@ -1156,7 +1156,7 @@ resume:
  * filesystems using synthetic inode numbers, and is necessary
  * to keep getcwd() working.
  */
- 
+//TODO: next... 
 ino_t find_inode_number(struct dentry *dir, struct qstr *name)
 {
 	struct dentry * dentry;
@@ -1215,6 +1215,8 @@ static void __init dcache_init(unsigned long mempages)
 	for (order = 0; ((1UL << order) << PAGE_SHIFT) < mempages; order++)
 		;
 
+	//创建hash表
+	//一直循环直到执行成功
 	do {
 		unsigned long tmp;
 
@@ -1234,9 +1236,11 @@ static void __init dcache_init(unsigned long mempages)
 	printk("Dentry-cache hash table entries: %d (order: %ld, %ld bytes)\n",
 			nr_hash, order, (PAGE_SIZE << order));
 
+	//最后还是没有成功则报错
 	if (!dentry_hashtable)
 		panic("Failed to allocate dcache hash table\n");
 
+	//hash表初始化
 	d = dentry_hashtable;
 	i = nr_hash;
 	do {

@@ -8,6 +8,9 @@
  *  'buffer.c' implements the buffer-cache functions. Race-conditions have
  * been avoided by NEVER letting an interrupt change a buffer (except for the
  * data, of course), but instead letting the caller do it.
+ *
+ * 'buffer.c' 实现 buffer-cache 功能。
+ * 不允许中断来修改buffer，相反的通过调用函数来修改。
  */
 
 /* Start bdflush() with kernel_thread not syscall - Paul Gortmaker, 12/95 */
