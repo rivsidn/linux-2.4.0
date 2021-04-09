@@ -52,6 +52,7 @@ static unsigned int d_hash_shift;
 static struct list_head *dentry_hashtable;
 static LIST_HEAD(dentry_unused);
 
+//统计
 struct {
 	int nr_dentry;
 	int nr_unused;
@@ -180,7 +181,7 @@ kill_it: {
  *
  * no dcache lock.
  */
- 
+//TODO: next... 
 int d_invalidate(struct dentry * dentry)
 {
 	/*
@@ -1145,8 +1146,8 @@ resume:
 
 /**
  * find_inode_number - check for dentry with name
- * @dir: directory to check
- * @name: Name to find.
+ * @dir: directory to check(目录)
+ * @name: Name to find(查找的名字).
  *
  * Check whether a dentry already exists for the given name,
  * and return the inode number if it has an inode. Otherwise
@@ -1156,7 +1157,6 @@ resume:
  * filesystems using synthetic inode numbers, and is necessary
  * to keep getcwd() working.
  */
-//TODO: next... 
 ino_t find_inode_number(struct dentry *dir, struct qstr *name)
 {
 	struct dentry * dentry;
