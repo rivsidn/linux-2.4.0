@@ -409,7 +409,7 @@ struct inode {
 	unsigned long		i_ino;
 	atomic_t		i_count;
 	kdev_t			i_dev;
-	umode_t			i_mode;
+	umode_t			i_mode;		//查看文件格式(普通文件、目录等)
 	nlink_t			i_nlink;
 	uid_t			i_uid;
 	gid_t			i_gid;

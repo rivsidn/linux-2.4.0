@@ -64,10 +64,14 @@ struct dentry {
 					/* ROOT的d_parent 等于自己 */
 	struct list_head d_vfsmnt;	/* 挂载到该文件下的文件系统 */
 	struct list_head d_hash;	/* lookup hash list */
+					/* 查询的hash表 */
 	struct list_head d_lru;		/* d_count = 0 LRU list */
+					/* d_count = 0 时会加入到LRU链表中 */
 	struct list_head d_child;	/* child of parent list */
 	struct list_head d_subdirs;	/* our children */
+					/* 子目录 */
 	struct list_head d_alias;	/* inode alias list */
+					/* inode 别名链表 */
 	struct qstr d_name;
 	unsigned long d_time;		/* used by d_revalidate */
 	struct dentry_operations  *d_op;

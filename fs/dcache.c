@@ -181,7 +181,6 @@ kill_it: {
  *
  * no dcache lock.
  */
-//TODO: next... 
 int d_invalidate(struct dentry * dentry)
 {
 	/*
@@ -228,7 +227,9 @@ int d_invalidate(struct dentry * dentry)
 
 static inline struct dentry * __dget_locked(struct dentry *dentry)
 {
+	//增加引用计数
 	atomic_inc(&dentry->d_count);
+	//如果增加之后为1 说明之前为0，所以此时需要将dentry 从lru 链表中删除
 	if (atomic_read(&dentry->d_count) == 1) {
 		dentry_stat.nr_unused--;
 		list_del(&dentry->d_lru);
@@ -251,7 +252,7 @@ struct dentry * dget_locked(struct dentry *dentry)
  * there can be only one alias and it can be unhashed only if it has
  * no children.
  */
-
+//TODO: next...
 struct dentry * d_find_alias(struct inode *inode)
 {
 	struct list_head *head, *next, *tmp;
