@@ -50,6 +50,7 @@ static kmem_cache_t *dentry_cache;
 static unsigned int d_hash_mask;
 static unsigned int d_hash_shift;
 static struct list_head *dentry_hashtable;
+//没用到的dentry{}链表
 static LIST_HEAD(dentry_unused);
 
 //统计
@@ -62,6 +63,7 @@ struct {
 } dentry_stat = {0, 0, 45, 0,};
 
 /* no dcache_lock, please */
+/* 释放dentry{}占用的内存 */
 static inline void d_free(struct dentry *dentry)
 {
 	if (dentry->d_op && dentry->d_op->d_release)
@@ -252,7 +254,6 @@ struct dentry * dget_locked(struct dentry *dentry)
  * there can be only one alias and it can be unhashed only if it has
  * no children.
  */
-//TODO: next...
 struct dentry * d_find_alias(struct inode *inode)
 {
 	struct list_head *head, *next, *tmp;
@@ -313,6 +314,7 @@ static inline void prune_one_dentry(struct dentry * dentry)
 	dentry_iput(dentry);
 	parent = dentry->d_parent;
 	d_free(dentry);
+	//减少父目录的引用计数
 	if (parent != dentry)
 		dput(parent);
 	spin_lock(&dcache_lock);
@@ -330,7 +332,9 @@ static inline void prune_one_dentry(struct dentry * dentry)
  * This function may fail to free any resources if
  * all the dentries are in use.
  */
- 
+/*
+ * 该函数当所有目录都在用着的时候会失败
+ */ 
 void prune_dcache(int count)
 {
 	spin_lock(&dcache_lock);
@@ -340,6 +344,7 @@ void prune_dcache(int count)
 
 		tmp = dentry_unused.prev;
 
+		//为空则返回
 		if (tmp == &dentry_unused)
 			break;
 		list_del_init(tmp);
@@ -358,6 +363,7 @@ void prune_dcache(int count)
 		if (atomic_read(&dentry->d_count))
 			BUG();
 
+		//已经减少了对应的个数跳出循环
 		prune_one_dentry(dentry);
 		if (!--count)
 			break;
@@ -386,7 +392,7 @@ void prune_dcache(int count)
  * is used to free the dcache before unmounting a file
  * system
  */
-
+//TODO: next...
 void shrink_dcache_sb(struct super_block * sb)
 {
 	struct list_head *tmp, *next;

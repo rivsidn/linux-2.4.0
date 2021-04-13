@@ -402,7 +402,7 @@ struct block_device {
 struct inode {
 	struct list_head	i_hash;
 	struct list_head	i_list;
-	struct list_head	i_dentry;
+	struct list_head	i_dentry;	//dentry{} 链表
 
 	struct list_head	i_dirty_buffers;
 
