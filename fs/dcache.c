@@ -391,6 +391,8 @@ void prune_dcache(int count)
  * Shrink the dcache for the specified super block. This
  * is used to free the dcache before unmounting a file
  * system
+ *
+ * 用于卸载文件系统之前释放特定超级块的目录缓存.
  */
 //TODO: next...
 void shrink_dcache_sb(struct super_block * sb)
