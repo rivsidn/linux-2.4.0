@@ -394,7 +394,6 @@ void prune_dcache(int count)
  *
  * 用于卸载文件系统之前释放特定超级块的目录缓存.
  */
-//TODO: next...
 void shrink_dcache_sb(struct super_block * sb)
 {
 	struct list_head *tmp, *next;
@@ -404,7 +403,7 @@ void shrink_dcache_sb(struct super_block * sb)
 	 * Pass one ... move the dentries for the specified
 	 * superblock to the most recent end of the unused list.
 	 */
-	spin_lock(&dcache_lock);
+	spin_lock(&dcache_lock);		//加锁
 	next = dentry_unused.next;
 	while (next != &dentry_unused) {
 		tmp = next;
@@ -435,7 +434,7 @@ repeat:
 		prune_one_dentry(dentry);
 		goto repeat;
 	}
-	spin_unlock(&dcache_lock);
+	spin_unlock(&dcache_lock);		//解锁
 }
 
 /*
@@ -450,6 +449,8 @@ repeat:
  *
  * Return true if the parent or its subdirectories contain
  * a mount point
+ *
+ * 如果有挂载点则返回true；如果没有则返回false.
  */
  
 int have_submounts(struct dentry *parent)
@@ -458,6 +459,7 @@ int have_submounts(struct dentry *parent)
 	struct list_head *next;
 
 	spin_lock(&dcache_lock);
+	//当前目录是否是挂载点
 	if (d_mountpoint(parent))
 		goto positive;
 repeat:
@@ -522,8 +524,8 @@ resume:
 		if (!list_empty(&dentry->d_subdirs)) {
 			this_parent = dentry;
 #ifdef DCACHE_DEBUG
-printk(KERN_DEBUG "select_parent: descending to %s/%s, found=%d\n",
-dentry->d_parent->d_name.name, dentry->d_name.name, found);
+			printk(KERN_DEBUG "select_parent: descending to %s/%s, found=%d\n",
+				dentry->d_parent->d_name.name, dentry->d_name.name, found);
 #endif
 			goto repeat;
 		}
@@ -535,8 +537,8 @@ dentry->d_parent->d_name.name, dentry->d_name.name, found);
 		next = this_parent->d_child.next; 
 		this_parent = this_parent->d_parent;
 #ifdef DCACHE_DEBUG
-printk(KERN_DEBUG "select_parent: ascending to %s/%s, found=%d\n",
-this_parent->d_parent->d_name.name, this_parent->d_name.name, found);
+		printk(KERN_DEBUG "select_parent: ascending to %s/%s, found=%d\n",
+			this_parent->d_parent->d_name.name, this_parent->d_name.name, found);
 #endif
 		goto resume;
 	}
@@ -606,7 +608,9 @@ void shrink_dcache_memory(int priority, unsigned int gfp_mask)
  * available. On a success the dentry is returned. The name passed in is
  * copied and the copy passed in may be reused after this call.
  */
- 
+/*
+ * 申请一个dentry{} 结构体
+ */ 
 struct dentry * d_alloc(struct dentry * parent, const struct qstr *name)
 {
 	char * str;
@@ -647,6 +651,7 @@ struct dentry * d_alloc(struct dentry * parent, const struct qstr *name)
 		dentry->d_parent = dget(parent);
 		dentry->d_sb = parent->d_sb;
 		spin_lock(&dcache_lock);
+		//将子目录添加到父目录下
 		list_add(&dentry->d_child, &parent->d_subdirs);
 		spin_unlock(&dcache_lock);
 	} else
@@ -674,6 +679,7 @@ struct dentry * d_alloc(struct dentry * parent, const struct qstr *name)
 void d_instantiate(struct dentry *entry, struct inode * inode)
 {
 	spin_lock(&dcache_lock);
+	//将entry{}添加到inode{}下
 	if (inode)
 		list_add(&entry->d_alias, &inode->i_dentry);
 	entry->d_inode = inode;
@@ -697,6 +703,7 @@ struct dentry * d_alloc_root(struct inode * root_inode)
 		res = d_alloc(NULL, &(const struct qstr) { "/", 1, 0 });
 		if (res) {
 			res->d_sb = root_inode->i_sb;
+			//root dentry{}.d_parent等于自己
 			res->d_parent = res;
 			d_instantiate(res, root_inode);
 		}
@@ -721,7 +728,10 @@ static inline struct list_head * d_hash(struct dentry * parent, unsigned long ha
  * is returned. The caller must use d_put to free the entry when it has
  * finished using it. %NULL is returned on failure.
  */
- 
+/*
+ * 从父目录中查找一个dentry{}，如果找到了增加引用计数，返回，调用者使用完之
+ * 后需要手动释放引用计数.
+ */ 
 struct dentry * d_lookup(struct dentry * parent, struct qstr * name)
 {
 	unsigned int len = name->len;
@@ -739,6 +749,7 @@ struct dentry * d_lookup(struct dentry * parent, struct qstr * name)
 		tmp = tmp->next;
 		if (dentry->d_name.hash != hash)
 			continue;
+		//hash 表是全局的
 		if (dentry->d_parent != parent)
 			continue;
 		if (parent->d_op && parent->d_op->d_compare) {
@@ -796,6 +807,8 @@ int d_validate(struct dentry *dentry, struct dentry *dparent,
 		/*
 		 * Special case: local mount points don't live in
 		 * the hashes, so we search the super blocks.
+		 * 特殊情况：本地挂载点并不在hash中，所以我们查找
+		 * 超级块.
 		 */
 		struct super_block *sb = sb_entry(super_blocks.next);
 
@@ -861,7 +874,9 @@ void d_delete(struct dentry * dentry)
  *
  * Adds a dentry to the hash according to its name.
  */
- 
+/*
+ * 将一个dentry{} 重新添加到hash表中
+ */ 
 void d_rehash(struct dentry * entry)
 {
 	struct list_head *list = d_hash(entry->d_parent, entry->d_name.hash);
@@ -959,6 +974,7 @@ void d_move(struct dentry * dentry, struct dentry * target)
 
 /**
  * d_path - return the path of a dentry
+ *        - 返回目录的路径
  * @dentry: dentry to report
  * @vfsmnt: vfsmnt to which the dentry belongs
  * @root: root dentry
@@ -972,6 +988,7 @@ void d_move(struct dentry * dentry, struct dentry * target)
  *
  * "buflen" should be %PAGE_SIZE or more. Caller holds the dcache_lock.
  */
+//TODO: next...  //内核调试
 char * __d_path(struct dentry *dentry, struct vfsmount *vfsmnt,
 		struct dentry *root, struct vfsmount *rootmnt,
 		char *buffer, int buflen)
@@ -982,6 +999,7 @@ char * __d_path(struct dentry *dentry, struct vfsmount *vfsmnt,
 
 	*--end = '\0';
 	buflen--;
+	//如果不是root且d_hash为空，则表示该文件已经删除
 	if (!IS_ROOT(dentry) && list_empty(&dentry->d_hash)) {
 		buflen -= 10;
 		end -= 10;
@@ -1045,6 +1063,7 @@ global_root:
  *		return NULL;
  *	}
  */
+//TODO: next... 内核调试
 asmlinkage long sys_getcwd(char *buf, unsigned long size)
 {
 	int error;
@@ -1112,7 +1131,7 @@ int is_subdir(struct dentry * new_dentry, struct dentry * old_dentry)
 	for (;;) {
 		if (new_dentry != old_dentry) {
 			struct dentry * parent = new_dentry->d_parent;
-			if (parent == new_dentry)
+			if (parent == new_dentry)	//已经查找到root
 				break;
 			new_dentry = parent;
 			continue;
@@ -1123,6 +1142,7 @@ int is_subdir(struct dentry * new_dentry, struct dentry * old_dentry)
 	return result;
 }
 
+//TODO: next...
 void d_genocide(struct dentry *root)
 {
 	struct dentry *this_parent = root;
