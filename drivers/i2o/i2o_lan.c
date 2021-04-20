@@ -13,9 +13,9 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- *	Authors: 	Auvo Häkkinen <Auvo.Hakkinen@cs.Helsinki.FI>
- *	Fixes:		Juha Sievänen <Juha.Sievanen@cs.Helsinki.FI>
- *	 		Taneli Vähäkangas <Taneli.Vahakangas@cs.Helsinki.FI>
+ *	Authors: 	Auvo Hé‹•kinen <Auvo.Hakkinen@cs.Helsinki.FI>
+ *	Fixes:		Juha Sievé‹˜en <Juha.Sievanen@cs.Helsinki.FI>
+ *	 		Taneli Vé‹’é‹•angas <Taneli.Vahakangas@cs.Helsinki.FI>
  *			Deepak Saxena <deepak@plexity.net>
  *
  *	Tested:		in FDDI environment (using SysKonnect's DDM)

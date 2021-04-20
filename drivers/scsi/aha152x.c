@@ -1,6 +1,6 @@
 /* aha152x.c -- Adaptec AHA-152x driver
- * Author: Jürgen E. Fischer, fischer@norbit.de
- * Copyright 1993-1999 Jürgen E. Fischer
+ * Author: Jé»µgen E. Fischer, fischer@norbit.de
+ * Copyright 1993-1999 Jé»µgen E. Fischer
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -326,7 +326,7 @@ enum {
 };
 
 #if defined(MODULE)
-MODULE_AUTHOR("Jürgen Fischer");
+MODULE_AUTHOR("Jé»µgen Fischer");
 MODULE_DESCRIPTION(AHA152X_REVID);
 MODULE_PARM(io, "1-2i");
 MODULE_PARM_DESC(io,"base io address of controller");

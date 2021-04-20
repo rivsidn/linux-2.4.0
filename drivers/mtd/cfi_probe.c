@@ -409,21 +409,21 @@ static void print_cfi_ident(struct cfi_ident *cfip)
 	else
 		printk("No Vpp line\n");
 	
-	printk("Typical byte/word write timeout: %d ｵs\n", 1<<cfip->WordWriteTimeoutTyp);
-	printk("Maximum byte/word write timeout: %d ｵs\n", (1<<cfip->WordWriteTimeoutMax) * (1<<cfip->WordWriteTimeoutTyp));
+	printk("Typical byte/word write timeout: %d 逾構n", 1<<cfip->WordWriteTimeoutTyp);
+	printk("Maximum byte/word write timeout: %d 逾構n", (1<<cfip->WordWriteTimeoutMax) * (1<<cfip->WordWriteTimeoutTyp));
 	
 	if (cfip->BufWriteTimeoutTyp || cfip->BufWriteTimeoutMax) {
-		printk("Typical full buffer write timeout: %d ｵs\n", 1<<cfip->BufWriteTimeoutTyp);
-		printk("Maximum full buffer write timeout: %d ｵs\n", (1<<cfip->BufWriteTimeoutMax) * (1<<cfip->BufWriteTimeoutTyp));
+		printk("Typical full buffer write timeout: %d 逾構n", 1<<cfip->BufWriteTimeoutTyp);
+		printk("Maximum full buffer write timeout: %d 逾構n", (1<<cfip->BufWriteTimeoutMax) * (1<<cfip->BufWriteTimeoutTyp));
 	}
 	else
 		printk("Full buffer write not supported\n");
 	
-	printk("Typical block erase timeout: %d ｵs\n", 1<<cfip->BlockEraseTimeoutTyp);
-	printk("Maximum block erase timeout: %d ｵs\n", (1<<cfip->BlockEraseTimeoutMax) * (1<<cfip->BlockEraseTimeoutTyp));
+	printk("Typical block erase timeout: %d 逾構n", 1<<cfip->BlockEraseTimeoutTyp);
+	printk("Maximum block erase timeout: %d 逾構n", (1<<cfip->BlockEraseTimeoutMax) * (1<<cfip->BlockEraseTimeoutTyp));
 	if (cfip->ChipEraseTimeoutTyp || cfip->ChipEraseTimeoutMax) {
-		printk("Typical chip erase timeout: %d ｵs\n", 1<<cfip->ChipEraseTimeoutTyp); 
-		printk("Maximum chip erase timeout: %d ｵs\n", (1<<cfip->ChipEraseTimeoutMax) * (1<<cfip->ChipEraseTimeoutTyp));
+		printk("Typical chip erase timeout: %d 逾構n", 1<<cfip->ChipEraseTimeoutTyp); 
+		printk("Maximum chip erase timeout: %d 逾構n", (1<<cfip->ChipEraseTimeoutMax) * (1<<cfip->ChipEraseTimeoutTyp));
 	}
 	else
 		printk("Chip erase not supported\n");

@@ -2,8 +2,8 @@
  *  util.c
  *  Miscellaneous support
  *
- *  Copyright (C) 1997,1999 Martin von Löwis
- *  Copyright (C) 1997 Régis Duchesne
+ *  Copyright (C) 1997,1999 Martin von Lé°“is
+ *  Copyright (C) 1997 Ré–“is Duchesne
  *
  *  The utf8 routines are copied from Python wstrop module.
  */

@@ -10691,7 +10691,7 @@ static void ncr_sir_task_recovery(ncb_p np, int num)
 
 /*==========================================================
 **
-**	Gérard's alchemy:) that deals with with the data 
+**	Gé–žard's alchemy:) that deals with with the data 
 **	pointer for both MDP and the residual calculation.
 **
 **==========================================================

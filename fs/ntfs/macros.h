@@ -1,8 +1,8 @@
 /*
  *  macros.h
  *
- *  Copyright (C) 1995 Martin von Löwis
- *  Copyright (C) 1996 Régis Duchesne
+ *  Copyright (C) 1995 Martin von Lé°“is
+ *  Copyright (C) 1996 Ré–“is Duchesne
  */
 
 #define NTFS_FD(vol)		((vol)->u.fd)

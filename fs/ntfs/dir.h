@@ -2,7 +2,7 @@
  *  dir.h
  *  Header file for dir.c
  *
- *  Copyright (C) 1997 Régis Duchesne
+ *  Copyright (C) 1997 Ré–“is Duchesne
  */
 
 #define ITERATE_SPLIT_DONE      1

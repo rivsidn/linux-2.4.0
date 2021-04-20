@@ -8,9 +8,9 @@
  *
  *      This code is still under development / test.
  *
- *	Author:		Auvo Häkkinen <Auvo.Hakkinen@cs.Helsinki.FI>
- *			Juha Sievänen <Juha.Sievanen@cs.Helsinki.FI>
- *			Taneli Vähäkangas <Taneli.Vahakangas@cs.Helsinki.FI>
+ *	Author:		Auvo Hé‹•kinen <Auvo.Hakkinen@cs.Helsinki.FI>
+ *			Juha Sievé‹˜en <Juha.Sievanen@cs.Helsinki.FI>
+ *			Taneli Vé‹’é‹•angas <Taneli.Vahakangas@cs.Helsinki.FI>
  */
 
 #ifndef _I2O_LAN_H

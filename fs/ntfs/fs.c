@@ -2,9 +2,9 @@
  *  fs.c
  *  NTFS driver for Linux 2.3.x
  *
- *  Copyright (C) 1995-1997, 1999 Martin von Löwis
+ *  Copyright (C) 1995-1997, 1999 Martin von Lé°“is
  *  Copyright (C) 1996 Richard Russon
- *  Copyright (C) 1996-1997 Régis Duchesne
+ *  Copyright (C) 1996-1997 Ré–“is Duchesne
  *  Copyright (C) 2000, Anton Altaparmakov
  */
 
@@ -961,7 +961,7 @@ static void __exit exit_ntfs_fs(void)
 }
 
 EXPORT_NO_SYMBOLS;
-MODULE_AUTHOR("Martin von Löwis");
+MODULE_AUTHOR("Martin von Lé°“is");
 MODULE_DESCRIPTION("NTFS driver");
 #ifdef DEBUG
 MODULE_PARM(ntdebug, "i");

@@ -2,7 +2,7 @@
  *  support.h
  *  Header file for specific support.c
  *
- *  Copyright (C) 1997 Régis Duchesne
+ *  Copyright (C) 1997 Ré–“is Duchesne
  */
 
 /* Debug levels */

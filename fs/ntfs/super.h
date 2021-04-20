@@ -2,8 +2,8 @@
  *  super.h
  *  Header file for super.c
  *
- *  Copyright (C) 1995-1997 Martin von Löwis
- *  Copyright (C) 1996-1997 Régis Duchesne
+ *  Copyright (C) 1995-1997 Martin von Lé°“is
+ *  Copyright (C) 1996-1997 Ré–“is Duchesne
  */
 
 #define ALLOC_REQUIRE_LOCATION 1

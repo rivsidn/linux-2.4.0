@@ -19,7 +19,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                */
 /* ------------------------------------------------------------------------- */
 
-/* With some changes from Kyˆsti M‰lkki <kmalkki@cc.hut.fi> and even
+/* With some changes from KyÈ∞èti MÈãñkki <kmalkki@cc.hut.fi> and even
    Frodo Looijaard <frodol@dds.nl> */
 
 /* $Id: i2c-elektor.h,v 1.4 2000/01/18 23:54:07 frodo Exp $ */

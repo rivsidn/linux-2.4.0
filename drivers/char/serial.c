@@ -19,7 +19,7 @@
  *
  *  rs_set_termios fixed to look also for changes of the input
  *      flags INPCK, BRKINT, PARMRK, IGNPAR and IGNBRK.
- *                                            Bernd Anhäupl 05/17/96.
+ *                                            Bernd Anhé‹Ÿpl 05/17/96.
  *
  *  1/97:  Extended dumb serial ports are a config option now.  
  *         Saves 4k.   Michael A. Griffith <grif@acm.org>

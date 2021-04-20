@@ -4,7 +4,7 @@
  *  Copyright (c) 1999 Vojtech Pavlik
  *
  *  Based on the work of:
- *	Andree Borrmann		Mats Sjövall
+ *	Andree Borrmann		Mats Sjé°’all
  *
  *  Sponsored by SuSE
  */

@@ -244,8 +244,8 @@ struct awc_command {
 	a_com.lock_state = 0;\
 };
 
-/* väga veider asi järgnevast 
- makrost välja jäetud	if (cmd.bap) AWC_IN((cmd.bap)->data);\
+/* vé‹‘a veider asi jé‹œgnevast 
+ makrost vé‹–ja jé‹tud	if (cmd.bap) AWC_IN((cmd.bap)->data);\
 */
 
 #define AWC_BAP_UNLOCK(com) { \

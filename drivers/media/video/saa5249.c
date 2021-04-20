@@ -105,11 +105,11 @@ struct saa5249_device
 };
 
 
-#define CCTWR 34		/* I≤C write/read-address of vtx-chip */
+#define CCTWR 34		/* IÁù† write/read-address of vtx-chip */
 #define CCTRD 35
 #define NOACK_REPEAT 10		/* Retry access this many times on failure */
 #define CLEAR_DELAY (HZ/20)	/* Time required to clear a page */
-#define READY_TIMEOUT (30*HZ/1000)	/* Time to wait for ready signal of I≤C-bus interface */
+#define READY_TIMEOUT (30*HZ/1000)	/* Time to wait for ready signal of IÁù†-bus interface */
 #define INIT_DELAY 500		/* Time in usec to wait at initialization of CEA interface */
 #define START_DELAY 10		/* Time in usec to wait before starting write-cycle (CEA) */
 
@@ -324,10 +324,10 @@ static int i2c_senddata(struct saa5249_device *t, ...)
 	return i2c_sendbuf(t, buf[0], ct-1, buf+1);
 }
 
-/* Get count number of bytes from I≤C-device at address adr, store them in buf. Start & stop
+/* Get count number of bytes from IÁù†-device at address adr, store them in buf. Start & stop
  * handshaking is done by this routine, ack will be sent after the last byte to inhibit further
  * sending of data. If uaccess is TRUE, data is written to user-space with put_user.
- * Returns -1 if I≤C-device didn't send acknowledge, 0 otherwise
+ * Returns -1 if IÁù†-device didn't send acknowledge, 0 otherwise
  */
 
 static int i2c_getdata(struct saa5249_device *t, int count, u8 *buf) 

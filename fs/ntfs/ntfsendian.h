@@ -1,7 +1,7 @@
 /*
  *  ntfsendian.h
  *
- *  Copyright (C) 1998, 1999 Martin von Löwis
+ *  Copyright (C) 1998, 1999 Martin von Lé°“is
  *  Copyright (C) 1998 Joseph Malicki
  *  Copyright (C) 1999 Werner Seiler
  */

@@ -913,7 +913,7 @@ Changes for patch v104
 Changes for patch v105
 
 - Unregister SCSI host from <scsi_host_no_list> in <scsi_unregister>
-  Thanks to Zoltán Böszörményi <zboszor@mail.externet.hu>
+  Thanks to Zolté†¤ Bé°zé°mé–šyi <zboszor@mail.externet.hu>
 
 - Don't save /dev/log in rc.devfs
 

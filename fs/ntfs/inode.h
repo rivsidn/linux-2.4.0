@@ -2,8 +2,8 @@
  *  inode.h
  *  Header file for inode.c
  *
- *  Copyright (C) 1997 Régis Duchesne
- *  Copyright (C) 1998 Martin von Löwis
+ *  Copyright (C) 1997 Ré–“is Duchesne
+ *  Copyright (C) 1998 Martin von Lé°“is
  */
 
 ntfs_attribute *ntfs_find_attr(ntfs_inode *ino, int type, char *name);

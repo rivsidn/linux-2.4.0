@@ -1,8 +1,8 @@
 /*
  *  super.c
  *
- *  Copyright (C) 1995-1997, 1999 Martin von Löwis
- *  Copyright (C) 1996-1997 Régis Duchesne
+ *  Copyright (C) 1995-1997, 1999 Martin von Lé°“is
+ *  Copyright (C) 1996-1997 Ré–“is Duchesne
  *  Copyright (C) 1999 Steve Dodd
  *  Copyright (C) 2000 Anton Altparmakov
  */

@@ -37,13 +37,13 @@
  *  Alessandro Zummo <azummo@ita.flashnet.it>
  *
  * 12-04-2000 ISAPnP cleanup, reorg, fixes, and multiple card support.
- *  Thanks to Gaël Quéri and Alessandro Zummo for testing and fixes.
+ *  Thanks to Gaé›” Qué–ži and Alessandro Zummo for testing and fixes.
  *  Paul E. Laufer <pelaufer@csupomona.edu>
  *
  * 06-05-2000 added another card. Daniel M. Newman <dmnewman@pobox.com>
  *
  * 25-05-2000 Added Creative SB AWE64 Gold (CTL00B2). 
- * 	Pål-Kristian Engstad <engstad@att.net>
+ * 	PéŒ¶-Kristian Engstad <engstad@att.net>
  *
  * 12-08-2000 Added Creative SB32 PnP (CTL009F).
  * 	Kasatenko Ivan Alex. <skywriter@rnc.ru>

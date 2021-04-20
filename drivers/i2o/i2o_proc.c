@@ -17,8 +17,8 @@
  *   DISCLAIMER: This code is still under development/test and may cause
  *   your system to behave unpredictably.  Use at your own discretion.
  *
- *   LAN entries by Juha Sievänen (Juha.Sievanen@cs.Helsinki.FI),
- *		    Auvo Häkkinen (Auvo.Hakkinen@cs.Helsinki.FI)
+ *   LAN entries by Juha Sievé‹˜en (Juha.Sievanen@cs.Helsinki.FI),
+ *		    Auvo Hé‹•kinen (Auvo.Hakkinen@cs.Helsinki.FI)
  *   University of Helsinki, Department of Computer Science
  */
 

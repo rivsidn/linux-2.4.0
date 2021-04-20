@@ -5,9 +5,9 @@
  *
  * Version:	@(#)6pack.c	0.3.0	04/07/98
  *
- * Authors:	Andreas Könsgen <ajk@iehk.rwth-aachen.de>
+ * Authors:	Andreas Ké°Šsgen <ajk@iehk.rwth-aachen.de>
  *
- * Quite a lot of stuff "stolen" by Jörg Reuter from slip.c, written by
+ * Quite a lot of stuff "stolen" by Jé°Žg Reuter from slip.c, written by
  *
  *		Laurence Culhane, <loz@holmes.demon.co.uk>
  *		Fred N. van Kempen, <waltje@uwalt.nl.mugnet.org>
@@ -1057,7 +1057,7 @@ static void decode_data(unsigned char inbyte, struct sixpack *sp)
 }
 
 
-MODULE_AUTHOR("Andreas Könsgen <ajk@ccac.rwth-aachen.de>");
+MODULE_AUTHOR("Andreas Ké°Šsgen <ajk@ccac.rwth-aachen.de>");
 MODULE_DESCRIPTION("6pack driver for AX.25");
 MODULE_PARM(sixpack_maxdev, "i");
 MODULE_PARM_DESC(sixpack_maxdev, "number of 6PACK devices");

@@ -1,6 +1,6 @@
 /* $Id: hfc_pci.c,v 1.34.6.3 2000/12/10 23:39:19 kai Exp $
 
- * hfc_pci.c     low level driver for CCD´s hfc-pci based cards
+ * hfc_pci.c     low level driver for CCDç£— hfc-pci based cards
  *
  * Author     Werner Cornelius (werner@isdn4linux.de)
  *            based on existing driver for CCD hfc ISA cards

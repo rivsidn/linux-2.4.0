@@ -2,7 +2,7 @@
  *  util.h
  *  Header file for util.c
  *
- *  Copyright (C) 1997 Régis Duchesne
+ *  Copyright (C) 1997 Ré–“is Duchesne
  */
 
 /* Which character set is used for file names */

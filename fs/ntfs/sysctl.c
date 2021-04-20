@@ -2,8 +2,8 @@
  *  sysctl.c
  *  System control stuff
  *
- *  Copyright (C) 1997 Martin von Löwis
- *  Copyright (C) 1997 Régis Duchesne
+ *  Copyright (C) 1997 Martin von Lé°“is
+ *  Copyright (C) 1997 Ré–“is Duchesne
  *
  */
 

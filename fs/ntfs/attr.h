@@ -2,7 +2,7 @@
  *  attr.h
  *  Header file for attr.c
  *
- *  Copyright (C) 1997 Régis Duchesne
+ *  Copyright (C) 1997 Ré–“is Duchesne
  */
 
 int ntfs_extend_attr(ntfs_inode *ino, ntfs_attribute *attr, int *len,

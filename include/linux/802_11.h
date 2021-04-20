@@ -24,7 +24,7 @@ enum ieee_802_11_link_status_failure_reason {
         {Due_Inactivity,	0xff," Disassociated due to inactivity "},\
         {AP_Overload,		0xff," Disassociated because AP is unable to handle all currently associated stations "},\
         {Class_2_from_NonAuth,	0xff," Class 2 frame received from non-Authenticated station"},\
-        {Class_3_from_NonAuth,	0xff," Class 3 frame received from non­Associated station"},\
+        {Class_3_from_NonAuth,	0xff," Class 3 frame received from nonç‘¼ssociated station"},\
         {Sender_Quits_BSS,	0xff," Disassociated because sending station is leaving (has left) BSS"},\
         {Association_requester_not_authenticated,0xff," Station requesting (Re)Association is not Authenticated with responding station"},\
         {Reserved10,		0xff," Reserved"},\

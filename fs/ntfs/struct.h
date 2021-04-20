@@ -2,7 +2,7 @@
  * struct.h
  * Structure definitions
  *
- *  Copyright (C) 1997 Régis Duchesne
+ *  Copyright (C) 1997 Ré–“is Duchesne
  *  Copyright (C) 2000 Anton Altaparmakov
  */
 

@@ -768,7 +768,7 @@ int s390_start_IO( int            irq,      /* IRQ */
 			/*
 			 * init the device driver specific devstat irb area
 			 *
-			 * Note : don´t clear saved irb info in case of sense !
+			 * Note : donç£˜ clear saved irb info in case of sense !
 			 */
 			memset( &((devstat_t *)ioinfo[irq]->irq_desc.action->dev_id)->ii.irb,
 				'\0', sizeof( irb_t) );

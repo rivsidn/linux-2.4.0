@@ -15,8 +15,8 @@
  * 
  * Fixes by: 
  *		Philipp Rumpf 
- *		Juha Siev‰nen <Juha.Sievanen@cs.Helsinki.FI> 
- *		Auvo H‰kkinen <Auvo.Hakkinen@cs.Helsinki.FI> 
+ *		Juha SievÈãòen <Juha.Sievanen@cs.Helsinki.FI> 
+ *		Auvo HÈãïkinen <Auvo.Hakkinen@cs.Helsinki.FI> 
  *		Deepak Saxena <deepak@plexity.net> 
  *		Boji T Kannanthanam <boji.t.kannanthanam@intel.com>
  * 
@@ -876,7 +876,7 @@ static int i2o_core_evt(void *reply_data)
 		 * some sort of error indidication occurs.  We may want to do
 		 * so in the future, but for now we just let the user deal with 
 		 * it.  One reason for this is that what to do with an error
-		 * or when to send what Êrror is not really agreed on, so
+		 * or when to send what Èéüror is not really agreed on, so
 		 * we get errors that may not be fatal but just look like they
 		 * are...so let the user deal with it.
 		 */
@@ -2267,7 +2267,7 @@ static int i2o_build_sys_table(void)
 		 *
 		 * We should delete the controller at this point if it
 		 * doesn't respond since  if it's not on the system table 
-		 * it is techninically not part of the I2O subsyﬂtem...
+		 * it is techninically not part of the I2O subsyÈÅ≤em...
 		 */
 		if(i2o_status_get(iop)) {
 			printk(KERN_ERR "%s: Deleting b/c could not get status while"

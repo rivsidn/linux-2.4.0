@@ -248,7 +248,7 @@
        
      * Title: "Design and Implementation of the Second Extended
        Filesystem"
-       Author: Rémy Card, Theodore Ts'o, Stephen Tweedie.
+       Author: Ré–™y Card, Theodore Ts'o, Stephen Tweedie.
        URL: http://web.mit.edu/tytso/www/linux/ext2intro.html
        Keywords: ext2, linux fs history, inode, directory, link, devices,
        VFS, physical structure, performance, benchmarks, ext2fs library,
@@ -540,7 +540,7 @@
        
      * Title: "Linux 2.0"
        Author: Remy Card, Eric Dumas, Franck Mevel.
-       Publisher: Gestión 2000.
+       Publisher: Gestié«‡ 2000.
        Date: 1997.
        Pages: 501.
        ISBN: 8-480-88208-5

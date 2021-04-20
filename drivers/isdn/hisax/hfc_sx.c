@@ -1,6 +1,6 @@
 /* $Id: hfc_sx.c,v 1.9 2000/11/24 17:05:37 kai Exp $
 
- * hfc_sx.c     low level driver for CCD´s hfc-s+/sp based cards
+ * hfc_sx.c     low level driver for CCDç£— hfc-s+/sp based cards
  *
  * Author     Werner Cornelius (werner@isdn4linux.de)
  *            based on existing driver for CCD HFC PCI cards

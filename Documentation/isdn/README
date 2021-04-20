@@ -400,7 +400,7 @@ README for the ISDN-subsystem
      the script tools/tcltk/isdnmon. You can add actions for line-status
      changes. See the comments at the beginning of the script for how to
      do that. There are other tty-based tools in the tools-subdirectory
-     contributed by Michael Knigge (imon), Volker Gˆtz (imontty) and
+     contributed by Michael Knigge (imon), Volker GÈ∞êz (imontty) and
      Andreas Kool (isdnmon).
 
    l) For initial testing, you can set the verbose-level to 2 (default: 0).

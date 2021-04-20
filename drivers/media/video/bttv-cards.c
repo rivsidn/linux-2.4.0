@@ -767,7 +767,7 @@ struct tvcard bttv_tvcards[] = {
 },{
 
 /* ---- card 0x34 ---------------------------------- */
-	name:           "Pinnacle Studio PCTV Pro", /* David H‰rdeman <david@2gen.com> */
+	name:           "Pinnacle Studio PCTV Pro", /* David HÈãúdeman <david@2gen.com> */
 	video_inputs:   3,
 	audio_inputs:   1,
 	tuner:          0,
@@ -1043,7 +1043,7 @@ static void __devinit hauppauge_eeprom(struct bttv *btv)
 void __devinit bttv_hauppauge_boot_msp34xx(struct bttv *btv)
 {
         /* reset/enable the MSP on some Hauppauge cards */
-        /* Thanks to Kyˆsti M‰lkki (kmalkki@cc.hut.fi)! */
+        /* Thanks to KyÈ∞èti MÈãñkki (kmalkki@cc.hut.fi)! */
         btaor(32, ~32, BT848_GPIO_OUT_EN);
         btaor(0, ~32, BT848_GPIO_DATA);
         udelay(2500);

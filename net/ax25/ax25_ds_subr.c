@@ -55,7 +55,7 @@ void ax25_ds_enquiry_response(ax25_cb *ax25)
 {
 	ax25_cb *ax25o;
 
-	/* Please note that neither DK4EG´s nor DG2FEF´s
+	/* Please note that neither DK4EGç£— nor DG2FEFç£—
 	 * DAMA spec mention the following behaviour as seen
 	 * with TheFirmware:
 	 *

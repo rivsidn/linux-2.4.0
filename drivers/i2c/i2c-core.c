@@ -17,7 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
 
-/* With some changes from Kyˆsti M‰lkki <kmalkki@cc.hut.fi>.
+/* With some changes from KyÈ∞èti MÈãñkki <kmalkki@cc.hut.fi>.
    All SMBus-related things are written by Frodo Looijaard <frodol@dds.nl> */
 
 /* $Id: i2c-core.c,v 1.58 2000/10/29 22:57:38 frodo Exp $ */

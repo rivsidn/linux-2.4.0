@@ -968,7 +968,7 @@ W:	http://pcmcia-cs.sourceforge.net
 S:	Maintained
 
 PCNET32 NETWORK DRIVER
-P:	Thomas Bogendörfer
+P:	Thomas Bogendé°Žfer
 M:	tsbogend@alpha.franken.de
 L:	linux-net@vger.kernel.org
 S:	Maintained

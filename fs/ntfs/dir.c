@@ -1,7 +1,7 @@
 /*
  *  dir.c
  *
- *  Copyright (C) 1995-1997, 1999 Martin von Löwis
+ *  Copyright (C) 1995-1997, 1999 Martin von Lé°“is
  *  Copyright (C) 1999 Steve Dodd
  *  Copyright (C) 1999 Joseph Malicki
  */

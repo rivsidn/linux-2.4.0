@@ -6,7 +6,7 @@
  *   - macros that read and write those types from and to byte arrays
  *   - types derived from OS specific ones
  *
- *  Copyright (C) 1996,1998, 1999 Martin von Löwis
+ *  Copyright (C) 1996,1998, 1999 Martin von Lé°“is
  */
 
 #ifdef NTFS_IN_LINUX_KERNEL
