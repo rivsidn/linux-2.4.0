@@ -1142,7 +1142,7 @@ int is_subdir(struct dentry * new_dentry, struct dentry * old_dentry)
 	return result;
 }
 
-//TODO: next...
+//递减引用计数
 void d_genocide(struct dentry *root)
 {
 	struct dentry *this_parent = root;

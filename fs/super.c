@@ -15,7 +15,7 @@
  *  Added kerneld support: Jacques Gelinas and Bjorn Ekwall
  *  Added change_root: Werner Almesberger & Hans Lermen, Feb '96
  *  Added options to /proc/mounts:
- *    Torbjörn Lindh (torbjorn.lindh@gopta.se), April 14, 1996.
+ *    Torbjé°Žn Lindh (torbjorn.lindh@gopta.se), April 14, 1996.
  *  Added devfs support: Richard Gooch <rgooch@atnf.csiro.au>, 13-JAN-1998
  *  Heavily rewritten for 'one fs - one tree' dcache architecture. AV, Mar 2000
  */
@@ -112,7 +112,6 @@ static struct file_system_type **find_filesystem(const char *name)
  *	structures and must not be freed until the file system has been
  *	unregistered.
  */
- 
 int register_filesystem(struct file_system_type * fs)
 {
 	int res = 0;
@@ -143,7 +142,6 @@ int register_filesystem(struct file_system_type * fs)
  *	Once this function has returned the &struct file_system_type structure
  *	may be freed or reused.
  */
- 
 int unregister_filesystem(struct file_system_type * fs)
 {
 	struct file_system_type ** tmp;
