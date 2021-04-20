@@ -240,6 +240,7 @@ asmlinkage long sys_sysfs(int option, unsigned long arg1, unsigned long arg2)
 	return retval;
 }
 
+//将文件系统信息输出到buf中
 int get_filesystem_list(char * buf)
 {
 	int len = 0;
@@ -257,6 +258,7 @@ int get_filesystem_list(char * buf)
 	return len;
 }
 
+//TODO: next...
 struct file_system_type *get_fs_type(const char *name)
 {
 	struct file_system_type *fs;
