@@ -258,11 +258,10 @@ int get_filesystem_list(char * buf)
 	return len;
 }
 
-//TODO: next...
 struct file_system_type *get_fs_type(const char *name)
 {
 	struct file_system_type *fs;
-	
+
 	read_lock(&file_systems_lock);
 	fs = *(find_filesystem(name));
 	if (fs && !try_inc_mod_count(fs->owner))
@@ -311,6 +310,7 @@ static struct vfsmount *add_vfsmnt(struct nameidata *nd,
 	struct super_block *sb = root->d_inode->i_sb;
 	char *name;
 
+	//申请一个vfsmount{}结构体
 	mnt = kmalloc(sizeof(struct vfsmount), GFP_KERNEL);
 	if (!mnt)
 		goto out;
@@ -433,25 +433,25 @@ static unsigned char need_escaping[] = { ' ', '\t', '\n', '\\' };
 
 static int
 mangle(const unsigned char *s, char *buf, int len) {
-        char *sp;
-        int n;
+	char *sp;
+	int n;
 
-        sp = buf;
-        while(*s && sp-buf < len-3) {
-                for (n = 0; n < sizeof(need_escaping); n++) {
-                        if (*s == need_escaping[n]) {
-                                *sp++ = '\\';
-                                *sp++ = '0' + ((*s & 0300) >> 6);
-                                *sp++ = '0' + ((*s & 070) >> 3);
-                                *sp++ = '0' + (*s & 07);
-                                goto next;
-                        }
-                }
-                *sp++ = *s;
-        next:
-                s++;
-        }
-        return sp - buf;	/* no trailing NUL */
+	sp = buf;
+	while(*s && sp-buf < len-3) {
+		for (n = 0; n < sizeof(need_escaping); n++) {
+			if (*s == need_escaping[n]) {
+				*sp++ = '\\';
+				*sp++ = '0' + ((*s & 0300) >> 6);
+				*sp++ = '0' + ((*s & 070) >> 3);
+				*sp++ = '0' + (*s & 07);
+				goto next;
+			}
+		}
+		*sp++ = *s;
+next:
+		s++;
+	}
+	return sp - buf;	/* no trailing NUL */
 }
 
 static struct proc_fs_info {
@@ -487,6 +487,7 @@ static struct proc_nfs_info {
 	{ 0, NULL, NULL }
 };
 
+//该函数输出 /proc/mounts
 int get_filesystem_info( char *buf )
 {
 	struct list_head *p;
@@ -621,6 +622,7 @@ void sync_supers(kdev_t dev)
 		if (!sb->s_dirt)
 			continue;
 		lock_super(sb);
+		//super_block{} 同步
 		if (sb->s_dev && sb->s_dirt && (!dev || dev == sb->s_dev))
 			if (sb->s_op && sb->s_op->write_super)
 				sb->s_op->write_super(sb);
@@ -644,38 +646,40 @@ struct super_block * get_super(kdev_t dev)
 		return NULL;
 restart:
 	s = sb_entry(super_blocks.next);
-	while (s != sb_entry(&super_blocks))
+	while (s != sb_entry(&super_blocks)) {
 		if (s->s_dev == dev) {
 			wait_on_super(s);
 			if (s->s_dev == dev)
 				return s;
 			goto restart;
-		} else
+		} else {
 			s = sb_entry(s->s_list.next);
+		}
+	}
 	return NULL;
 }
 
 asmlinkage long sys_ustat(dev_t dev, struct ustat * ubuf)
 {
-        struct super_block *s;
-        struct ustat tmp;
-        struct statfs sbuf;
+	struct super_block *s;
+	struct ustat tmp;
+	struct statfs sbuf;
 	int err = -EINVAL;
 
 	lock_kernel();
-        s = get_super(to_kdev_t(dev));
+	s = get_super(to_kdev_t(dev));
 	unlock_kernel();
-        if (s == NULL)
-                goto out;
+	if (s == NULL)
+		goto out;
 	err = vfs_statfs(s, &sbuf);
 	if (err)
 		goto out;
 
-        memset(&tmp,0,sizeof(struct ustat));
-        tmp.f_tfree = sbuf.f_bfree;
-        tmp.f_tinode = sbuf.f_ffree;
+	memset(&tmp,0,sizeof(struct ustat));
+	tmp.f_tfree = sbuf.f_bfree;
+	tmp.f_tinode = sbuf.f_ffree;
 
-        err = copy_to_user(ubuf,&tmp,sizeof(struct ustat)) ? -EFAULT : 0;
+	err = copy_to_user(ubuf,&tmp,sizeof(struct ustat)) ? -EFAULT : 0;
 out:
 	return err;
 }
@@ -688,7 +692,9 @@ out:
  *	%NULL is returned if there are insufficient resources to complete
  *	the request.
  */
- 
+/*
+ *	申请一个空的superblocks 结构体
+ */
 struct super_block *get_empty_super(void)
 {
 	struct super_block *s;
@@ -700,11 +706,12 @@ struct super_block *get_empty_super(void)
 			continue;
 		if (!s->s_lock)
 			return s;
-		printk("VFS: empty superblock %p locked!\n", s);
+		printk("VFS: empty superblock %p locked!\n", s);	//异常
 	}
 	/* Need a new one... */
 	if (nr_super_blocks >= max_super_blocks)
 		return NULL;
+	//内存申请，初始化
 	s = kmalloc(sizeof(struct super_block),  GFP_USER);
 	if (s) {
 		nr_super_blocks++;
@@ -758,9 +765,10 @@ out_fail:
  * Unnamed block devices are dummy devices used by virtual
  * filesystems which don't use real block-devices.  -- jrs
  */
-
+/* 位图 */
 static unsigned int unnamed_dev_in_use[256/(8*sizeof(unsigned int))];
 
+/* 获取未命名的设备 */
 kdev_t get_unnamed_dev(void)
 {
 	int i;
@@ -772,6 +780,7 @@ kdev_t get_unnamed_dev(void)
 	return 0;
 }
 
+/* 释放未命名的设备 */
 void put_unnamed_dev(kdev_t dev)
 {
 	if (!dev || MAJOR(dev) != UNNAMED_MAJOR)
@@ -929,8 +938,9 @@ static void kill_super(struct super_block *sb, int umount_root)
 	if (bdev) {
 		blkdev_put(bdev, BDEV_FS);
 		bdput(bdev);
-	} else
+	} else {
 		put_unnamed_dev(dev);
+	}
 }
 
 /*
@@ -941,7 +951,8 @@ static void kill_super(struct super_block *sb, int umount_root)
 static int do_remount_sb(struct super_block *sb, int flags, char *data)
 {
 	int retval;
-	
+
+	//只读文件系统
 	if (!(flags & MS_RDONLY) && sb->s_dev && is_read_only(sb->s_dev))
 		return -EACCES;
 		/*flags |= MS_RDONLY;*/
@@ -974,6 +985,7 @@ struct vfsmount *kern_mount(struct file_system_type *type)
 	struct vfsmount *mnt;
 	if (!dev)
 		return ERR_PTR(-EMFILE);
+
 	sb = read_super(dev, NULL, type, 0, NULL, 0);
 	if (!sb) {
 		put_unnamed_dev(dev);
@@ -1030,6 +1042,7 @@ static int do_umount(struct vfsmount *mnt, int umount_root, int flags)
 		 * Special case for "unmounting" root ...
 		 * we just try to remount it readonly.
 		 */
+		/* 以只读方式重新挂载根文件系统 */
 		mntput(mnt);
 		if (!(sb->s_flags & MS_RDONLY))
 			retval = do_remount_sb(sb, MS_RDONLY, 0);
@@ -1132,6 +1145,7 @@ asmlinkage long sys_umount(char * name, int flags)
 	if (retval)
 		goto out;
 	retval = -EINVAL;
+	//如果此时不是挂载点
 	if (nd.dentry != nd.mnt->mnt_root)
 		goto dput_and_out;
 
@@ -1342,7 +1356,6 @@ long do_mount(char * dev_name, char * dir_name, char *type_page,
 		return do_loopback(dev_name, dir_name);
 
 	/* For the rest we need the type */
-
 	if (!type_page || !memchr(type_page, 0, PAGE_SIZE))
 		return -EINVAL;
 
@@ -1358,7 +1371,7 @@ long do_mount(char * dev_name, char * dir_name, char *type_page,
 
 	/* ... filesystem driver... */
 	fstype = get_fs_type(type_page);
-	if (!fstype)		
+	if (!fstype)
 		return -ENODEV;
 
 	/* ... and mountpoint. Do the lookup first to force automounting. */
@@ -1459,6 +1472,7 @@ out1:
 	return retval;
 }
 
+//TODO: 没读这段
 void __init mount_root(void)
 {
 	struct file_system_type * fs_type;

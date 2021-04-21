@@ -322,6 +322,9 @@ extern void set_bh_page(struct buffer_head *bh, struct page *page, unsigned long
  *
  * Derek Atkins <warlord@MIT.EDU> 94-10-20
  */
+/*
+ * 结构体，用于修改inode属性
+ */
 struct iattr {
 	unsigned int	ia_valid;
 	umode_t		ia_mode;
@@ -625,6 +628,7 @@ extern void kill_fasync(struct fasync_struct **, int, int);
 /* only for net: no internal synchronization */
 extern void __kill_fasync(struct fasync_struct *, int, int);
 
+//文件路径查找过程中用到的临时结构
 struct nameidata {
 	struct dentry *dentry;
 	struct vfsmount *mnt;

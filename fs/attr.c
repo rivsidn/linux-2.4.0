@@ -15,6 +15,7 @@
 /* Taken over from the old code... */
 
 /* POSIX UID/GID verification for setting inode attributes. */
+/* 字面意思，属性是否能修改 */
 int inode_change_ok(struct inode *inode, struct iattr *attr)
 {
 	int retval = -EPERM;
@@ -57,6 +58,7 @@ error:
 	return retval;
 }
 
+/* 设置属性 */
 void inode_setattr(struct inode * inode, struct iattr * attr)
 {
 	unsigned int ia_valid = attr->ia_valid;
@@ -81,6 +83,7 @@ void inode_setattr(struct inode * inode, struct iattr * attr)
 	mark_inode_dirty(inode);
 }
 
+/* 掩码转换 */
 static int setattr_mask(unsigned int ia_valid)
 {
 	unsigned long dn_mask = 0;
@@ -129,7 +132,9 @@ int notify_change(struct dentry * dentry, struct iattr * attr)
 	}
 	unlock_kernel();
 	if (!error) {
+		//掩码转换
 		unsigned long dn_mask = setattr_mask(ia_valid);
+		//修改之后发送通知
 		if (dn_mask)
 			inode_dir_notify(dentry->d_parent->d_inode, dn_mask);
 	}

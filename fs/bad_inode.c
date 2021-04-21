@@ -64,7 +64,6 @@ struct inode_operations bad_inode_ops =
 	revalidate:	EIO_ERROR,
 };
 
-
 /*
  * When a filesystem is unable to read an inode due to an I/O error in
  * its read_inode() function, it can call make_bad_inode() to return a
@@ -83,7 +82,7 @@ struct inode_operations bad_inode_ops =
  *	on it to fail from this point on.
  */
  
-void make_bad_inode(struct inode * inode) 
+void make_bad_inode(struct inode * inode)
 {
 	inode->i_mode = S_IFREG;
 	inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
