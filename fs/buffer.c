@@ -174,6 +174,9 @@ void __wait_on_buffer(struct buffer_head * bh)
  * We will ultimately want to put these in a separate list, but for
  * now we search all of the lists for dirty buffers.
  */
+/*
+ * TODO: next...
+ */
 static int sync_buffers(kdev_t dev, int wait)
 {
 	int i, retry, pass = 0, err = 0;
@@ -1274,13 +1277,15 @@ void set_bh_page (struct buffer_head *bh, struct page *page, unsigned long offse
 	bh->b_page = page;
 	if (offset >= PAGE_SIZE)
 		BUG();
-	if (PageHighMem(page))
+	if (PageHighMem(page)) {
 		/*
 		 * This catches illegal uses and preserves the offset:
 		 */
 		bh->b_data = (char *)(0 + offset);
-	else
+	} else {
+		/* 页面的虚拟地址加偏移量 */
 		bh->b_data = page_address(page) + offset;
+	}
 }
 
 /*
@@ -1292,13 +1297,13 @@ void set_bh_page (struct buffer_head *bh, struct page *page, unsigned long offse
  * from ordinary buffer allocations, and only async requests are allowed
  * to sleep waiting for buffer heads. 
  */
-//TODO: next...
 static struct buffer_head * create_buffers(struct page * page, unsigned long size, int async)
 {
 	struct buffer_head *bh, *head;
 	long offset;
 
 try_again:
+	//创建一个页面对应的buffer_head，并返回head
 	head = NULL;
 	offset = PAGE_SIZE;
 	while ((offset -= size) >= 0) {
@@ -1306,7 +1311,7 @@ try_again:
 		if (!bh)
 			goto no_grow;
 
-		bh->b_dev = B_FREE;  /* Flag as unused */
+		bh->b_dev = B_FREE;  	/* Flag as unused */
 		bh->b_this_page = head;
 		head = bh;
 
@@ -1314,7 +1319,7 @@ try_again:
 		bh->b_next_free = NULL;
 		bh->b_pprev = NULL;
 		atomic_set(&bh->b_count, 0);
-		bh->b_size = size;
+		bh->b_size = size;	/* block size */
 
 		set_bh_page(bh, page, offset);
 
@@ -1436,6 +1441,7 @@ static void create_empty_buffers(struct page *page, kdev_t dev, unsigned long bl
 	if (page->buffers)
 		BUG();
 
+	//循环设置该页面上的buffer_head
 	bh = head;
 	do {
 		bh->b_dev = dev;
@@ -2181,6 +2187,7 @@ int brw_kiovec(int rw, int nr, struct kiobuf *iovec[],
  * FIXME: we need a swapper_inode->get_block function to remove
  *        some of the bmap kludges and interface ugliness here.
  */
+
 int brw_page(int rw, struct page *page, kdev_t dev, int b[], int size)
 {
 	struct buffer_head *head, *bh;
@@ -2188,21 +2195,24 @@ int brw_page(int rw, struct page *page, kdev_t dev, int b[], int size)
 	if (!PageLocked(page))
 		panic("brw_page: page not locked for I/O");
 
+	//如果页面没有设置buffer_head，则设置
 	if (!page->buffers)
 		create_empty_buffers(page, dev, size);
 	head = bh = page->buffers;
 
 	/* Stage 1: lock all the buffers */
+	/* 第一步：将所有的buffer锁定并正确设置 */
 	do {
-		lock_buffer(bh);
+		lock_buffer(bh);			//此处加锁
 		bh->b_blocknr = *(b++);
 		set_bit(BH_Mapped, &bh->b_state);
-		bh->b_end_io = end_buffer_io_async;
+		bh->b_end_io = end_buffer_io_async;	//此处解锁
 		atomic_inc(&bh->b_count);
 		bh = bh->b_this_page;
 	} while (bh != head);
 
 	/* Stage 2: start the IO */
+	/* 第二步：启动IO */
 	do {
 		submit_bh(rw, bh);
 		bh = bh->b_this_page;

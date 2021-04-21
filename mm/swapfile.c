@@ -954,6 +954,9 @@ bad_unused:
 /*
  * Kernel_lock protects against swap device deletion.
  */
+/*
+ * 解析entry，获取到了offset、dev或swapf
+ */
 void get_swaphandle_info(swp_entry_t entry, unsigned long *offset, 
 			kdev_t *dev, struct inode **swapf)
 {

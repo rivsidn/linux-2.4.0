@@ -56,7 +56,7 @@ static int rw_swap_page_base(int rw, swp_entry_t entry, struct page *page, int w
 	get_swaphandle_info(entry, &offset, &dev, &swapf);
 	if (dev) {
 		zones[0] = offset;
-		zones_used = 1;
+		zones_used = 1;		//zones_used = PAGE_SIZE/block_size;
 		block_size = PAGE_SIZE;
 	} else if (swapf) {
 		int i, j;
@@ -74,7 +74,7 @@ static int rw_swap_page_base(int rw, swp_entry_t entry, struct page *page, int w
 	} else {
 		return 0;
 	}
- 	if (!wait) {
+	if (!wait) {
 		SetPageDecrAfter(page);
 		atomic_inc(&nr_async_pages);
 	}
@@ -86,8 +86,8 @@ static int rw_swap_page_base(int rw, swp_entry_t entry, struct page *page, int w
  	 * decrementing the page count, and unlocking the page in the
  	 * swap lock map - in the IO completion handler.
  	 */
- 	if (!wait)
- 		return 1;
+	if (!wait)
+		return 1;
 
  	wait_on_page(page);
 	/* This shouldn't happen, but check to be sure. */

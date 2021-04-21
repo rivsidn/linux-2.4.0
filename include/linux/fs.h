@@ -235,7 +235,7 @@ struct buffer_head {
 	struct buffer_head *b_next_free;/* lru/free list linkage */
 	struct buffer_head *b_prev_free;/* doubly linked list of buffers */
 	struct buffer_head *b_this_page;/* circular list of buffers in one page */
-					/* 在某一页上的buffer的循环链表 */
+					/* 在某一页上的buffer_head 的循环链表 */
 	struct buffer_head *b_reqnext;	/* request queue */
 
 	struct buffer_head **b_pprev;	/* doubly linked list of hash-queue */
