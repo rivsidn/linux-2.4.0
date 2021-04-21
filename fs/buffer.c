@@ -1292,6 +1292,7 @@ void set_bh_page (struct buffer_head *bh, struct page *page, unsigned long offse
  * from ordinary buffer allocations, and only async requests are allowed
  * to sleep waiting for buffer heads. 
  */
+//TODO: next...
 static struct buffer_head * create_buffers(struct page * page, unsigned long size, int async)
 {
 	struct buffer_head *bh, *head;
@@ -2361,7 +2362,7 @@ static void sync_page_buffers(struct buffer_head *bh, int wait)
 int try_to_free_buffers(struct page * page, int wait)
 {
 	struct buffer_head * tmp, * bh = page->buffers;
-	int index = BUFSIZE_INDEX(bh->b_size);
+	int index = BUFSIZE_INDEX(bh->b_size);	//获取index
 	int loop = 0;
 
 cleaned_buffers_try_again:

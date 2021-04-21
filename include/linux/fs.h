@@ -241,8 +241,9 @@ struct buffer_head {
 	struct buffer_head **b_pprev;	/* doubly linked list of hash-queue */
 	char * b_data;			/* pointer to data block (512 byte) */
 	struct page *b_page;		/* the page this bh is mapped to */
+					/* 该buffer_head 映射的页面 */
 	void (*b_end_io)(struct buffer_head *bh, int uptodate); /* I/O completion */
- 	void *b_private;		/* reserved for b_end_io */
+	void *b_private;		/* reserved for b_end_io */
 
 	unsigned long b_rsector;	/* Real buffer location on disk */
 	wait_queue_head_t b_wait;
