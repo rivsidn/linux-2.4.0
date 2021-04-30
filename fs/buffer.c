@@ -174,9 +174,6 @@ void __wait_on_buffer(struct buffer_head * bh)
  * We will ultimately want to put these in a separate list, but for
  * now we search all of the lists for dirty buffers.
  */
-/*
- * TODO: next...
- */
 static int sync_buffers(kdev_t dev, int wait)
 {
 	int i, retry, pass = 0, err = 0;
@@ -329,7 +326,9 @@ asmlinkage long sys_sync(void)
 /*
  *	filp may be NULL if called via the msync of a vma.
  */
- 
+/*
+ * 	将数据全部同步到buffers，然后将buffer 写入到磁盘
+ */ 
 int file_fsync(struct file *filp, struct dentry *dentry, int datasync)
 {
 	struct inode * inode = dentry->d_inode;
@@ -489,8 +488,8 @@ static void __remove_from_free_list(struct buffer_head * bh, int index)
 	bh->b_next_free = bh->b_prev_free = NULL;
 }
 
-/* must be called with both the hash_table_lock and the lru_list_lock
-   held */
+/* must be called with both the hash_table_lock and the lru_list_lock held */
+/* 调用该函数的时候必须同时获取到hash_table_lock 和lru_list_lock */
 static void __remove_from_queues(struct buffer_head *bh)
 {
 	__hash_unlink(bh);
@@ -507,6 +506,10 @@ static void __insert_into_queues(struct buffer_head *bh)
 
 /* This function must only run if there are no other
  * references _anywhere_ to this buffer head.
+ */
+/*
+ * 该buffer_head 没有任何引用计数的时候才能调用该函数.
+ * 将bh 加入到 free_list[] 中.
  */
 static void put_last_free(struct buffer_head * bh)
 {
@@ -561,6 +564,7 @@ struct buffer_head * get_hash_table(kdev_t dev, int block, int size)
 	return bh;
 }
 
+/* 获取硬件块大小，如果不知道返回 0 */
 unsigned int get_hardblocksize(kdev_t dev)
 {
 	/*
@@ -580,6 +584,7 @@ unsigned int get_hardblocksize(kdev_t dev)
 	return 0;
 }
 
+/* 将buffer_head 插入到inode 缓冲队列中 */
 void buffer_insert_inode_queue(struct buffer_head *bh, struct inode *inode)
 {
 	spin_lock(&lru_list_lock);
@@ -616,26 +621,28 @@ int inode_has_buffers(struct inode *inode)
 }
 
 
-/* If invalidate_buffers() will trash dirty buffers, it means some kind
-   of fs corruption is going on. Trashing dirty data always imply losing
-   information that was supposed to be just stored on the physical layer
-   by the user.
-
-   Thus invalidate_buffers in general usage is not allwowed to trash dirty
-   buffers. For example ioctl(FLSBLKBUF) expects dirty data to be preserved.
-
-   NOTE: In the case where the user removed a removable-media-disk even if
-   there's still dirty data not synced on disk (due a bug in the device driver
-   or due an error of the user), by not destroying the dirty buffers we could
-   generate corruption also on the next media inserted, thus a parameter is
-   necessary to handle this case in the most safe way possible (trying
-   to not corrupt also the new disk inserted with the data belonging to
-   the old now corrupted disk). Also for the ramdisk the natural thing
-   to do in order to release the ramdisk memory is to destroy dirty buffers.
-
-   These are two special cases. Normal usage imply the device driver
-   to issue a sync on the device (without waiting I/O completation) and
-   then an invalidate_buffers call that doesn't trash dirty buffers. */
+/*
+ * If invalidate_buffers() will trash dirty buffers, it means some kind
+ * of fs corruption is going on. Trashing dirty data always imply losing
+ * information that was supposed to be just stored on the physical layer
+ * by the user.
+ *
+ * Thus invalidate_buffers in general usage is not allwowed to trash dirty
+ * buffers. For example ioctl(FLSBLKBUF) expects dirty data to be preserved.
+ *
+ * NOTE: In the case where the user removed a removable-media-disk even if
+ * there's still dirty data not synced on disk (due a bug in the device driver
+ * or due an error of the user), by not destroying the dirty buffers we could
+ * generate corruption also on the next media inserted, thus a parameter is
+ * necessary to handle this case in the most safe way possible (trying
+ * to not corrupt also the new disk inserted with the data belonging to
+ * the old now corrupted disk). Also for the ramdisk the natural thing
+ * to do in order to release the ramdisk memory is to destroy dirty buffers.
+ *
+ * These are two special cases. Normal usage imply the device driver
+ * to issue a sync on the device (without waiting I/O completation) and
+ * then an invalidate_buffers call that doesn't trash dirty buffers.
+ */
 void __invalidate_buffers(kdev_t dev, int destroy_dirty_buffers)
 {
 	int i, nlist, slept;
@@ -686,7 +693,7 @@ out:
 		goto retry;
 }
 
-//TODO: 磁盘交换页面部分调用到了该函数，该函数是做什么用的？
+/* 重新设置block size 并无效之前的buffer */
 void set_blocksize(kdev_t dev, int size)
 {
 	extern int *blksize_size[];
@@ -1033,9 +1040,11 @@ repeat:
 	goto repeat;
 }
 
-/* -1 -> no need to flush
-    0 -> async flush
-    1 -> sync flush (wait for I/O completation) */
+/*
+ * -1 -> no need to flush
+ *  0 -> async flush
+ *  1 -> sync flush (wait for I/O completation)
+ */
 int balance_dirty_state(kdev_t dev)
 {
 	unsigned long dirty, tot, hard_dirty_limit, soft_dirty_limit;
@@ -1075,6 +1084,9 @@ int balance_dirty_state(kdev_t dev)
  * pressures on different devices - thus the (currently unused)
  * 'dev' parameter.
  */
+/*
+ * 检查是否需要唤醒bdflush.
+ */
 void balance_dirty(kdev_t dev)
 {
 	int state = balance_dirty_state(dev);
@@ -1090,8 +1102,10 @@ static __inline__ void __mark_dirty(struct buffer_head *bh)
 	refile_buffer(bh);
 }
 
-/* atomic version, the user must call balance_dirty() by hand
-   as soon as it become possible to block */
+/*
+ * atomic version, the user must call balance_dirty() by hand
+ * as soon as it become possible to block
+ */
 void __mark_buffer_dirty(struct buffer_head *bh)
 {
 	if (!atomic_set_buffer_dirty(bh))
@@ -1144,6 +1158,7 @@ void __brelse(struct buffer_head * buf)
 		atomic_dec(&buf->b_count);
 		return;
 	}
+	//试图释放一个没引用的buffer
 	printk("VFS: brelse: Trying to free free buffer\n");
 }
 
@@ -1188,12 +1203,13 @@ struct buffer_head * bread(kdev_t dev, int block, int size)
 	wait_on_buffer(bh);
 	if (buffer_uptodate(bh))
 		return bh;
-	brelse(bh);
+	brelse(bh);	//读取失败释放bh
 	return NULL;
 }
 
 /*
  * Note: the caller should wake up the buffer_wait list if needed.
+ * 添加bh 到unused_list.
  */
 static __inline__ void __put_unused_buffer_head(struct buffer_head * bh)
 {
@@ -1220,6 +1236,7 @@ static struct buffer_head * get_unused_buffer_head(int async)
 {
 	struct buffer_head * bh;
 
+	/* 没有用到的buffer_head 数量大于 NR_RESERVED，直接返回bh */
 	spin_lock(&unused_list_lock);
 	if (nr_unused_buffer_heads > NR_RESERVED) {
 		bh = unused_list;
@@ -1303,7 +1320,7 @@ static struct buffer_head * create_buffers(struct page * page, unsigned long siz
 	long offset;
 
 try_again:
-	//创建一个页面对应的buffer_head，并返回head
+	//获取buffer_head，建立与page的对应关系，并返回head
 	head = NULL;
 	offset = PAGE_SIZE;
 	while ((offset -= size) >= 0) {
@@ -1387,6 +1404,9 @@ static void unmap_buffer(struct buffer_head * bh)
  * and no IO is going on (no buffer is locked), because
  * we have truncated the file and are going to free the
  * blocks on-disk..
+ */
+/*
+ * 此处的offset 是页面内部的offset
  */
 int block_flushpage(struct page *page, unsigned long offset)
 {
@@ -1583,8 +1603,9 @@ static int __block_prepare_write(struct inode *inode, struct page *page,
 	bbits = inode->i_sb->s_blocksize_bits;
 	block = page->index << (PAGE_CACHE_SHIFT - bbits);
 
-	for(bh = head, block_start = 0; bh != head || !block_start;
-	    block++, block_start=block_end, bh = bh->b_this_page) {
+	for (bh = head, block_start = 0;
+	     bh != head || !block_start;
+	     block++, block_start=block_end, bh = bh->b_this_page) {
 		if (!bh)
 			BUG();
 		block_end = block_start+blocksize;
@@ -1623,6 +1644,7 @@ static int __block_prepare_write(struct inode *inode, struct page *page,
 	}
 	/*
 	 * If we issued read requests - let them complete.
+	 * 如果我们提交了读请求，等待结束.
 	 */
 	while(wait_bh > wait) {
 		wait_on_buffer(*--wait_bh);
@@ -1645,9 +1667,9 @@ static int __block_commit_write(struct inode *inode, struct page *page,
 
 	blocksize = inode->i_sb->s_blocksize;
 
-	for(bh = head = page->buffers, block_start = 0;
-	    bh != head || !block_start;
-	    block_start=block_end, bh = bh->b_this_page) {
+	for (bh = head = page->buffers, block_start = 0;
+	     bh != head || !block_start;
+	     block_start=block_end, bh = bh->b_this_page) {
 		block_end = block_start + blocksize;
 		if (block_end <= from || block_start >= to) {
 			if (!buffer_uptodate(bh))
@@ -1681,6 +1703,9 @@ static int __block_commit_write(struct inode *inode, struct page *page,
  * Reads the page asynchronously --- the unlock_buffer() and
  * mark_buffer_uptodate() functions propagate buffer state into the
  * page struct once IO has completed.
+ */
+/*
+ * TODO{mark}
  */
 int block_read_full_page(struct page *page, get_block_t *get_block)
 {

@@ -224,6 +224,7 @@ struct buffer_head {
 	unsigned long b_blocknr;	/* block number */
 	unsigned short b_size;		/* block size */
 	unsigned short b_list;		/* List that this buffer appears */
+					/* 当前buffer 在哪个链中 */
 	kdev_t b_dev;			/* device (B_FREE = free) */
 
 	atomic_t b_count;		/* users using this block */
