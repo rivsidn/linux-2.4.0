@@ -49,8 +49,11 @@ struct poll_table_struct;
 /* And dynamically-tunable limits and defaults: */
 struct files_stat_struct {
 	int nr_files;		/* read only */
+				/* 当前总数 */
 	int nr_free_files;	/* read only */
+				/* 当前空闲数量 */
 	int max_files;		/* tunable */
+				/* 当前允许的最大值 */
 };
 extern struct files_stat_struct files_stat;
 extern int max_super_blocks, nr_super_blocks;

@@ -34,6 +34,7 @@ struct file * get_empty_filp(void)
 	struct file * f;
 
 	file_list_lock();
+	//如果当前空闲的大于要保留的，从空闲的中申请之后返回.
 	if (files_stat.nr_free_files > NR_RESERVED_FILES) {
 	used_one:
 		f = list_entry(free_list.next, struct file, f_list);
@@ -51,6 +52,7 @@ struct file * get_empty_filp(void)
 	}
 	/*
 	 * Use a reserved one if we're the superuser
+	 * 超级用户直接从保留的之后获取
 	 */
 	if (files_stat.nr_free_files && !current->euid)
 		goto used_one;
@@ -167,6 +169,7 @@ void file_moveto(struct file *new, struct file *old)
 	file_list_unlock();
 }
 
+/* 文件系统是否能以只读方式重新挂载 */
 int fs_may_remount_ro(struct super_block *sb)
 {
 	struct list_head *p;
