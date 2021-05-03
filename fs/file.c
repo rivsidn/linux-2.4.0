@@ -19,6 +19,9 @@
  * Allocate an fd array, using kmalloc or vmalloc.
  * Note: the array isn't cleared at allocation time.
  */
+/*
+ * 申请一个fd 数组，该数组并没有被清空.
+ */
 struct file ** alloc_fd_array(int num)
 {
 	struct file **new_fds;
@@ -52,7 +55,9 @@ void free_fd_array(struct file **array, int num)
  * Expand the fd array in the files_struct.  Called with the files
  * spinlock held for write.
  */
-
+/*
+ * 拓展files_struct 中的fd 数组，写的时候需要获取spinlock 锁.
+ */
 int expand_fd_array(struct files_struct *files, int nr)
 {
 	struct file **new_fds;

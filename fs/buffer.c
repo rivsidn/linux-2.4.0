@@ -1704,9 +1704,6 @@ static int __block_commit_write(struct inode *inode, struct page *page,
  * mark_buffer_uptodate() functions propagate buffer state into the
  * page struct once IO has completed.
  */
-/*
- * TODO{mark}
- */
 int block_read_full_page(struct page *page, get_block_t *get_block)
 {
 	struct inode *inode = page->mapping->host;
@@ -1722,6 +1719,9 @@ int block_read_full_page(struct page *page, get_block_t *get_block)
 		create_empty_buffers(page, inode->i_dev, blocksize);
 	head = page->buffers;
 
+	//blocks 表示要读多少块
+	//iblock 表示从多少块开始读，下边的循环中表示当前要读的块
+	//lblock 表示一共有多少块
 	blocks = PAGE_CACHE_SIZE >> inode->i_sb->s_blocksize_bits;
 	iblock = page->index << (PAGE_CACHE_SHIFT - inode->i_sb->s_blocksize_bits);
 	lblock = (inode->i_size+blocksize-1) >> inode->i_sb->s_blocksize_bits;
@@ -1759,12 +1759,14 @@ int block_read_full_page(struct page *page, get_block_t *get_block)
 		 * all buffers are uptodate - we can set the page
 		 * uptodate as well.
 		 */
+		/* 所有的buffer 都是最新的，所以此处可以直接返回 */
 		SetPageUptodate(page);
 		UnlockPage(page);
 		return 0;
 	}
 
 	/* Stage two: lock the buffers */
+	/* 锁定要操作的buffers */
 	for (i = 0; i < nr; i++) {
 		struct buffer_head * bh = arr[i];
 		lock_buffer(bh);
@@ -1773,6 +1775,7 @@ int block_read_full_page(struct page *page, get_block_t *get_block)
 	}
 
 	/* Stage 3: start the IO */
+	/* 启动IO操作 */
 	for (i = 0; i < nr; i++)
 		submit_bh(READ, arr[i]);
 
@@ -1783,7 +1786,10 @@ int block_read_full_page(struct page *page, get_block_t *get_block)
  * For moronic filesystems that do not allow holes in file.
  * We may have to extend the file.
  */
-
+/*
+ * 某些迟钝的文件系统不允许文件中存在空洞，此时我们必须要拓展
+ * 文件.
+ */
 int cont_prepare_write(struct page *page, unsigned offset, unsigned to, get_block_t *get_block, unsigned long *bytes)
 {
 	struct address_space *mapping = page->mapping;
@@ -1886,6 +1892,7 @@ int generic_commit_write(struct file *file, struct page *page,
 	kunmap(page);
 	if (pos > inode->i_size) {
 		inode->i_size = pos;
+		//只有inode 的属性改变了才会将inode 设置成dirty
 		mark_inode_dirty(inode);
 	}
 	return 0;
