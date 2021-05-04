@@ -91,6 +91,7 @@ static void put_filesystem(struct file_system_type *fs)
 		__MOD_DEC_USE_COUNT(fs->owner);
 }
 
+/* 所有的文件系统存储在file_systems 链表中 */
 static struct file_system_type **find_filesystem(const char *name)
 {
 	struct file_system_type **p;
@@ -111,6 +112,9 @@ static struct file_system_type **find_filesystem(const char *name)
  *	The &struct file_system_type that is passed is linked into the kernel 
  *	structures and must not be freed until the file system has been
  *	unregistered.
+ */
+/*
+ *	注册一个新的文件系统
  */
 int register_filesystem(struct file_system_type * fs)
 {

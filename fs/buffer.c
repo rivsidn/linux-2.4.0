@@ -538,6 +538,9 @@ static void put_last_free(struct buffer_head * bh)
  * will force it bad). This shouldn't really happen currently, but
  * the code is ready.
  */
+/*
+ * 所有的buffer_head 存在一个hash 表中，key 通过dev, block 获得
+ */
 static inline struct buffer_head * __get_hash_table(kdev_t dev, int block, int size)
 {
 	struct buffer_head *bh = hash(dev, block);
@@ -989,6 +992,11 @@ void invalidate_inode_buffers(struct inode *inode)
  * 14.02.92: changed it to sync dirty buffers a bit: better performance
  * when the filesystem starts to get full of dirty blocks (I hope).
  */
+/*
+ * [OS]<--->[buffer]<--->[dev]
+ * 操作系统不会直接同硬件设备传递数据，中间有buffer 缓存，该函数的意思应该是
+ * 获取dev，block 对应的buffer_head。
+ */
 struct buffer_head * getblk(kdev_t dev, int block, int size)
 {
 	struct buffer_head * bh;
@@ -997,6 +1005,7 @@ struct buffer_head * getblk(kdev_t dev, int block, int size)
 repeat:
 	spin_lock(&lru_list_lock);
 	write_lock(&hash_table_lock);
+	/* 如果当前dev,block 对应的buffer_head 已经存在，获取直接返回 */
 	bh = __get_hash_table(dev, block, size);
 	if (bh)
 		goto out;
@@ -1155,7 +1164,7 @@ void refile_buffer(struct buffer_head *bh)
 void __brelse(struct buffer_head * buf)
 {
 	if (atomic_read(&buf->b_count)) {
-		atomic_dec(&buf->b_count);
+		atomic_dec(&buf->b_count);	//递减引用计数
 		return;
 	}
 	//试图释放一个没引用的buffer
@@ -1192,18 +1201,29 @@ void __bforget(struct buffer_head * buf)
  * bread() reads a specified block and returns the buffer that contains
  * it. It returns NULL if the block was unreadable.
  */
+/*
+ * 读取设备中的某一个块，block 是块在设备中的位置.
+ * 文件系统挂载初期通过该文件读取设备的超级块，所以此处应该是直接跟硬件
+ * 交换数据，跟文件系统没什么关系.
+ */
 struct buffer_head * bread(kdev_t dev, int block, int size)
 {
 	struct buffer_head * bh;
 
+	/*
+	 * 从getblk() 中获取的bh 存在两种可能：
+	 * 1. 之前就已经存在的
+	 * 2. 新的
+	 * 所以后续紧接着判断是否是最新的，如果是最新的就直接返回即可。
+	 */
 	bh = getblk(dev, block, size);
 	if (buffer_uptodate(bh))
 		return bh;
 	ll_rw_block(READ, 1, &bh);
-	wait_on_buffer(bh);
+	wait_on_buffer(bh);		//等待IO操作结束
 	if (buffer_uptodate(bh))
 		return bh;
-	brelse(bh);	//读取失败释放bh
+	brelse(bh);			//读取失败释放bh
 	return NULL;
 }
 

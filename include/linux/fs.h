@@ -698,7 +698,7 @@ struct super_block {
 	struct dquot_operations	*dq_op;
 	unsigned long		s_flags;
 	unsigned long		s_magic;
-	struct dentry		*s_root;
+	struct dentry		*s_root;	/* 挂载点的dentry{} */
 	wait_queue_head_t	s_wait;
 
 	struct list_head	s_dirty;	/* dirty inodes */

@@ -335,6 +335,7 @@ struct ext2_inode {
 
 /*
  * Structure of the super block
+ * 文件的超级块结构体
  */
 struct ext2_super_block {
 	__u32	s_inodes_count;		/* Inodes count */

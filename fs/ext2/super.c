@@ -146,18 +146,19 @@ void ext2_put_super (struct super_block * sb)
 }
 
 static struct super_operations ext2_sops = {
-read_inode:	ext2_read_inode,
-		write_inode:	ext2_write_inode,
-		put_inode:	ext2_put_inode,
-		delete_inode:	ext2_delete_inode,
-		put_super:	ext2_put_super,
-		write_super:	ext2_write_super,
-		statfs:		ext2_statfs,
-		remount_fs:	ext2_remount,
+	read_inode:	ext2_read_inode,
+	write_inode:	ext2_write_inode,
+	put_inode:	ext2_put_inode,
+	delete_inode:	ext2_delete_inode,
+	put_super:	ext2_put_super,
+	write_super:	ext2_write_super,
+	statfs:		ext2_statfs,
+	remount_fs:	ext2_remount,
 };
 
 /*
  * This function has been shamelessly adapted from the msdos fs
+ * 该函数不知羞耻的改编自msdos 文件系统
  */
 static int parse_options (char * options, unsigned long * sb_block,
 		unsigned short *resuid, unsigned short * resgid,
@@ -381,8 +382,8 @@ static int ext2_check_descriptors (struct super_block * sb)
 
 #define log2(n) ffz(~(n))
 
-struct super_block * ext2_read_super (struct super_block * sb, void * data,
-		int silent)
+/* silent 此处只影响打印信息 */
+struct super_block * ext2_read_super (struct super_block * sb, void * data, int silent)
 {
 	struct buffer_head * bh;
 	struct ext2_super_block * es;
@@ -428,6 +429,7 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 		offset = (sb_block*BLOCK_SIZE) % blocksize;
 	}
 
+	/* 获取超级块信息 */
 	if (!(bh = bread (dev, logic_sb_block, blocksize))) {
 		printk ("EXT2-fs: unable to read superblock\n");
 		return NULL;
@@ -472,6 +474,7 @@ failed_mount:
 				bdevname(dev), i);
 		goto failed_mount;
 	}
+	/* s_log_block_size 这里应该是以K 为单位，s_blocksize 应该是以字节为单位 */
 	sb->s_blocksize_bits =
 		le32_to_cpu(EXT2_SB(sb)->s_es->s_log_block_size) + 10;
 	sb->s_blocksize = 1 << sb->s_blocksize_bits;
@@ -625,6 +628,7 @@ failed_mount:
 	sb->u.ext2_sb.s_gdb_count = db_count;
 	/*
 	 * set up enough so that it can read an inode
+	 * 设置超级块的操作函数
 	 */
 	sb->s_op = &ext2_sops;
 	sb->s_root = d_alloc_root(iget(sb, EXT2_ROOT_INO));
@@ -740,9 +744,9 @@ int ext2_statfs (struct super_block * sb, struct statfs * buf)
 	unsigned long overhead;
 	int i;
 
-	if (test_opt (sb, MINIX_DF))
+	if (test_opt (sb, MINIX_DF)) {
 		overhead = 0;
-	else {
+	} else {
 		/*
 		 * Compute the overhead (FS structures)
 		 */
@@ -785,17 +789,19 @@ int ext2_statfs (struct super_block * sb, struct statfs * buf)
 
 static DECLARE_FSTYPE_DEV(ext2_fs_type, "ext2", ext2_read_super);
 
+/* 初始化，文件系统注册 */
 static int __init init_ext2_fs(void)
 {
 	return register_filesystem(&ext2_fs_type);
 }
 
+/* 文件系统注销 */
 static void __exit exit_ext2_fs(void)
 {
 	unregister_filesystem(&ext2_fs_type);
 }
 
-EXPORT_NO_SYMBOLS;
+EXPORT_NO_SYMBOLS;	//不导出任何符号表
 
 module_init(init_ext2_fs)
 module_exit(exit_ext2_fs)

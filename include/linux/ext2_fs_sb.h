@@ -40,6 +40,7 @@ struct ext2_sb_info {
 	unsigned long s_groups_count;	/* Number of groups in the fs */
 	struct buffer_head * s_sbh;	/* Buffer containing the super block */
 	struct ext2_super_block * s_es;	/* Pointer to the super block in the buffer */
+					/* 缓冲区超级块的指针 */
 	struct buffer_head ** s_group_desc;
 	unsigned short s_loaded_inode_bitmaps;
 	unsigned short s_loaded_block_bitmaps;
