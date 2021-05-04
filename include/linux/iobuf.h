@@ -31,8 +31,7 @@
 
 /* The main kiobuf struct used for all our IO! */
 
-struct kiobuf 
-{
+struct kiobuf {
 	int		nr_pages;	/* Pages actually referenced */
 					/* 实际引用的页面 */
 	int		array_len;	/* Space in the allocated lists */

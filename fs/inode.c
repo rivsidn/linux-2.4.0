@@ -52,7 +52,7 @@ static unsigned int i_hash_shift;
  */
 
 static LIST_HEAD(inode_in_use);
-static LIST_HEAD(inode_unused);
+static LIST_HEAD(inode_unused);			/* inode->i_list 嵌入到该链表中 */
 static struct list_head *inode_hashtable;
 static LIST_HEAD(anon_hash_chain); /* for inodes with NULL i_sb */
 
@@ -81,6 +81,7 @@ static void destroy_inode(struct inode *inode)
 {
 	if (!list_empty(&inode->i_dirty_buffers))
 		BUG();
+	//释放内存到缓存中
 	kmem_cache_free(inode_cachep, (inode));
 }
 
@@ -171,13 +172,13 @@ static inline void wait_on_inode(struct inode *inode)
 		__wait_on_inode(inode);
 }
 
-
 static inline void write_inode(struct inode *inode, int sync)
 {
 	if (inode->i_sb && inode->i_sb->s_op && inode->i_sb->s_op->write_inode)
 		inode->i_sb->s_op->write_inode(inode, sync);
 }
 
+/* 增加引用计数，如果是第一次增加则需要添加到in_use 链表中 */
 static inline void __iget(struct inode * inode)
 {
 	if (atomic_read(&inode->i_count)) {
@@ -192,9 +193,12 @@ static inline void __iget(struct inode * inode)
 	inodes_stat.nr_unused--;
 }
 
+/*
+ * 同步inode
+ */
 static inline void sync_one(struct inode *inode, int sync)
 {
-	if (inode->i_state & I_LOCK) {
+	if (inode->i_state & I_LOCK) {		//正在执行io 操作
 		__iget(inode);
 		spin_unlock(&inode_lock);
 		__wait_on_inode(inode);
@@ -227,6 +231,9 @@ static inline void sync_one(struct inode *inode, int sync)
 	}
 }
 
+/*
+ * 超级块中的s_dirty 链表
+ */
 static inline void sync_list(struct list_head *head)
 {
 	struct list_head * tmp;
@@ -268,6 +275,9 @@ void sync_inodes(kdev_t dev)
 /*
  * Called with the spinlock already held..
  */
+/*
+ * 遍历所有的超级块，依次执行
+ */
 static void sync_all_inodes(void)
 {
 	struct super_block * sb = sb_entry(super_blocks.next);
@@ -296,9 +306,9 @@ void write_inode_now(struct inode *inode, int sync)
 		while (inode->i_state & I_DIRTY)
 			sync_one(inode, sync);
 		spin_unlock(&inode_lock);
-	}
-	else
+	} else {
 		printk("write_inode_now: no super block\n");
+	}
 }
 
 /**
@@ -404,13 +414,14 @@ static void dispose_list(struct list_head * head)
 		if (inode->i_data.nrpages)
 			truncate_inode_pages(&inode->i_data, 0);
 		clear_inode(inode);
-		destroy_inode(inode);
+		destroy_inode(inode);		//释放内存到缓存中，然后缩减缓存中内存
 		inodes_stat.nr_inodes--;
 	}
 }
 
 /*
  * Invalidate all inodes for a device.
+ * 使设备上的所有inodes 变无效.
  */
 static int invalidate_list(struct list_head *head, struct super_block * sb, struct list_head * dispose)
 {
@@ -433,7 +444,7 @@ static int invalidate_list(struct list_head *head, struct super_block * sb, stru
 			list_del(&inode->i_hash);
 			INIT_LIST_HEAD(&inode->i_hash);
 			list_del(&inode->i_list);
-			list_add(&inode->i_list, dispose);
+			list_add(&inode->i_list, dispose);		//将所有inode 加入到dispose 中，统一删除
 			inode->i_state |= I_FREEING;
 			count++;
 			continue;
@@ -461,7 +472,9 @@ static int invalidate_list(struct list_head *head, struct super_block * sb, stru
  *	fails because there are busy inodes then a non zero value is returned.
  *	If the discard is successful all the inodes have been discarded.
  */
- 
+/*
+ *	删除设备上的inodes
+ */
 int invalidate_inodes(struct super_block * sb)
 {
 	int busy;
@@ -475,6 +488,7 @@ int invalidate_inodes(struct super_block * sb)
 
 	dispose_list(&throw_away);
 
+	/* 返回0 表示所有的inode 都已删除 */
 	return busy;
 }
 
@@ -494,6 +508,9 @@ int invalidate_inodes(struct super_block * sb)
 	 !inode_has_buffers(inode))
 #define INODE(entry)	(list_entry(entry, struct inode, i_list))
 
+/*
+ * goal: 要削减的cache 数量
+ */
 void prune_icache(int goal)
 {
 	LIST_HEAD(list);
@@ -505,6 +522,7 @@ void prune_icache(int goal)
 	/* go simple and safe syncing everything before starting */
 	sync_all_inodes();
 
+	/* 遍历所有没有到的inode 缓存 */
 	entry = inode_unused.prev;
 	while (entry != &inode_unused)
 	{
@@ -521,7 +539,7 @@ void prune_icache(int goal)
 		list_del(tmp);
 		list_del(&inode->i_hash);
 		INIT_LIST_HEAD(&inode->i_hash);
-		list_add(tmp, freeable);
+		list_add(tmp, freeable);		//freeable 链表是局部变量
 		inode->i_state |= I_FREEING;
 		count++;
 		if (!--goal)
@@ -533,6 +551,9 @@ void prune_icache(int goal)
 	dispose_list(freeable);
 }
 
+/*
+ * 减小inode 缓存占用的内存
+ */
 void shrink_icache_memory(int priority, int gfp_mask)
 {
 	int count = 0;
@@ -565,6 +586,8 @@ static struct inode * find_inode(struct super_block * sb, unsigned long ino, str
 	struct list_head *tmp;
 	struct inode * inode;
 
+	//从hash 表头部中找到一个符合条件的inode，返回
+	//注意这里一点是，不管引用计数是否为0 都返回，也就是说不管这个inode有没有人在用都返回
 	tmp = head;
 	for (;;) {
 		tmp = tmp->next;
@@ -623,7 +646,9 @@ static void clean_inode(struct inode *inode)
  * a %NULL pointer is returned. The returned inode is not on any superblock
  * lists.
  */
- 
+/*
+ * 获取一个空的inode
+ */
 struct inode * get_empty_inode(void)
 {
 	static unsigned long last_ino;
@@ -666,10 +691,10 @@ static struct inode * get_new_inode(struct super_block *sb, unsigned long ino, s
 		old = find_inode(sb, ino, head, find_actor, opaque);
 		if (!old) {
 			inodes_stat.nr_inodes++;
-			list_add(&inode->i_list, &inode_in_use);
-			list_add(&inode->i_hash, head);
+			list_add(&inode->i_list, &inode_in_use);	//加入链表中
+			list_add(&inode->i_hash, head);			//加入hash表中
 			inode->i_sb = sb;
-			inode->i_dev = sb->s_dev;
+			inode->i_dev = sb->s_dev;			//通过i_dev、i_ino 获取确定inode 在设备中位置
 			inode->i_ino = ino;
 			inode->i_flags = 0;
 			atomic_set(&inode->i_count, 1);
@@ -700,7 +725,7 @@ static struct inode * get_new_inode(struct super_block *sb, unsigned long ino, s
 		 */
 		__iget(old);
 		spin_unlock(&inode_lock);
-		destroy_inode(inode);
+		destroy_inode(inode);		//释放刚申请
 		inode = old;
 		wait_on_inode(inode);
 	}
@@ -730,7 +755,9 @@ static inline unsigned long hash(struct super_block *sb, unsigned long i_ino)
  *	With a large number of inodes live on the file system this function
  *	currently becomes quite slow.
  */
- 
+/*
+ *	获取一个独一无二的inode 号
+ */
 ino_t iunique(struct super_block *sb, ino_t max_reserved)
 {
 	static ino_t counter = 0;
@@ -742,15 +769,16 @@ retry:
 	if (counter > max_reserved) {
 		head = inode_hashtable + hash(sb,counter);
 		inode = find_inode(sb, res = counter++, head, NULL, NULL);
+		//如果找不到则返回res
 		if (!inode) {
 			spin_unlock(&inode_lock);
 			return res;
 		}
 	} else {
+		//从max_reserved+1 开始查找
 		counter = max_reserved + 1;
 	}
 	goto retry;
-	
 }
 
 struct inode *igrab(struct inode *inode)
@@ -771,7 +799,10 @@ struct inode *igrab(struct inode *inode)
 	return inode;
 }
 
-
+/*
+ *	iget() 调用的iget4() 函数，最后两个参数均为 NULL
+ *	就是获取一个inode{}
+ */
 struct inode *iget4(struct super_block *sb, unsigned long ino, find_inode_t find_actor, void *opaque)
 {
 	struct list_head * head = inode_hashtable + hash(sb,ino);
@@ -808,7 +839,7 @@ void insert_inode_hash(struct inode *inode)
 	if (inode->i_sb)
 		head = inode_hashtable + hash(inode->i_sb, inode->i_ino);
 	spin_lock(&inode_lock);
-	list_add(&inode->i_hash, head);
+	list_add(&inode->i_hash, head);		//插入到hash 表中
 	spin_unlock(&inode_lock);
 }
 
@@ -822,7 +853,7 @@ void insert_inode_hash(struct inode *inode)
 void remove_inode_hash(struct inode *inode)
 {
 	spin_lock(&inode_lock);
-	list_del(&inode->i_hash);
+	list_del(&inode->i_hash);	//从hash 表中删除
 	INIT_LIST_HEAD(&inode->i_hash);
 	spin_unlock(&inode_lock);
 }
@@ -834,69 +865,81 @@ void remove_inode_hash(struct inode *inode)
  *	Puts an inode, dropping its usage count. If the inode use count hits
  *	zero the inode is also then freed and may be destroyed.
  */
- 
+/*
+ *	释放inode 节点
+ */
 void iput(struct inode *inode)
 {
-	if (inode) {
-		struct super_operations *op = NULL;
+	//超级块操作函数
+	struct super_operations *op = NULL;
 
-		if (inode->i_sb && inode->i_sb->s_op)
-			op = inode->i_sb->s_op;
-		if (op && op->put_inode)
-			op->put_inode(inode);
+	if (!inode)
+		return;
 
-		if (!atomic_dec_and_lock(&inode->i_count, &inode_lock))
+	if (inode->i_sb && inode->i_sb->s_op)
+		op = inode->i_sb->s_op;
+	if (op && op->put_inode)
+		op->put_inode(inode);
+
+	if (!atomic_dec_and_lock(&inode->i_count, &inode_lock))
+		return;
+
+	if (!inode->i_nlink) {
+		list_del(&inode->i_hash);
+		INIT_LIST_HEAD(&inode->i_hash);
+		list_del(&inode->i_list);
+		INIT_LIST_HEAD(&inode->i_list);
+		inode->i_state|=I_FREEING;
+		inodes_stat.nr_inodes--;
+		spin_unlock(&inode_lock);
+
+		//缓冲区页面
+		if (inode->i_data.nrpages)
+			truncate_inode_pages(&inode->i_data, 0);
+
+		if (op && op->delete_inode) {
+			void (*delete)(struct inode *) = op->delete_inode;
+			/* s_op->delete_inode internally recalls clear_inode() */
+			delete(inode);
+		} else {
+			clear_inode(inode);
+		}
+		if (inode->i_state != I_CLEAR)
+			BUG();
+	} else {
+		if (!list_empty(&inode->i_hash)) {
+			if (!(inode->i_state & I_DIRTY)) {
+				list_del(&inode->i_list);
+				list_add(&inode->i_list, &inode_unused);
+			}
+			inodes_stat.nr_unused++;
+			spin_unlock(&inode_lock);
 			return;
-
-		if (!inode->i_nlink) {
-			list_del(&inode->i_hash);
-			INIT_LIST_HEAD(&inode->i_hash);
+		} else {
+			/* magic nfs path */
 			list_del(&inode->i_list);
 			INIT_LIST_HEAD(&inode->i_list);
 			inode->i_state|=I_FREEING;
 			inodes_stat.nr_inodes--;
 			spin_unlock(&inode_lock);
-
-			if (inode->i_data.nrpages)
-				truncate_inode_pages(&inode->i_data, 0);
-
-			if (op && op->delete_inode) {
-				void (*delete)(struct inode *) = op->delete_inode;
-				/* s_op->delete_inode internally recalls clear_inode() */
-				delete(inode);
-			} else
-				clear_inode(inode);
-			if (inode->i_state != I_CLEAR)
-				BUG();
-		} else {
-			if (!list_empty(&inode->i_hash)) {
-				if (!(inode->i_state & I_DIRTY)) {
-					list_del(&inode->i_list);
-					list_add(&inode->i_list,
-						 &inode_unused);
-				}
-				inodes_stat.nr_unused++;
-				spin_unlock(&inode_lock);
-				return;
-			} else {
-				/* magic nfs path */
-				list_del(&inode->i_list);
-				INIT_LIST_HEAD(&inode->i_list);
-				inode->i_state|=I_FREEING;
-				inodes_stat.nr_inodes--;
-				spin_unlock(&inode_lock);
-				clear_inode(inode);
-			}
+			clear_inode(inode);
 		}
-		destroy_inode(inode);
 	}
+	//释放内存
+	destroy_inode(inode);
 }
 
+/*
+ * 强制删除某个indoe 节点
+ */
 void force_delete(struct inode *inode)
 {
 	/*
 	 * Kill off unused inodes ... iput() will unhash and
 	 * delete the inode if we set i_nlink to zero.
+	 */
+	/*
+	 * 引用计数为1 的时候将 i_nlink 设置为 0
 	 */
 	if (atomic_read(&inode->i_count) == 1)
 		inode->i_nlink = 0;
@@ -913,7 +956,9 @@ void force_delete(struct inode *inode)
  *	disk block relative to the disk start that holds that block of the 
  *	file.
  */
- 
+/*
+ *	通过文件中的block 获取设备中的block 号
+ */
 int bmap(struct inode * inode, int block)
 {
 	int res = 0;
@@ -924,6 +969,7 @@ int bmap(struct inode * inode, int block)
 
 /*
  * Initialize the hash tables.
+ * 初始化hash 表
  */
 void __init inode_init(unsigned long mempages)
 {
@@ -949,6 +995,7 @@ void __init inode_init(unsigned long mempages)
 		while ((tmp >>= 1UL) != 0UL)
 			i_hash_shift++;
 
+		//申请hash表
 		inode_hashtable = (struct list_head *)
 			__get_free_pages(GFP_ATOMIC, order);
 	} while (inode_hashtable == NULL && --order >= 0);
@@ -959,6 +1006,7 @@ void __init inode_init(unsigned long mempages)
 	if (!inode_hashtable)
 		panic("Failed to allocate inode hash table\n");
 
+	//hash 表初始化
 	head = inode_hashtable;
 	i = nr_hash;
 	do {
@@ -967,7 +1015,7 @@ void __init inode_init(unsigned long mempages)
 		i--;
 	} while (i);
 
-	/* inode slab cache */
+	/* inode slab cache(初始化缓存) */
 	inode_cachep = kmem_cache_create("inode_cache", sizeof(struct inode),
 					 0, SLAB_HWCACHE_ALIGN, init_once,
 					 NULL);
@@ -983,7 +1031,7 @@ void __init inode_init(unsigned long mempages)
  *	This function automatically handles read only file systems and media,
  *	as well as the "noatime" flag and inode specific "noatime" markers.
  */
- 
+/* 更新访问时间 */
 void update_atime (struct inode *inode)
 {
 	if ( IS_NOATIME (inode) ) return;

@@ -25,7 +25,7 @@ void end_kio_request(struct kiobuf *kiobuf, int uptodate)
 	}
 }
 
-
+/* 初始化 */
 void __init kiobuf_setup(void)
 {
 	kiobuf_cachep =  kmem_cache_create("kiobuf",
@@ -48,7 +48,7 @@ int alloc_kiovec(int nr, struct kiobuf **bufp)
 {
 	int i;
 	struct kiobuf *iobuf;
-	
+
 	for (i = 0; i < nr; i++) {
 		iobuf = kmem_cache_alloc(kiobuf_cachep, SLAB_KERNEL);
 		if (!iobuf) {

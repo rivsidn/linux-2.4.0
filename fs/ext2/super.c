@@ -797,5 +797,5 @@ static void __exit exit_ext2_fs(void)
 
 EXPORT_NO_SYMBOLS;
 
-	module_init(init_ext2_fs)
+module_init(init_ext2_fs)
 module_exit(exit_ext2_fs)

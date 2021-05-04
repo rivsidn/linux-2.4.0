@@ -408,8 +408,8 @@ struct block_device {
 };
 
 struct inode {
-	struct list_head	i_hash;
-	struct list_head	i_list;
+	struct list_head	i_hash;		//插入到inode_hashtable 表中
+	struct list_head	i_list;		//插入到inode_unused 链表中
 	struct list_head	i_dentry;	//dentry{} 链表
 
 	struct list_head	i_dirty_buffers;
@@ -418,7 +418,7 @@ struct inode {
 	atomic_t		i_count;
 	kdev_t			i_dev;
 	umode_t			i_mode;		//查看文件格式(普通文件、目录等)
-	nlink_t			i_nlink;
+	nlink_t			i_nlink;	//连接计数
 	uid_t			i_uid;
 	gid_t			i_gid;
 	kdev_t			i_rdev;
@@ -434,10 +434,10 @@ struct inode {
 	struct inode_operations	*i_op;
 	struct file_operations	*i_fop;	/* former ->i_op->default_file_ops */
 	struct super_block	*i_sb;
-	wait_queue_head_t	i_wait;
+	wait_queue_head_t	i_wait;		//等待队列
 	struct file_lock	*i_flock;
 	struct address_space	*i_mapping;
-	struct address_space	i_data;	
+	struct address_space	i_data;
 	struct dquot		*i_dquot[MAXQUOTAS];
 	struct pipe_inode_info	*i_pipe;
 	struct block_device	*i_bdev;
@@ -836,6 +836,9 @@ struct inode_operations {
 /*
  * NOTE: write_inode, delete_inode, clear_inode, put_inode can be called
  * without the big kernel lock held in all filesystems.
+ */
+/*
+ * 超级块操作函数
  */
 struct super_operations {
 	void (*read_inode) (struct inode *);

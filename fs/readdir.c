@@ -208,6 +208,7 @@ static int filldir(void * __buf, const char * name, int namlen, off_t offset,
 	return 0;
 }
 
+/* 获取目录表项 */
 asmlinkage long sys_getdents(unsigned int fd, void * dirent, unsigned int count)
 {
 	struct file * file;
