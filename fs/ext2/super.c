@@ -30,6 +30,7 @@
 
 static char error_buf[1024];
 
+/* 输出错误信息 */
 void ext2_error (struct super_block * sb, const char * function,
 		const char * fmt, ...)
 {
@@ -60,6 +61,7 @@ void ext2_error (struct super_block * sb, const char * function,
 	}
 }
 
+/* 异常系统挂起 */
 NORET_TYPE void ext2_panic (struct super_block * sb, const char * function,
 		const char * fmt, ...)
 {
@@ -83,6 +85,7 @@ NORET_TYPE void ext2_panic (struct super_block * sb, const char * function,
 			bdevname(sb->s_dev), function, error_buf);
 }
 
+/* 告警信息 */
 void ext2_warning (struct super_block * sb, const char * function,
 		const char * fmt, ...)
 {
@@ -95,6 +98,7 @@ void ext2_warning (struct super_block * sb, const char * function,
 			bdevname(sb->s_dev), function, error_buf);
 }
 
+/* 更新动态版本 */
 void ext2_update_dynamic_rev(struct super_block *sb)
 {
 	struct ext2_super_block *es = EXT2_SB(sb)->s_es;
@@ -120,6 +124,7 @@ void ext2_update_dynamic_rev(struct super_block *sb)
 	 */
 }
 
+//TODO: next...
 void ext2_put_super (struct super_block * sb)
 {
 	int db_count;
