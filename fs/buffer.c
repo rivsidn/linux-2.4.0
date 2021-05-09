@@ -1203,8 +1203,8 @@ void __bforget(struct buffer_head * buf)
  */
 /*
  * 读取设备中的某一个块，block 是块在设备中的位置.
- * 文件系统挂载初期通过该文件读取设备的超级块，所以此处应该是直接跟硬件
- * 交换数据，跟文件系统没什么关系.
+ * block : 逻辑块号
+ * size  : 逻辑块大小
  */
 struct buffer_head * bread(kdev_t dev, int block, int size)
 {

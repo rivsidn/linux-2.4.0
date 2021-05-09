@@ -124,21 +124,23 @@ void ext2_update_dynamic_rev(struct super_block *sb)
 	 */
 }
 
-//TODO: next...
 void ext2_put_super (struct super_block * sb)
 {
 	int db_count;
 	int i;
 
+	/* 如果并非以只读方式挂载 */
 	if (!(sb->s_flags & MS_RDONLY)) {
 		sb->u.ext2_sb.s_es->s_state = le16_to_cpu(sb->u.ext2_sb.s_mount_state);
 		mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
 	}
+	/* 释放所有的组描述符buffer */
 	db_count = EXT2_SB(sb)->s_gdb_count;
 	for (i = 0; i < db_count; i++)
 		if (sb->u.ext2_sb.s_group_desc[i])
 			brelse (sb->u.ext2_sb.s_group_desc[i]);
 	kfree(sb->u.ext2_sb.s_group_desc);
+	/* 释放inode 位图和block 位图 */
 	for (i = 0; i < EXT2_MAX_GROUP_LOADED; i++)
 		if (sb->u.ext2_sb.s_inode_bitmap[i])
 			brelse (sb->u.ext2_sb.s_inode_bitmap[i]);
@@ -163,7 +165,14 @@ static struct super_operations ext2_sops = {
 
 /*
  * This function has been shamelessly adapted from the msdos fs
- * 该函数不知羞耻的改编自msdos 文件系统
+ */
+/*
+ * 解析文件系统加载时候的选项
+ * options	 : 输入参数
+ * sb_block	 : 输出参数，该文件系统超级块所在的块号
+ * resuid	 : 输出参数，能够使用预留块的用户ID
+ * resgit	 : 输出参数，能够使用预留块的用户组ID
+ * mounut_options: 输出参数，文件系统挂载的选项
  */
 static int parse_options (char * options, unsigned long * sb_block,
 		unsigned short *resuid, unsigned short * resgid,
@@ -345,6 +354,7 @@ static int ext2_check_descriptors (struct super_block * sb)
 	unsigned long block = le32_to_cpu(sb->u.ext2_sb.s_es->s_first_data_block);
 	struct ext2_group_desc * gdp = NULL;
 
+	/* 检查组描述符 */
 	ext2_debug ("Checking group descriptors");
 
 	for (i = 0; i < sb->u.ext2_sb.s_groups_count; i++)
@@ -387,12 +397,16 @@ static int ext2_check_descriptors (struct super_block * sb)
 
 #define log2(n) ffz(~(n))
 
-/* silent 此处只影响打印信息 */
+/*
+ * 文件系统入口函数
+ * silent 此处只会影响打印信息
+ */
 struct super_block * ext2_read_super (struct super_block * sb, void * data, int silent)
 {
 	struct buffer_head * bh;
 	struct ext2_super_block * es;
 	unsigned long sb_block = 1;
+	/* 使用预留块的用户、用户组ID */
 	unsigned short resuid = EXT2_DEF_RESUID;
 	unsigned short resgid = EXT2_DEF_RESGID;
 	unsigned long logic_sb_block = 1;
@@ -410,6 +424,9 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data, int 
 	 * This is important for devices that have a hardware
 	 * sectorsize that is larger than the default.
 	 */
+	/*
+	 * 获取硬件的块大小
+	 */
 	blocksize = get_hardblocksize(dev);
 	if( blocksize == 0 || blocksize < BLOCK_SIZE )
 	{
@@ -422,6 +439,7 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data, int 
 		return NULL;
 	}
 
+	/* 设置该设备 blocksize */
 	set_blocksize (dev, blocksize);
 
 	/*
@@ -445,8 +463,8 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data, int 
 	 */
 	es = (struct ext2_super_block *) (((char *)bh->b_data) + offset);
 	sb->u.ext2_sb.s_es = es;
-	sb->s_magic = le16_to_cpu(es->s_magic);
-	if (sb->s_magic != EXT2_SUPER_MAGIC) {
+	sb->s_magic = le16_to_cpu(es->s_magic);		//文件系统中的内容都是小端存储
+	if (sb->s_magic != EXT2_SUPER_MAGIC) {		//判断文件系统的魔数
 		if (!silent)
 			printk ("VFS: Can't find an ext2 filesystem on dev "
 					"%s.\n", bdevname(dev));
@@ -466,6 +484,9 @@ failed_mount:
 	 * previously didn't change the revision level when setting the flags,
 	 * so there is a chance incompat flags are set on a rev 0 filesystem.
 	 */
+	/*
+	 * 检查特性是否支持，不支持则不能挂载
+	 */
 	if ((i = EXT2_HAS_INCOMPAT_FEATURE(sb, ~EXT2_FEATURE_INCOMPAT_SUPP))) {
 		printk("EXT2-fs: %s: couldn't mount because of "
 				"unsupported optional features (%x).\n",
@@ -479,7 +500,6 @@ failed_mount:
 				bdevname(dev), i);
 		goto failed_mount;
 	}
-	/* s_log_block_size 这里应该是以K 为单位，s_blocksize 应该是以字节为单位 */
 	sb->s_blocksize_bits =
 		le32_to_cpu(EXT2_SB(sb)->s_es->s_log_block_size) + 10;
 	sb->s_blocksize = 1 << sb->s_blocksize_bits;
@@ -543,7 +563,7 @@ failed_mount:
 		sb->u.ext2_sb.s_inodes_per_block;
 	sb->u.ext2_sb.s_desc_per_block = sb->s_blocksize /
 		sizeof (struct ext2_group_desc);
-	sb->u.ext2_sb.s_sbh = bh;
+	sb->u.ext2_sb.s_sbh = bh;		//缓冲区指针
 	if (resuid != EXT2_DEF_RESUID)
 		sb->u.ext2_sb.s_resuid = resuid;
 	else
@@ -593,12 +613,15 @@ failed_mount:
 		goto failed_mount;
 	}
 
+	/* 设置文件系统的block group个数 */
 	sb->u.ext2_sb.s_groups_count = (le32_to_cpu(es->s_blocks_count) -
 			le32_to_cpu(es->s_first_data_block) +
 			EXT2_BLOCKS_PER_GROUP(sb) - 1) /
 		EXT2_BLOCKS_PER_GROUP(sb);
+	/* 描述符表占有多少个block */
 	db_count = (sb->u.ext2_sb.s_groups_count + EXT2_DESC_PER_BLOCK(sb) - 1) /
 		EXT2_DESC_PER_BLOCK(sb);
+	/* 申请内存将描述符表block 的 buffer_head 统计起来 */
 	sb->u.ext2_sb.s_group_desc = kmalloc (db_count * sizeof (struct buffer_head *), GFP_KERNEL);
 	if (sb->u.ext2_sb.s_group_desc == NULL) {
 		printk ("EXT2-fs: not enough memory\n");
@@ -615,6 +638,7 @@ failed_mount:
 			goto failed_mount;
 		}
 	}
+	/* 检查描述符，如果不通过，跳转到挂载失败 */
 	if (!ext2_check_descriptors (sb)) {
 		for (j = 0; j < db_count; j++)
 			brelse (sb->u.ext2_sb.s_group_desc[j]);
@@ -622,6 +646,7 @@ failed_mount:
 		printk ("EXT2-fs: group descriptors corrupted !\n");
 		goto failed_mount;
 	}
+	/* 每个block group 都有对应的inode bitmap 和 block bitmap */
 	for (i = 0; i < EXT2_MAX_GROUP_LOADED; i++) {
 		sb->u.ext2_sb.s_inode_bitmap_number[i] = 0;
 		sb->u.ext2_sb.s_inode_bitmap[i] = NULL;
@@ -687,6 +712,7 @@ void ext2_write_super (struct super_block * sb)
 	sb->s_dirt = 0;
 }
 
+/* 重新挂载文件系统 */
 int ext2_remount (struct super_block * sb, int * flags, char * data)
 {
 	struct ext2_super_block * es;
@@ -707,6 +733,7 @@ int ext2_remount (struct super_block * sb, int * flags, char * data)
 	sb->u.ext2_sb.s_resuid = resuid;
 	sb->u.ext2_sb.s_resgid = resgid;
 	es = sb->u.ext2_sb.s_es;
+	/* 如果两个都是只读、只写，不需要继续操作，直接返回 */
 	if ((*flags & MS_RDONLY) == (sb->s_flags & MS_RDONLY))
 		return 0;
 	if (*flags & MS_RDONLY) {
@@ -722,8 +749,7 @@ int ext2_remount (struct super_block * sb, int * flags, char * data)
 		mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
 		sb->s_dirt = 1;
 		ext2_commit_super (sb, es);
-	}
-	else {
+	} else {
 		int ret;
 		if ((ret = EXT2_HAS_RO_COMPAT_FEATURE(sb,
 						~EXT2_FEATURE_RO_COMPAT_SUPP))) {
@@ -744,6 +770,7 @@ int ext2_remount (struct super_block * sb, int * flags, char * data)
 	return 0;
 }
 
+/* 计算统计信息 */
 int ext2_statfs (struct super_block * sb, struct statfs * buf)
 {
 	unsigned long overhead;
@@ -782,7 +809,9 @@ int ext2_statfs (struct super_block * sb, struct statfs * buf)
 	buf->f_type = EXT2_SUPER_MAGIC;
 	buf->f_bsize = sb->s_blocksize;
 	buf->f_blocks = le32_to_cpu(sb->u.ext2_sb.s_es->s_blocks_count) - overhead;
+	/* 空闲的 */
 	buf->f_bfree = ext2_count_free_blocks (sb);
+	/* 可用的= 空闲的-超级用户预留 */
 	buf->f_bavail = buf->f_bfree - le32_to_cpu(sb->u.ext2_sb.s_es->s_r_blocks_count);
 	if (buf->f_bfree < le32_to_cpu(sb->u.ext2_sb.s_es->s_r_blocks_count))
 		buf->f_bavail = 0;

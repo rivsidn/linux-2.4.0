@@ -13,6 +13,7 @@
 
 static int nibblemap[] = {4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0};
 
+/* 计算空闲的位数 */
 unsigned long ext2_count_free (struct buffer_head * map, unsigned int numchars)
 {
 	unsigned int i;

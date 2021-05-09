@@ -21,6 +21,7 @@
 
 /*
  * ialloc.c contains the inodes allocation and deallocation routines
+ * inode 申请和释放函数
  */
 
 /*

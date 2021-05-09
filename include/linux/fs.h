@@ -44,7 +44,7 @@ struct poll_table_struct;
 #define INR_OPEN 1024		/* Initial setting for nfile rlimits */
 
 #define BLOCK_SIZE_BITS 10
-#define BLOCK_SIZE (1<<BLOCK_SIZE_BITS)
+#define BLOCK_SIZE (1<<BLOCK_SIZE_BITS)		//1024
 
 /* And dynamically-tunable limits and defaults: */
 struct files_stat_struct {
@@ -98,6 +98,7 @@ extern int leases_enable, dir_notify_enable, lease_break_time;
 				  */
 /*
  * These are the fs-independent mount-flags: up to 32 flags are supported
+ * 独立于文件系统的挂载标识位，最多支持32个
  */
 #define MS_RDONLY	 1	/* Mount read-only */
 #define MS_NOSUID	 2	/* Ignore suid and sgid bits */

@@ -465,6 +465,7 @@ struct ext2_super_block {
 
 /*
  * Default values for user and/or group using reserved blocks
+ * 预留块blocks 用户用户组的默认数值
  */
 #define	EXT2_DEF_RESUID		0
 #define	EXT2_DEF_RESGID		0

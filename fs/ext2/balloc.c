@@ -19,6 +19,7 @@
 
 /*
  * balloc.c contains the blocks allocation and deallocation routines
+ * 该文件包含块申请和释放函数
  */
 
 /*
@@ -676,6 +677,10 @@ static inline int test_root(int a, int b)
 	}
 }
 
+/*
+ * 如果是3、5、7的倍数则返回 1，表示此时的group 中存有superblock 
+ * 和group 描述符表的备份
+ */
 int ext2_group_sparse(int group)
 {
 	return (test_root(group, 3) || test_root(group, 5) ||
@@ -689,6 +694,9 @@ int ext2_group_sparse(int group)
  *
  *	Return the number of blocks used by the superblock (primary or backup)
  *	in this group.  Currently this will be only 0 or 1.
+ */
+/*
+ *	block group 中用作超级块的block 个数
  */
 int ext2_bg_has_super(struct super_block *sb, int group)
 {
@@ -706,6 +714,10 @@ int ext2_bg_has_super(struct super_block *sb, int group)
  *	Return the number of blocks used by the group descriptor table
  *	(primary or backup) in this group.  In the future there may be a
  *	different number of descriptor blocks in each group.
+ */
+/*
+ *	group 表，紧跟在superblock 之后，所以此处的判断方式和上边的超级块判断方式
+ *	一致的
  */
 unsigned long ext2_bg_num_gdb(struct super_block *sb, int group)
 {
