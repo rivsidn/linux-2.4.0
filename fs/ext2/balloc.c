@@ -36,6 +36,10 @@
 
 #define in_range(b, first, len)		((b) >= (first) && (b) <= (first) + (len) - 1)
 
+/*
+ * 获取组描述符结构体
+ * 如果bh 不为空，设置该组描述符的buffer_header指针
+ */
 struct ext2_group_desc * ext2_get_group_desc(struct super_block * sb,
 					     unsigned int block_group,
 					     struct buffer_head ** bh)
@@ -120,6 +124,9 @@ error_out:
  * 
  * Return the slot used to store the bitmap, or a -ve error code.
  */
+/*
+ * 将block 位图从磁盘加载到内存中
+ */
 static int __load_block_bitmap (struct super_block * sb,
 			        unsigned int block_group)
 {
@@ -147,11 +154,15 @@ static int __load_block_bitmap (struct super_block * sb,
 		return block_group;
 	}
 
+	/* 找块位图 */
 	for (i = 0; i < sb->u.ext2_sb.s_loaded_block_bitmaps &&
 		    sb->u.ext2_sb.s_block_bitmap_number[i] != block_group; i++)
 		;
 	if (i < sb->u.ext2_sb.s_loaded_block_bitmaps &&
-  	    sb->u.ext2_sb.s_block_bitmap_number[i] == block_group) {
+	    sb->u.ext2_sb.s_block_bitmap_number[i] == block_group) {
+		/*
+		 * 如果找到了，将块位图移到头部
+		 */
 		block_bitmap_number = sb->u.ext2_sb.s_block_bitmap_number[i];
 		block_bitmap = sb->u.ext2_sb.s_block_bitmap[i];
 		for (j = i; j > 0; j--) {
@@ -181,6 +192,7 @@ static int __load_block_bitmap (struct super_block * sb,
 			sb->u.ext2_sb.s_block_bitmap[j] =
 				sb->u.ext2_sb.s_block_bitmap[j - 1];
 		}
+		/* 如果没有找到，读到位置 0 处 */
 		retval = read_block_bitmap (sb, block_group, 0);
 	}
 	return retval;
@@ -248,6 +260,7 @@ static inline int load_block_bitmap (struct super_block * sb,
 	return slot;
 }
 
+/* 释放块 */
 void ext2_free_blocks (const struct inode * inode, unsigned long block,
 		       unsigned long count)
 {
@@ -281,6 +294,7 @@ void ext2_free_blocks (const struct inode * inode, unsigned long block,
 
 do_more:
 	overflow = 0;
+	/* block所在的块组和快组内偏移量 */
 	block_group = (block - le32_to_cpu(es->s_first_data_block)) /
 		      EXT2_BLOCKS_PER_GROUP(sb);
 	bit = (block - le32_to_cpu(es->s_first_data_block)) %
@@ -288,6 +302,9 @@ do_more:
 	/*
 	 * Check to see if we are freeing blocks across a group
 	 * boundary.
+	 */
+	/*
+	 * 检查我们要释放的块是否跨越了块边界
 	 */
 	if (bit + count > EXT2_BLOCKS_PER_GROUP(sb)) {
 		overflow = bit + count - EXT2_BLOCKS_PER_GROUP(sb);
@@ -304,10 +321,8 @@ do_more:
 
 	if (in_range (le32_to_cpu(gdp->bg_block_bitmap), block, count) ||
 	    in_range (le32_to_cpu(gdp->bg_inode_bitmap), block, count) ||
-	    in_range (block, le32_to_cpu(gdp->bg_inode_table),
-		      sb->u.ext2_sb.s_itb_per_group) ||
-	    in_range (block + count - 1, le32_to_cpu(gdp->bg_inode_table),
-		      sb->u.ext2_sb.s_itb_per_group))
+	    in_range (block, le32_to_cpu(gdp->bg_inode_table), sb->u.ext2_sb.s_itb_per_group) ||
+	    in_range (block + count - 1, le32_to_cpu(gdp->bg_inode_table), sb->u.ext2_sb.s_itb_per_group))
 		ext2_error (sb, "ext2_free_blocks",
 			    "Freeing blocks in system zones - "
 			    "Block = %lu, count = %lu",
@@ -326,7 +341,7 @@ do_more:
 				cpu_to_le32(le32_to_cpu(es->s_free_blocks_count)+1);
 		}
 	}
-	
+
 	mark_buffer_dirty(bh2);
 	mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
 
@@ -335,6 +350,7 @@ do_more:
 		ll_rw_block (WRITE, 1, &bh);
 		wait_on_buffer (bh);
 	}
+	/* 重复删除下一个块组的块 */
 	if (overflow) {
 		block += count;
 		count = overflow;
@@ -353,6 +369,8 @@ error_return:
  * each block group the search first looks for an entire free byte in the block
  * bitmap, and then for any free bit if that fails.
  */
+/* 申请块 */
+/* TODO: next...*/
 int ext2_new_block (const struct inode * inode, unsigned long goal,
     u32 * prealloc_count, u32 * prealloc_block, int * err)
 {
@@ -618,6 +636,7 @@ out:
 	
 }
 
+/* 统计空闲块的数量 */
 unsigned long ext2_count_free_blocks (struct super_block * sb)
 {
 #ifdef EXT2FS_DEBUG
