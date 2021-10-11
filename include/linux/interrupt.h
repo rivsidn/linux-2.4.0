@@ -52,7 +52,9 @@ enum {
    tasklets are more than enough. F.e. all serial device BHs et
    al. should be converted to tasklets, not to softirqs.
  */
-
+/*
+ * 数越小，优先级越高，所以此处的 HI_SOFTIRQ 优先级最高
+ */
 enum
 {
 	HI_SOFTIRQ=0,

@@ -258,6 +258,7 @@ static void bh_action(unsigned long nr)
 	int cpu = smp_processor_id();
 
 	//处理时候必须要获取global_bh_lock，该操作确保后半部串行化处理.
+	//由于此处是一个自旋锁，所以此处的串行化是全局串行化.
 	if (!spin_trylock(&global_bh_lock))
 		goto resched;
 
@@ -289,10 +290,32 @@ void remove_bh(int nr)
 	bh_base[nr] = NULL;
 }
 
+/*
+ * bottom half(后半段) 是老版本内核的处理机制。
+ * 老版本内核中后半段处理是串行的，某一时间段只能有一个CPU处理后半段函数，
+ * 该机制在SMP下会限制系统性能。
+ * 当前版本引入了软中断机制，后半段作为软中断机制的特例处理。
+ * 后半段函数的调用顺序：
+ * tasklet_hi_action()--> bh_action()-->后半段处理函数
+ * 正常的软中断函数调用顺序：
+ * tasklet_action()-->tasklet_struct{}->func() 软中断处理函数
+ *
+ * 所以软中断中有三个层次结构体：
+ * softirq_action{}	软中断，do_softirq() 中调用其中的action()函数
+ * tasklet_struct{}	软中断处理函数中调用其中的func()函数
+ * 后半段处理函数	bh_task_vec[] 是tasklet_struct{} 结构体，其中的func()
+ * 			都是bh_action()，在该函数中加上各种串行化各种限制，而
+ * 			后调用后半段处理函数.
+ * 			后半段处理函数是一类特殊的 HI_SOFTIRQ.
+ */
 void __init softirq_init()
 {
 	int i;
 
+	/*
+	 * 初始化了32个tasklet_struct{} 结构体，每个结构体的函数都是bh_action。
+	 * 后半段是特殊的 HI_SOFTIRQ 软中断。
+	 */
 	for (i=0; i<32; i++)
 		tasklet_init(bh_task_vec+i, bh_action, i);
 
