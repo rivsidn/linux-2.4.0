@@ -149,6 +149,9 @@ SYMBOL_NAME_STR(x) ":\n\t" \
 	"addl $4,%esp\n\t" \
 	"jmp ret_from_intr\n");
 
+/*
+ * call_do_IRQ(void) 是一个声明，符号位置在下边定义.
+ */
 #define BUILD_COMMON_IRQ() \
 asmlinkage void call_do_IRQ(void); \
 __asm__( \
