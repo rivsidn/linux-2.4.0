@@ -55,6 +55,7 @@ asmlinkage void do_softirq()
 	if (in_interrupt())
 		return;
 
+	/* 递增local_bh_count()，递增之后会在in_interrupt() 中直接返回 */
 	local_bh_disable();
 
 	local_irq_disable();
@@ -68,6 +69,10 @@ restart:
 		/* Reset active bitmask before enabling irqs */
 		softirq_active(cpu) &= ~active;
 
+		/*
+		 * 中断开启。
+		 * 软中断处理过程中，对应CPU的中断是开启的，软中断是关闭的。
+		 */
 		local_irq_enable();
 
 		h = softirq_vec;
@@ -90,6 +95,7 @@ restart:
 			goto retry;
 	}
 
+	/* 递减local_bh_count() */
 	local_bh_enable();
 
 	/* Leave with locally disabled hard irqs. It is critical to close

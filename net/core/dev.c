@@ -1310,6 +1310,10 @@ static inline void handle_diverter(struct sk_buff *skb)
 #endif   /* CONFIG_NET_DIVERT */
 
 
+/*
+ * 软中断处理过程中，对应CPU的中断是开启的，软中断是关闭的。
+ * 对应CPU不会重复进入到软中断处理中，不同的CPU可能会同时处于软中断中。
+ */
 static void net_rx_action(struct softirq_action *h)
 {
 	int this_cpu = smp_processor_id();
