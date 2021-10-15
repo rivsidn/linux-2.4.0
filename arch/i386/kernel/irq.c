@@ -570,12 +570,28 @@ asmlinkage unsigned int do_IRQ(struct pt_regs regs)
 	   REPLAY is when Linux resends an IRQ that was dropped earlier
 	   WAITING is used by probe to mark irqs that are being tested
 	   */
+	/*
+	 * IRQ_REPLAY 在 enable_irq() 中设置。
+	 * 中断使能之前如果有中断产生，设置IRQ_PENDING 标识位，使能中断
+	 * 时检测到IRQ_PENDING 标识位，则设置IRQ_REPLAY标识。
+	 * 该标识位在该部分处理过程中没有起到任何作用。
+	 */
 	status = desc->status & ~(IRQ_REPLAY | IRQ_WAITING);
 	status |= IRQ_PENDING; /* we _want_ to handle it */
 
 	/*
 	 * If the IRQ is disabled for whatever reason, we cannot
 	 * use the action we have.
+	 */
+	/*
+	 * IRQ_DISABLED 时，表示此时中断没使能。
+	 * action 为一直为空，status 设置了 IRQ_PENDING 标识位。
+	 * 由于action 为空，此时会通过 if (!action) goto out; 退出该函数，
+	 * 当enable_irq() 时，如果检测到IRQ_PENDING 标识位会设置IRQ_REPLAY
+	 * 标识位，并重新执行中断。
+	 * IRQ_INPROGRESS 表示中断正在处理过程中。
+	 * 出现这种情况有两种可能，假设是共享中断，且处理中断时允许中断开启；
+	 * SMP 情况下，会出现该情况。
 	 */
 	action = NULL;
 	if (!(status & (IRQ_DISABLED | IRQ_INPROGRESS))) {
@@ -590,6 +606,14 @@ asmlinkage unsigned int do_IRQ(struct pt_regs regs)
 	   Since we set PENDING, if another processor is handling
 	   a different instance of this same irq, the other processor
 	   will take care of it.
+	 */
+	/*
+	 * 不可能出现中断使能了但是 action 不为空的情况存在。
+	 * 否则此时desc->status 设置了 IRQ_INPROGRESS，会导致后续即使
+	 * 挂载了中断处理函数，中断也得不到处理。
+	 * 按照《情景分析》的说法，IRQ_DISABLED 是在第一次挂载中断处理
+	 * 函数的时候设置的。
+	 * TODO: 关于这部分还没梳理清楚。
 	 */
 	if (!action)
 		goto out;
