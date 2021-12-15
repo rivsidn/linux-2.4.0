@@ -57,9 +57,6 @@ static unsigned int int_sqrt(unsigned int x)
  *    algorithm has been meticulously tuned to meet the priniciple
  *    of least surprise ... (be careful when you change it)
  */
-/*
- * TODO: 没看该函数
- */
 static int badness(struct task_struct *p)
 {
 	int points, cpu_time, run_time;
@@ -174,7 +171,7 @@ void oom_kill(void)
 
 	/* This process has hardware access, be more careful. */
 	if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_RAWIO)) {
-		force_sig(SIGTERM, p);	//TODO: 这两个信号的差异？？？
+		force_sig(SIGTERM, p);
 	} else {
 		force_sig(SIGKILL, p);
 	}
