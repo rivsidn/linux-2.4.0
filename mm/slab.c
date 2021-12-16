@@ -162,6 +162,7 @@ typedef struct slab_s {
  * The limit is stored in the per-cpu structure to reduce the data cache
  * footprint.
  */
+/* TODO: 读到这里了... */
 typedef struct cpucache_s {
 	unsigned int avail;
 	unsigned int limit;
@@ -182,7 +183,6 @@ typedef struct cpucache_s {
 struct kmem_cache_s {
 /* 1) each alloc & free */
 	/* full, partial first, then free */
-	/* 全部用了、只用了部分、全部空闲 */
 	struct list_head	slabs;
 	struct list_head	*firstnotfull;
 	unsigned int		objsize;
@@ -394,7 +394,13 @@ static void kmem_cache_estimate (unsigned long gfporder, size_t size,
 		extra = sizeof(kmem_bufctl_t);
 	}
 	i = 0;
-	//可容纳范围之内累加
+
+	/*
+	 * base 为 slab_t 结构体大小; extra 为 kmem_bufctl_t 大小;
+	 * size 为 obj 大小; wastage 为 slab 占用内存大小.
+	 *
+	 * 这里的意思是计算该 slab 中能容纳多少个 obj.
+	 */
 	while (i*size + L1_CACHE_ALIGN(base+i*extra) <= wastage)
 		i++;
 	if (i > 0)
@@ -877,7 +883,7 @@ typedef struct ccupdate_struct_s
 
 static void do_ccupdate_local(void *info)
 {
-	//cpucache_t{} 替换
+	//交换ccupdate_struct_t{}、kmem_cache_t{} 中的cpucache_t{}
 	ccupdate_struct_t *new = (ccupdate_struct_t *)info;
 	cpucache_t *old = cc_data(new->cachep);
 
@@ -1045,8 +1051,8 @@ static inline slab_t * kmem_cache_slabmgmt (kmem_cache_t *cachep,
 				sizeof(kmem_bufctl_t) + sizeof(slab_t));
 	}
 	slabp->inuse = 0;
-	slabp->colouroff = colour_off;		//偏移量
-	slabp->s_mem = objp+colour_off;		//实际可用的内存地址
+	slabp->colouroff = colour_off;		//申请内存起始位置到objects 位置的偏移量
+	slabp->s_mem = objp+colour_off;		//实际可用的内存地址，objects起始内存地址
 
 	return slabp;
 }
@@ -1056,14 +1062,13 @@ static inline void kmem_cache_init_objs (kmem_cache_t * cachep,
 {
 	int i;
 
+	/* num 是每个slab 中包含的obj 数量 */
 	for (i = 0; i < cachep->num; i++) {
-		//对于该slab中所有的obj
 		void* objp = slabp->s_mem+cachep->objsize*i;
 #if DEBUG
 		if (cachep->flags & SLAB_RED_ZONE) {
 			*((unsigned long*)(objp)) = RED_MAGIC1;
-			*((unsigned long*)(objp + cachep->objsize -
-					BYTES_PER_WORD)) = RED_MAGIC1;
+			*((unsigned long*)(objp + cachep->objsize - BYTES_PER_WORD)) = RED_MAGIC1;
 			objp += BYTES_PER_WORD;
 		}
 #endif
@@ -1092,7 +1097,7 @@ static inline void kmem_cache_init_objs (kmem_cache_t * cachep,
 		slab_bufctl(slabp)[i] = i+1;
 	}
 	slab_bufctl(slabp)[i-1] = BUFCTL_END;	//最后一个指向BUFCTL_END
-	slabp->free = 0;			//从头开始往下分配
+	slabp->free = 0;			//slab 中地一个空先的obj 编号
 }
 
 /*
@@ -1100,7 +1105,7 @@ static inline void kmem_cache_init_objs (kmem_cache_t * cachep,
  * kmem_cache_alloc() when there are no active objs left in a cache.
  */
 /*
- * 结构体的大小关系为 cache-->slab-->obj，该函数意思是在cache 中增加
+ * 结构体的包含关系为cache 包含slab，slab包含 obj，该函数在cache 中增加
  * 一个slab.
  */
 static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
@@ -1337,6 +1342,7 @@ void* kmem_cache_alloc_batch(kmem_cache_t* cachep, int flags)
 }
 #endif
 
+/* TODO: 读到这里了... */
 static inline void * __kmem_cache_alloc (kmem_cache_t *cachep, int flags)
 {
 	unsigned long save_flags;
