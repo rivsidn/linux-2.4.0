@@ -162,14 +162,21 @@ typedef struct slab_s {
  * The limit is stored in the per-cpu structure to reduce the data cache
  * footprint.
  */
-/* TODO: 读到这里了... */
+/*
+ * SMP 情况下，使能cpucache。
+ * 执行的时候会在 kmem_cache_s{} 中的cpudata 后申请limit 个指针。
+ * 释放的obj 会首先放入到cpudata 的指针中；申请obj 的时候也会首先在该结构体
+ * 中查询。
+ */
 typedef struct cpucache_s {
 	unsigned int avail;
 	unsigned int limit;
 } cpucache_t;
 
+/* cpucache_t{} 结构体后的指针数组 */
 #define cc_entry(cpucache) \
 	((void **)(((cpucache_t*)cpucache)+1))
+/* kmem_cache_t{} 中的cpudata 数组，每个CPU 占一个元素 */
 #define cc_data(cachep) \
 	((cachep)->cpudata[smp_processor_id()])
 /*
@@ -183,11 +190,11 @@ typedef struct cpucache_s {
 struct kmem_cache_s {
 /* 1) each alloc & free */
 	/* full, partial first, then free */
-	struct list_head	slabs;
-	struct list_head	*firstnotfull;
-	unsigned int		objsize;
-	unsigned int	 	flags;	/* constant flags */
-	unsigned int		num;	/* # of objs per slab */
+	struct list_head	slabs;		/* 所有slabs 的链表 */
+	struct list_head	*firstnotfull;	/* 链表头指针，指向地一个不为空的slab */
+	unsigned int		objsize;	/* obj 的大小 */
+	unsigned int	 	flags;		/* constant flags */
+	unsigned int		num;		/* # of objs per slab */
 	spinlock_t		spinlock;
 #ifdef CONFIG_SMP
 	unsigned int		batchcount;
@@ -203,8 +210,8 @@ struct kmem_cache_s {
 	size_t			colour;		/* cache colouring range */
 	unsigned int		colour_off;	/* colour offset */
 	unsigned int		colour_next;	/* cache colouring */
-	kmem_cache_t		*slabp_cache;
-	unsigned int		growing;
+	kmem_cache_t		*slabp_cache;	/* slab 与obj 分开管理时，slab 也是kmem_cache_t{} */
+	unsigned int		growing;	/* 标识位，不会收割设置了该标识位的kmem_cache_t{} */
 	unsigned int		dflags;		/* dynamic flags */
 
 	/* constructor func */
@@ -286,6 +293,9 @@ struct kmem_cache_s {
 #if DEBUG
 /* Magic nums for obj red zoning.
  * Placed in the first word before and the first word after an obj.
+ */
+/*
+ * 设置在obj 内存的起始位置和结束位置，发现魔数被修改则报异常
  */
 #define	RED_MAGIC1	0x5A2CF071UL	/* when obj is active */
 #define	RED_MAGIC2	0x170FC2A5UL	/* when obj is inactive */
@@ -379,6 +389,7 @@ static void enable_cpucache (kmem_cache_t *cachep);
 static void enable_all_cpucaches (void);
 #endif
 
+/* 计算一个slab_t{} 中可以创建obj 的个数，创建之后剩余的内存大小 */
 /* Cal the num objs, wastage, and bytes left over for a given slab size. */
 static void kmem_cache_estimate (unsigned long gfporder, size_t size,
 		 int flags, size_t *left_over, unsigned int *num)
@@ -422,11 +433,11 @@ void __init kmem_cache_init(void)
 {
 	size_t left_over;
 
+	/* 初始化锁和链表 */
 	init_MUTEX(&cache_chain_sem);
 	INIT_LIST_HEAD(&cache_chain);
 
-	kmem_cache_estimate(0, cache_cache.objsize, 0,
-			&left_over, &cache_cache.num);
+	kmem_cache_estimate(0, cache_cache.objsize, 0, &left_over, &cache_cache.num);
 	if (!cache_cache.num)
 		BUG();
 
@@ -491,8 +502,7 @@ int __init kmem_cpucache_init(void)
 
 __initcall(kmem_cpucache_init);
 
-/* Interface to system's page allocator. No need to hold the cache-lock.
- */
+/* Interface to system's page allocator. No need to hold the cache-lock. */
 static inline void * kmem_getpages (kmem_cache_t *cachep, unsigned long flags)
 {
 	void	*addr;
@@ -533,6 +543,7 @@ static inline void kmem_freepages (kmem_cache_t *cachep, void *addr)
 }
 
 #if DEBUG
+/* 设置cachep 中该obj 的所有字节为 POISON_BYTE，最后一字节为 POISON_END */
 static inline void kmem_poison_obj (kmem_cache_t *cachep, void *addr)
 {
 	int size = cachep->objsize;
@@ -544,6 +555,7 @@ static inline void kmem_poison_obj (kmem_cache_t *cachep, void *addr)
 	*(unsigned char *)(addr+size-1) = POISON_END;
 }
 
+/* 检查cachep 中该obj 的所有字节是否为 POISON_BYTE */
 static inline int kmem_check_poison_obj (kmem_cache_t *cachep, void *addr)
 {
 	int size = cachep->objsize;
@@ -578,7 +590,7 @@ static void kmem_slab_destroy (kmem_cache_t *cachep, slab_t *slabp)
 				if (*((unsigned long*)(objp)) != RED_MAGIC1)
 					BUG();
 				if (*((unsigned long*)(objp + cachep->objsize
-						-BYTES_PER_WORD)) != RED_MAGIC1)
+						- BYTES_PER_WORD)) != RED_MAGIC1)
 					BUG();
 				objp += BYTES_PER_WORD;
 			}
@@ -589,7 +601,7 @@ static void kmem_slab_destroy (kmem_cache_t *cachep, slab_t *slabp)
 #if DEBUG
 			if (cachep->flags & SLAB_RED_ZONE) {
 				objp -= BYTES_PER_WORD;
-			}	
+			}
 			if ((cachep->flags & SLAB_POISON)  &&
 				kmem_check_poison_obj(cachep, objp))
 				BUG();
@@ -699,7 +711,7 @@ kmem_cache_create (const char *name, size_t size, size_t offset,
 		size &= ~(BYTES_PER_WORD-1);
 		printk("%sForcing size word alignment - %s\n", func_nm, name);
 	}
-	
+
 #if DEBUG
 	if (flags & SLAB_RED_ZONE) {
 		/*
@@ -736,6 +748,12 @@ kmem_cache_create (const char *name, size_t size, size_t offset,
 	 * using high page-orders for slabs.  When the gfp() funcs are more
 	 * friendly towards high-order requests, this should be changed.
 	 */
+	/*
+	 * 计算slabs 占用的页面数和每个slab 中的obj 个数.
+	 * 现在应该尽量避免给slab 分配大的页面，当gfp() 函数对大的页面请求更
+	 * 友善的时候，这部分可以修改.
+	 */
+	/* TODO: 读到这里了... */
 	do {
 		unsigned int break_flag = 0;
 cal_wastage:
@@ -1183,7 +1201,6 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 	i = 1 << cachep->gfporder;
 	page = virt_to_page(objp);
 	do {
-		//只设置了page->list 的指针
 		SET_PAGE_CACHE(page, cachep);
 		SET_PAGE_SLAB(page, slabp);
 		PageSetSlab(page);		//设置标识位
@@ -1342,7 +1359,6 @@ void* kmem_cache_alloc_batch(kmem_cache_t* cachep, int flags)
 }
 #endif
 
-/* TODO: 读到这里了... */
 static inline void * __kmem_cache_alloc (kmem_cache_t *cachep, int flags)
 {
 	unsigned long save_flags;
