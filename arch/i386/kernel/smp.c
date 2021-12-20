@@ -437,6 +437,7 @@ static struct call_data_struct * call_data;
  * this function sends a 'generic call function' IPI to all other CPUs
  * in the system.
  */
+/* IPI: inter-processor interrupt */
 
 int smp_call_function (void (*func) (void *info), void *info, int nonatomic,
 			int wait)

@@ -753,7 +753,6 @@ kmem_cache_create (const char *name, size_t size, size_t offset,
 	 * 现在应该尽量避免给slab 分配大的页面，当gfp() 函数对大的页面请求更
 	 * 友善的时候，这部分可以修改.
 	 */
-	/* TODO: 读到这里了... */
 	do {
 		unsigned int break_flag = 0;
 cal_wastage:
@@ -797,6 +796,9 @@ next:
 	 * If the slab has been placed off-slab, and we have enough space then
 	 * move it on-slab. This is at the expense of any extra colouring.
 	 */
+	/*
+	 * 设置了off-slab时，此时如果有足够空间则使用on-slab。
+	 */
 	if (flags & CFLGS_OFF_SLAB && left_over >= slab_size) {
 		flags &= ~CFLGS_OFF_SLAB;
 		left_over -= slab_size;
@@ -834,6 +836,7 @@ next:
 	if (g_cpucache_up)
 		enable_cpucache(cachep);
 #endif
+	/* 将新创建的mem cache 添加到链表中，需要信号量保护 */
 	/* Need the semaphore to access the chain. */
 	down(&cache_chain_sem);
 	{
@@ -860,6 +863,8 @@ opps:
 /*
  * This check if the kmem_cache_t pointer is chained in the cache_cache
  * list. -arca
+ */
+/*
  * 检查kmem_cache_t 指针是否在cache_cache 链表中.
  */
 static int is_chained_kmem_cache(kmem_cache_t * cachep)
@@ -911,6 +916,9 @@ static void do_ccupdate_local(void *info)
 
 static void free_block (kmem_cache_t* cachep, void** objpp, int len);
 
+/*
+ * 释放所有的CPU 缓存
+ */
 static void drain_cpu_caches(kmem_cache_t *cachep)
 {
 	ccupdate_struct_t new;
@@ -963,6 +971,10 @@ static int __kmem_cache_shrink(kmem_cache_t *cachep)
 		if (slabp->inuse)
 			break;
 
+		/*
+		 * 因为此时删除的时候是从后往前删，所以如果遇到firstnotfull，
+		 * 前边的slab 一定就是被全部占用了。
+		 */
 		list_del(&slabp->list);
 		if (cachep->firstnotfull == &slabp->list)
 			cachep->firstnotfull = &cachep->slabs;
@@ -1012,13 +1024,14 @@ int kmem_cache_destroy (kmem_cache_t * cachep)
 	if (!cachep || in_interrupt() || cachep->growing)
 		BUG();
 
+	/* 从链表中删除该缓存 */
 	/* Find the cache in the chain of caches. */
 	down(&cache_chain_sem);
 	/* the chain is never empty, cache_cache is never destroyed */
 	if (clock_searchp == cachep)
 		clock_searchp = list_entry(cachep->next.next,
 						kmem_cache_t, next);
-	list_del(&cachep->next); //删除
+	list_del(&cachep->next);
 	up(&cache_chain_sem);
 
 	if (__kmem_cache_shrink(cachep)) {
@@ -1123,8 +1136,9 @@ static inline void kmem_cache_init_objs (kmem_cache_t * cachep,
  * kmem_cache_alloc() when there are no active objs left in a cache.
  */
 /*
- * 结构体的包含关系为cache 包含slab，slab包含 obj，该函数在cache 中增加
- * 一个slab.
+ * 结构体的包含关系为cache 包含slab，slab包含obj.
+ * 当通过kmem_cache_alloc() 申请内存的时候，如果此时没有可用的obj，调用
+ * 该函数在cache 中增加一个新的slab.
  */
 static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 {
@@ -1137,7 +1151,7 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 	unsigned long	 save_flags;
 
 	/* Be lazy and only check for valid flags here,
- 	 * keeping it out of the critical path in kmem_cache_alloc().
+	 * keeping it out of the critical path in kmem_cache_alloc().
 	 */
 	if (flags & ~(SLAB_DMA|SLAB_LEVEL_MASK|SLAB_NO_GROW))
 		BUG();
@@ -1213,7 +1227,7 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 	cachep->growing--;
 
 	/* Make slab active. */
-	list_add_tail(&slabp->list,&cachep->slabs);	//新申请的是空闲的，加到末尾
+	list_add_tail(&slabp->list, &cachep->slabs);	//新申请的是空闲的，加到末尾
 	if (cachep->firstnotfull == &cachep->slabs)
 		cachep->firstnotfull = &slabp->list;
 	STATS_INC_GROWN(cachep);
@@ -1244,11 +1258,14 @@ static int kmem_extra_free_checks (kmem_cache_t * cachep,
 	int i;
 	unsigned int objnr = (objp-slabp->s_mem)/cachep->objsize;
 
+	/* 是否超过最大个数 */
 	if (objnr >= cachep->num)
 		BUG();
+	/* 地址是否一致，除法会省略余数 */
 	if (objp != slabp->s_mem + objnr*cachep->objsize)
 		BUG();
 
+	/* 检查当前是否是空闲的(重复释放) */
 	/* Check slab's freelist to see if this obj is there. */
 	for (i = slabp->free; i != BUFCTL_END; i = slab_bufctl(slabp)[i]) {
 		if (i == objnr)
@@ -1276,6 +1293,7 @@ static inline void * kmem_cache_alloc_one_tail (kmem_cache_t *cachep,
 {
 	void *objp;
 
+	/* 更新统计信息 */
 	STATS_INC_ALLOCED(cachep);
 	STATS_INC_ACTIVE(cachep);
 	STATS_SET_HIGH(cachep);
@@ -1283,17 +1301,17 @@ static inline void * kmem_cache_alloc_one_tail (kmem_cache_t *cachep,
 	/* get obj pointer(slab中申请一个obj) */
 	/*
 	 * 每一个slab_t 结构体后边紧跟着的是一个数组链表，通过
-	 * slab_bufctl(slabp)[slabp->free] 可以查找下一个free的偏移量，
+	 * slab_bufctl(slabp)[slabp->free] 可以查找下一个free的下标，
 	 * slabp->s_mem + slabp->free*cachep->objsize 为空闲的obj，当
 	 * 该slab 已经不存在空闲obj的时候，此时的slabp->free 为 BUFCTL_END.
 	 */
 	slabp->inuse++;
 	objp = slabp->s_mem + slabp->free*cachep->objsize;
-	slabp->free=slab_bufctl(slabp)[slabp->free];
+	slabp->free = slab_bufctl(slabp)[slabp->free];
 
+	/* 如果该slab 被全部使用了，指向下一个slab */
 	if (slabp->free == BUFCTL_END)
 		/* slab now full: move to next slab for next alloc */
-		/* 全部使用了，指向下一个slab */
 		cachep->firstnotfull = slabp->list.next;
 #if DEBUG
 	if (cachep->flags & SLAB_POISON)
@@ -1333,6 +1351,7 @@ static inline void * kmem_cache_alloc_one_tail (kmem_cache_t *cachep,
 })
 
 #ifdef CONFIG_SMP
+/* 一次性申请多个，放到缓存中，只在smp 情况下生效 */
 void* kmem_cache_alloc_batch(kmem_cache_t* cachep, int flags)
 {
 	int batchcount = cachep->batchcount;
@@ -1347,7 +1366,7 @@ void* kmem_cache_alloc_batch(kmem_cache_t* cachep, int flags)
 		//cache中不存在空闲的slab了
 		if (p == &cachep->slabs)
 			break;
-		slabp = list_entry(p,slab_t, list);
+		slabp = list_entry(p, slab_t, list);
 		cc_entry(cc)[cc->avail++] =
 				kmem_cache_alloc_one_tail(cachep, slabp);
 	}
@@ -1651,13 +1670,13 @@ void kmem_cache_free (kmem_cache_t *cachep, void *objp)
 
 /**
  * kfree - free previously allocated memory
- *       - 释放之前申请的内存
+ *
  * @objp: pointer returned by kmalloc.
  *
  * Don't free memory not originally allocated by kmalloc()
  * or you will run into trouble.
- * 不要释放之前不是通过kamlloc() 申请的内存，否则会出现异常
  */
+/* 只能释放通过kmalloc() 申请的内存，否则会导致异常 */
 void kfree (const void *objp)
 {
 	kmem_cache_t *c;
@@ -1794,14 +1813,10 @@ static void enable_all_cpucaches (void)
 
 /**
  * kmem_cache_reap - Reclaim memory from caches.
- *                 - caches中回收内存
+ *
  * @gfp_mask: the type of memory required.
  *
  * Called from try_to_free_page().
- */
-/*
- * TODO: next...
- * 这个函数还没看明白
  */
 void kmem_cache_reap (int gfp_mask)
 {
@@ -1834,12 +1849,14 @@ void kmem_cache_reap (int gfp_mask)
 		spin_lock_irq(&searchp->spinlock);	//加锁
 		if (searchp->growing)
 			goto next_unlock;
+		/* 如果设置了DFLGS_GROWN 标识位，取消标识位，跳转到下一个查找 */
 		if (searchp->dflags & DFLGS_GROWN) {
 			searchp->dflags &= ~DFLGS_GROWN;
 			goto next_unlock;
 		}
 #ifdef CONFIG_SMP
 		{
+			/* 将缓存中的全部释放 */
 			cpucache_t *cc = cc_data(searchp);
 			if (cc && cc->avail) {
 				__free_block(searchp, cc_entry(cc), cc->avail);
@@ -1864,8 +1881,8 @@ void kmem_cache_reap (int gfp_mask)
 		 * to get high orders from gfp()).
 		 */
 		/*
-		 * TODO: next...
-		 * 先弄明白slab 的代码结构
+		 * 这里的pages 就是一个比较标准，通过 (pages*4 + 1)/5 的方式
+		 * 减小被选中的几率.
 		 */
 		pages = full_free * (1<<searchp->gfporder);
 		if (searchp->ctor)
@@ -1885,11 +1902,13 @@ void kmem_cache_reap (int gfp_mask)
 next_unlock:
 		spin_unlock_irq(&searchp->spinlock);	//解锁
 next:
-		searchp = list_entry(searchp->next.next,kmem_cache_t,next);
+		/* 跳转到下一个链表查找 */
+		searchp = list_entry(searchp->next.next, kmem_cache_t, next);
 	} while (--scan && searchp != clock_searchp);
 
 	clock_searchp = searchp;
 
+	/* 没找到可以释放的缓存，直接退出 */
 	if (!best_cachep)
 		/* couldn't find anything to reap */
 		goto out;
@@ -1906,7 +1925,7 @@ perfect:
 		p = best_cachep->slabs.prev;
 		if (p == &best_cachep->slabs)
 			break;
-		slabp = list_entry(p,slab_t,list);
+		slabp = list_entry(p, slab_t, list);
 		if (slabp->inuse)
 			break;
 		list_del(&slabp->list);
@@ -1944,7 +1963,6 @@ out:
 		}				\
 	} while (0)
 
-/* TODO: 阅读proc 文件系统的时候看 */
 static int proc_getdata (char*page, char**start, off_t off, int count)
 {
 	struct list_head *p;
@@ -1995,6 +2013,7 @@ static int proc_getdata (char*page, char**start, off_t off, int count)
 			active_slabs, num_slabs, (1<<cachep->gfporder));
 
 #if STATS
+		/* 输出统计信息 */
 		{
 			unsigned long errors = cachep->errors;
 			unsigned long high = cachep->high_mark;
@@ -2007,6 +2026,7 @@ static int proc_getdata (char*page, char**start, off_t off, int count)
 		}
 #endif
 #ifdef CONFIG_SMP
+		/* 输出缓存信息 */
 		{
 			unsigned int batchcount = cachep->batchcount;
 			unsigned int limit;
@@ -2020,6 +2040,7 @@ static int proc_getdata (char*page, char**start, off_t off, int count)
 		}
 #endif
 #if STATS && defined(CONFIG_SMP)
+		/* 输出统计信息 */
 		{
 			unsigned long allochit = atomic_read(&cachep->allochit);
 			unsigned long allocmiss = atomic_read(&cachep->allocmiss);
@@ -2060,9 +2081,6 @@ got_data:
  * total-slabs
  * num-pages-per-slab
  * + further values on SMP and with statistics enabled
- */
-/*
- * TODO: 如果此处超过了一个page该如何处理
  */
 int slabinfo_read_proc (char *page, char **start, off_t off,
 				 int count, int *eof, void *data)

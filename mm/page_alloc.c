@@ -939,6 +939,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	build_zonelists(pgdat);
 }
 
+/* TODO: 读到这里... */
 void __init free_area_init(unsigned long *zones_size)
 {
 	free_area_init_core(0, &contig_page_data, &mem_map, zones_size, 0, 0, 0);
@@ -948,6 +949,7 @@ static int __init setup_mem_frac(char *str)
 {
 	int j = 0;
 
+	/* 通过启动参数设置 zone_balance_ratio[] */
 	while (get_option(&str, &zone_balance_ratio[j++]) == 2);
 	printk("setup_mem_frac: ");
 	for (j = 0; j < MAX_NR_ZONES; j++) printk("%d  ", zone_balance_ratio[j]);
