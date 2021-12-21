@@ -116,6 +116,12 @@ extern __inline__ int get_order(unsigned long size)
 
 #endif /* __ASSEMBLY__ */
 
+/*
+ * 最低1G 的物理地址映射到了虚拟地址的3G-4G，所以:
+ *
+ * 虚拟地址转物理地址 = (虚拟地址 - PAGE_OFFSET)
+ * 物理地址转虚拟地址 = (物理地址 + PAGE_OFFSET)
+ */
 #define PAGE_OFFSET		((unsigned long)__PAGE_OFFSET)
 #define __pa(x)			((unsigned long)(x)-PAGE_OFFSET)
 #define __va(x)			((void *)((unsigned long)(x)+PAGE_OFFSET))

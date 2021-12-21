@@ -27,8 +27,8 @@ typedef struct zone_struct {
 	 * Commonly accessed fields:
 	 */
 	spinlock_t		lock;
-	unsigned long		offset;		//起始页面号在mem_map中下标
-	unsigned long		free_pages;	//空闲页面数
+	unsigned long		offset;			//起始页面号在mem_map中下标
+	unsigned long		free_pages;		//空闲页面数
 	unsigned long		inactive_clean_pages;
 	unsigned long		inactive_dirty_pages;
 	unsigned long		pages_min, pages_low, pages_high;

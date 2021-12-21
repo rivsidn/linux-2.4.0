@@ -551,6 +551,7 @@ try_again:
 /*
  * Common helper functions.
  */
+/* TODO: 读到这里... */
 unsigned long __get_free_pages(int gfp_mask, unsigned long order)
 {
 	struct page * page;
@@ -635,6 +636,7 @@ unsigned int nr_inactive_clean_pages (void)
 /*
  * Amount of free RAM allocatable as buffer memory:
  */
+/* TODO: 没看懂这个函数的作用 */
 unsigned int nr_free_buffer_pages (void)
 {
 	unsigned int sum;
@@ -796,9 +798,6 @@ static inline void build_zonelists(pg_data_t *pgdat)
  *   - mark all memory queues empty
  *   - clear the memory bitmaps
  */
-/*
- * 建立 zone_t{} 结构体
- */
 void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	unsigned long *zones_size, unsigned long zone_start_paddr, 
 	unsigned long *zholes_size, struct page *lmem_map)
@@ -809,19 +808,20 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	unsigned long totalpages, offset, realtotalpages;
 	unsigned int cumulative = 0;
 
+	/* 计算页面总数量 */
 	totalpages = 0;
 	for (i = 0; i < MAX_NR_ZONES; i++) {
-		unsigned long size = zones_size[i];	//zones_size[] 为输入参数
+		unsigned long size = zones_size[i];		//zones_size[] 为输入参数
 		totalpages += size;
 	}
 	realtotalpages = totalpages;
 	if (zholes_size)
 		for (i = 0; i < MAX_NR_ZONES; i++)
 			realtotalpages -= zholes_size[i];	//zholes_size[] 为输入参数
-			
+
 	printk("On node %d totalpages: %lu\n", nid, realtotalpages);
 
-	//初始化全局的活跃链表、不活跃脏链表
+	/* 初始化全局的活跃链表、不活跃脏链表 */
 	memlist_init(&active_list);
 	memlist_init(&inactive_dirty_list);
 
@@ -834,7 +834,6 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	 */
 	map_size = (totalpages + 1)*sizeof(struct page);
 	if (lmem_map == (struct page *)0) {
-		//申请内存
 		lmem_map = (struct page *) alloc_bootmem_node(pgdat, map_size);
 		lmem_map = (struct page *)(PAGE_OFFSET + 
 			MAP_ALIGN((unsigned long)lmem_map - PAGE_OFFSET));
@@ -858,7 +857,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		set_page_count(p, 0);		//设置页面引用计数
 		SetPageReserved(p);		//设置页面为reserved模式
 		init_waitqueue_head(&p->wait);	//初始化等待队列
-		memlist_init(&p->list);		//链表初始化
+		memlist_init(&p->list);		//链表头初始化
 	}
 
 	offset = lmem_map - mem_map;
@@ -876,7 +875,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		zone->name = zone_names[j];
 		zone->lock = SPIN_LOCK_UNLOCKED;
 		zone->zone_pgdat = pgdat;
-		zone->free_pages = 0;			//此时全部初始化为0
+		zone->free_pages = 0;		//此时全部初始化为0
 		zone->inactive_clean_pages = 0;
 		zone->inactive_dirty_pages = 0;
 		memlist_init(&zone->inactive_clean_list);
@@ -884,7 +883,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 			continue;
 
 		zone->offset = offset;
-		cumulative += size;	//局部变量，没有用到
+		cumulative += size;		//局部变量，没有用到
 		mask = (realsize / zone_balance_ratio[j]);
 		if (mask < zone_balance_min[j])
 			mask = zone_balance_min[j];
@@ -939,7 +938,6 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	build_zonelists(pgdat);
 }
 
-/* TODO: 读到这里... */
 void __init free_area_init(unsigned long *zones_size)
 {
 	free_area_init_core(0, &contig_page_data, &mem_map, zones_size, 0, 0, 0);
