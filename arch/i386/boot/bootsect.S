@@ -23,7 +23,8 @@
  * The loader has been made as simple as possible, and continuous
  * read errors will result in a unbreakable loop. Reboot by hand. It
  * loads pretty fast by getting whole tracks at a time whenever possible.
- * 
+ */
+/* 
  * 该程序一直在保护模式下执行.
  */
 

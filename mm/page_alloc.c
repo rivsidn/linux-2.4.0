@@ -352,8 +352,7 @@ try_again:
 			page = rmqueue(z, order);
 			if (page)
 				return page;
-		} else if (z->free_pages < z->pages_min &&
-					waitqueue_active(&kreclaimd_wait)) {
+		} else if (z->free_pages < z->pages_min && waitqueue_active(&kreclaimd_wait)) {
 				//唤醒等待队列
 				wake_up_interruptible(&kreclaimd_wait);
 		}
@@ -551,7 +550,6 @@ try_again:
 /*
  * Common helper functions.
  */
-/* TODO: 读到这里... */
 unsigned long __get_free_pages(int gfp_mask, unsigned long order)
 {
 	struct page * page;
