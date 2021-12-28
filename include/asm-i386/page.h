@@ -2,8 +2,8 @@
 #define _I386_PAGE_H
 
 /* PAGE_SHIFT determines the page size */
-#define PAGE_SHIFT	12
-#define PAGE_SIZE	(1UL << PAGE_SHIFT)
+#define PAGE_SHIFT	12				//页面偏移量
+#define PAGE_SIZE	(1UL << PAGE_SHIFT)		//页面大小(1<<12) 4K
 #define PAGE_MASK	(~(PAGE_SIZE-1))		//0xfffff000
 
 #ifdef __KERNEL__

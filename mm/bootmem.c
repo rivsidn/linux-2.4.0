@@ -25,11 +25,11 @@
  *
  * 调用该子系统时候必须在外部保证串行化.
  */
-unsigned long max_low_pfn;		//页面数
+unsigned long max_low_pfn;		//最高页号
 unsigned long min_low_pfn;		//最低页号
 
 /* return the number of _pages_ that will be allocated for the boot bitmap */
-/* 返回作为bitmap 需要的页面数 */
+/* 返回用来做位图的页面数量 */
 unsigned long __init bootmem_bootmap_pages (unsigned long pages)
 {
 	unsigned long mapsize;
@@ -43,6 +43,10 @@ unsigned long __init bootmem_bootmap_pages (unsigned long pages)
 
 /*
  * Called once to set up the allocator itself.
+ */
+/*
+ * 该函数中将所有页面初始化成一个平面的表，将所有页面设置成保留，
+ * 后边在 setup_arch() 函数中注册可用的内存.
  */
 static unsigned long __init init_bootmem_core (pg_data_t *pgdat,
 	unsigned long mapstart, unsigned long start, unsigned long end)
@@ -305,6 +309,7 @@ unsigned long __init init_bootmem (unsigned long start, unsigned long pages)
 	return(init_bootmem_core(&contig_page_data, start, 0, pages));
 }
 
+/* 设置内存为保留模式，不可用 */
 void __init reserve_bootmem (unsigned long addr, unsigned long size)
 {
 	reserve_bootmem_core(contig_page_data.bdata, addr, size);

@@ -416,6 +416,7 @@ static void __init print_memory_map(char *who)
 {
 	int i;
 
+	/* 输出内存映射信息 */
 	for (i = 0; i < e820.nr_map; i++) {
 		printk(" %s: %016Lx @ %016Lx ", who,
 			e820.map[i].size, e820.map[i].addr);
@@ -503,6 +504,10 @@ void __init setup_memory_region(void)
 	 *
 	 * Otherwise fake a memory map; one section from 0k->640k,
 	 * the next section from 1mb->appropriate_mem_k
+	 */
+	/*
+	 * 将启动过程中通过中断获取的内存保存到全局变量.
+	 * 如果不成功则通过尝试其他方式.
 	 */
 	if (copy_e820_map(E820_MAP, E820_MAP_NR) < 0) {
 		unsigned long mem_size;
@@ -668,7 +673,7 @@ void __init setup_arch(char **cmdline_p)
 	for (i = 0; i < e820.nr_map; i++) {
 		unsigned long start, end;
 		/* RAM? */
-		if (e820.map[i].type != E820_RAM)
+		if (e820.map[i].type != E820_RAM)	//只测试ram
 			continue;
 		start = PFN_UP(e820.map[i].addr);
 		end = PFN_DOWN(e820.map[i].addr + e820.map[i].size);

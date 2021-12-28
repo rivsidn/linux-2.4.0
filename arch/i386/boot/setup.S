@@ -549,7 +549,7 @@ done_apm_bios:
 	jmp	rmodeswtch_end
 
 rmodeswtch_normal:
-        pushw	%cs
+	pushw	%cs
 	call	default_switch
 
 rmodeswtch_end:
