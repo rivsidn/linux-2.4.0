@@ -60,14 +60,14 @@ ifeq (.config,$(wildcard .config))
 include .config
 ifeq (.depend,$(wildcard .depend))
 include .depend
-do-it-all:	Version vmlinux
+do-it-all:	Version vmlinux			# 配置、依赖文件都存在，正式开始编译
 else
 CONFIGURATION = depend
-do-it-all:	depend
+do-it-all:	depend				# 如果没有依赖文件，首先需要生成依赖文件
 endif
 else
 CONFIGURATION = config
-do-it-all:	config
+do-it-all:	config				# 如果没有配置文件，首先需要生成配置文件
 endif
 
 #
@@ -102,6 +102,7 @@ AFLAGS := -D__ASSEMBLY__ $(CPPFLAGS)
 # This is i386 specific.
 #
 
+# CURRENT 可以通过命令行指定，没指定时为空
 export ROOT_DEV = CURRENT
 
 #
