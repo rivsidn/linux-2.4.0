@@ -295,6 +295,7 @@ $(patsubst %, _dir_%, $(SUBDIRS)) : dummy include/linux/version.h include/config
 $(TOPDIR)/include/linux/version.h: include/linux/version.h
 $(TOPDIR)/include/linux/compile.h: include/linux/compile.h
 
+# 每次执行都将 .version 中内容 +1
 newversion:
 	@if [ ! -f .version ]; then \
 		echo 1 > .version; \
@@ -453,7 +454,7 @@ dep-files: scripts/mkdep archdep include/linux/version.h
 	scripts/mkdep `find $(FINDHPATH) -name SCCS -prune -o -follow -name \*.h ! -name modversions.h -print` > .hdepend
 	$(MAKE) $(patsubst %,_sfdep_%,$(SUBDIRS)) _FASTDEP_ALL_SUB_DIRS="$(SUBDIRS)"
 ifdef CONFIG_MODVERSIONS
-	$(MAKE) update-modverfile
+	$(MAKE) update-modverfile		# Rules.make 中定义
 endif
 
 ifdef CONFIG_MODVERSIONS
