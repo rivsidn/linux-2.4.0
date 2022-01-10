@@ -122,6 +122,8 @@ endif
 #
 # This make dependencies quickly
 #
+# 递归调用，创建所有目录的.depend 文件
+#
 fastdep: dummy
 	$(TOPDIR)/scripts/mkdep $(wildcard *.[chS] local.h.master) > .depend
 ifdef ALL_SUB_DIRS
@@ -202,8 +204,8 @@ multi-used	:= $(filter $(list-multi), $(obj-y) $(obj-m))
 multi-objs	:= $(foreach m, $(multi-used), $($(basename $(m))-objs))
 active-objs	:= $(sort $(multi-objs) $(obj-y) $(obj-m))
 
-ifdef CONFIG_MODVERSIONS
-ifneq "$(strip $(export-objs))" ""
+ifdef CONFIG_MODVERSIONS			# 如果配置文件中有该宏定义
+ifneq "$(strip $(export-objs))" ""		# 如果导出符号表的文件不为空
 
 MODINCL = $(TOPDIR)/include/linux/modules
 
@@ -221,6 +223,9 @@ else
 endif
 
 $(MODINCL)/%.ver: %.c
+	# 如果$*.stamp 文件不存在 或者 $*.stamp 时间戳老于依赖文件
+	# 创建文件之后判断，是否与已存在文件一致，如果一致则提示未修改；如果不一致则修改
+	# 最终更新 $*.stamp 文件时间戳
 	@if [ ! -r $(MODINCL)/$*.stamp -o $(MODINCL)/$*.stamp -ot $< ]; then \
 		echo '$(CC) $(CFLAGS) -E -D__GENKSYMS__ $<'; \
 		echo '| $(GENKSYMS) $(genksyms_smp_prefix) -k $(VERSION).$(PATCHLEVEL).$(SUBLEVEL) > $@.tmp'; \
@@ -229,10 +234,12 @@ $(MODINCL)/%.ver: %.c
 		if [ -r $@ ] && cmp -s $@ $@.tmp; then echo $@ is unchanged; rm -f $@.tmp; \
 		else echo mv $@.tmp $@; mv -f $@.tmp $@; fi; \
 	fi; touch $(MODINCL)/$*.stamp
-	
+
+# 所有文件都依赖于 $(TOPDIR)/include/linux/autoconf.h
 $(addprefix $(MODINCL)/,$(export-objs:.o=.ver)): $(TOPDIR)/include/linux/autoconf.h
 
 # updates .ver files but not modversions.h
+# 添加$(MODINCL)/ 到文件$(export-objs:.o=.ver) 上，构成新的文件名
 fastdep: $(addprefix $(MODINCL)/,$(export-objs:.o=.ver))
 
 # updates .ver files and modversions.h like before (is this needed?)

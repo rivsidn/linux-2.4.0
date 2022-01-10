@@ -9,6 +9,7 @@
 
 O_TARGET := kernel.o
 
+# 此处的 export-objs 意思是有导出符号表的文件
 export-objs = signal.o sys.o kmod.o context.o ksyms.o pm.o
 
 obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \

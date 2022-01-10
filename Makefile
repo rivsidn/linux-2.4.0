@@ -303,6 +303,7 @@ newversion:
 		expr 0`cat .version` + 1 > .version; \
 	fi
 
+# 每次编译都会生成一个头文件，标明编译的时间，谁编译，编译器版本等等
 include/linux/compile.h: $(CONFIGURATION) include/linux/version.h newversion
 	@echo -n \#define UTS_VERSION \"\#`cat .version` > .ver
 	@if [ -n "$(CONFIG_SMP)" ] ; then echo -n " SMP" >> .ver; fi
@@ -451,6 +452,8 @@ sums:
 
 dep-files: scripts/mkdep archdep include/linux/version.h
 	scripts/mkdep init/*.c > .depend
+	# 查找SCCS 文件，如果为文件夹则忽略
+	# 查找名称为 *.h 的文件，不包括 modversions.h 文件
 	scripts/mkdep `find $(FINDHPATH) -name SCCS -prune -o -follow -name \*.h ! -name modversions.h -print` > .hdepend
 	$(MAKE) $(patsubst %,_sfdep_%,$(SUBDIRS)) _FASTDEP_ALL_SUB_DIRS="$(SUBDIRS)"
 ifdef CONFIG_MODVERSIONS
