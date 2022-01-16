@@ -210,9 +210,9 @@ script:
 # Exporting objects are: all objects that define symbol tables
 #
 
-# TODO: 读到这里...
 ifdef CONFIG_MODULES
 
+# list-multi 是目录下定义的由多个.o 文件共同生成的.o 文件
 multi-used	:= $(filter $(list-multi), $(obj-y) $(obj-m))
 multi-objs	:= $(foreach m, $(multi-used), $($(basename $(m))-objs))
 active-objs	:= $(sort $(multi-objs) $(obj-y) $(obj-m))
@@ -248,11 +248,11 @@ $(MODINCL)/%.ver: %.c
 		else echo mv $@.tmp $@; mv -f $@.tmp $@; fi; \
 	fi; touch $(MODINCL)/$*.stamp
 
-# 所有文件都依赖于 $(TOPDIR)/include/linux/autoconf.h
+# $(MODINCL)/*.ver 文件生成规则，依赖于 $(TOPDIR)/include/linux/autoconf.h
 $(addprefix $(MODINCL)/,$(export-objs:.o=.ver)): $(TOPDIR)/include/linux/autoconf.h
 
 # updates .ver files but not modversions.h
-# 添加$(MODINCL)/ 到文件$(export-objs:.o=.ver) 上，构成新的文件名
+# $(MODINCL)/*.ver 文件在执行 fastdep 目标的时候生成
 fastdep: $(addprefix $(MODINCL)/,$(export-objs:.o=.ver))
 
 # updates .ver files and modversions.h like before (is this needed?)
