@@ -7,6 +7,7 @@
 #
 # Note 2! The CFLAGS definitions are now in the main makefile...
 
+# Rules.make 中使用，将该文件作为
 O_TARGET := kernel.o
 
 # 此处的 export-objs 意思是有导出符号表的文件
@@ -27,6 +28,8 @@ ifneq ($(CONFIG_IA64),y)
 # me.  I suspect most platforms don't need this, but until we know that for sure
 # I turn this off for IA-64 only.  Andreas Schwab says it's also needed on m68k
 # to get a correct value for the wait-channel (WCHAN in ps). --davidm
+#
+# 编译sched.o 的时候添加独有的编译选项，通过在Rules.make 中重新定义隐式规则来实现该功能
 CFLAGS_sched.o := $(PROFILING) -fno-omit-frame-pointer
 endif
 

@@ -34,11 +34,13 @@ unexport subdir-
 #
 # Get things started.
 #
+# 首先进入到子目录中执行，所有子目录执行结束之后，执行all_targets
 first_rule: sub_dirs
 	$(MAKE) all_targets
 
 both-m          := $(filter $(mod-subdirs), $(subdir-y))
 SUB_DIRS	:= $(subdir-y)
+# sort 排序并删除掉重复项
 MOD_SUB_DIRS	:= $(sort $(subdir-m) $(both-m))
 ALL_SUB_DIRS	:= $(sort $(subdir-y) $(subdir-m) $(subdir-n) $(subdir-))
 
@@ -53,6 +55,7 @@ ALL_SUB_DIRS	:= $(sort $(subdir-y) $(subdir-m) $(subdir-n) $(subdir-))
 %.i: %.c
 	$(CPP) $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) $< > $@
 
+# 重新定义了隐式规则，通过 .c 文件生成 .o 文件的时候，可以通过 $(CFLAGS_$@) 指定自己独立的编译选项
 %.o: %.c
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -c -o $@ $<
 	@ ( \
@@ -81,14 +84,14 @@ endif
 %.lst: %.c
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -g -c -o $*.o $<
 	$(TOPDIR)/scripts/makelst $* $(TOPDIR) $(OBJDUMP)
-#
-#
-#
+
+# 通过first_rule 执行该target
 all_targets: $(O_TARGET) $(L_TARGET)
 
 #
 # Rule to compile a set of .o files into one .o file
 #
+# O_TARGET 依赖于 $(obj-y)，$(obj-y) 通过隐式规则生成
 ifdef O_TARGET
 $(O_TARGET): $(obj-y)
 	rm -f $@

@@ -35,7 +35,9 @@ NM		= $(CROSS_COMPILE)nm
 STRIP		= $(CROSS_COMPILE)strip
 OBJCOPY		= $(CROSS_COMPILE)objcopy
 OBJDUMP		= $(CROSS_COMPILE)objdump
-# 设置该变量并导出，导出之后makefile 每次执行之前都会先读取该文件，获取内核配置
+# 设置该变量并导出，导出之后makefile 每次执行之前都会先读取该文件，获取内核配置；
+# 此处的 MAKEFILES 必须是相对路径，否则进入到子目录中之后会找不到。
+# 同时必须要将 TOPDIR 导出。
 MAKEFILES	= $(TOPDIR)/.config
 GENKSYMS	= /sbin/genksyms
 DEPMOD		= /sbin/depmod
@@ -288,8 +290,10 @@ include/config/MARKER: scripts/split-include include/linux/autoconf.h
 	scripts/split-include include/linux/autoconf.h include/config
 	@ touch include/config/MARKER
 
+# 目录添加 _dir_ 前缀
 linuxsubdirs: $(patsubst %, _dir_%, $(SUBDIRS))
 
+# 目录添加 _dir_ 前缀的规则，进入到对应文件中执行 make
 $(patsubst %, _dir_%, $(SUBDIRS)) : dummy include/linux/version.h include/config/MARKER
 	$(MAKE) CFLAGS="$(CFLAGS) $(CFLAGS_KERNEL)" -C $(patsubst _dir_%, %, $@)
 
@@ -297,6 +301,7 @@ $(TOPDIR)/include/linux/version.h: include/linux/version.h
 $(TOPDIR)/include/linux/compile.h: include/linux/compile.h
 
 # 每次执行都将 .version 中内容 +1
+# 生成compile.h 文件的时候，会读取该数值，并写入到 include/linux/compile.h
 newversion:
 	@if [ ! -f .version ]; then \
 		echo 1 > .version; \
@@ -335,6 +340,7 @@ init/version.o: init/version.c include/linux/compile.h include/config/MARKER
 init/main.o: init/main.c include/config/MARKER
 	$(CC) $(CFLAGS) $(CFLAGS_KERNEL) $(PROFILING) -c -o $*.o $<
 
+# 目录添加_dir_ 前缀之后作为新的target，重新执行
 fs lib mm ipc kernel drivers net: dummy
 	$(MAKE) CFLAGS="$(CFLAGS) $(CFLAGS_KERNEL)" $(subst $@, _dir_$@, $@)
 
