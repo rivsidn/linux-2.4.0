@@ -361,9 +361,11 @@ ifdef CONFIG_MODVERSIONS
 MODFLAGS += -DMODVERSIONS -include $(HPATH)/linux/modversions.h
 endif
 
+# 创建modules 这个伪目标，以及其依赖
 .PHONY: modules
 modules: $(patsubst %, _mod_%, $(SUBDIRS))
 
+# 进入子目录中，执行模块编译
 .PHONY: $(patsubst %, _mod_%, $(SUBDIRS))
 $(patsubst %, _mod_%, $(SUBDIRS)) : include/linux/version.h include/config/MARKER
 	$(MAKE) -C $(patsubst _mod_%, %, $@) CFLAGS="$(CFLAGS) $(MODFLAGS)" MAKING_MODULES=1 modules

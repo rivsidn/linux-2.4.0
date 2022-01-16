@@ -12,6 +12,7 @@ O_TARGET := pcmcia.o
 
 export-objs := ds.o cs.o cb_enabler.o yenta.o pci_socket.o
 
+# 此处写错了，应该是 list-multi
 multi-list = pcmcia_core.o yenta_socket.o
 
 yenta_socket-objs := pci_socket.o yenta.o

@@ -13,6 +13,7 @@ O_TARGET= atm.o
 
 export-objs = common.o atm_misc.o raw.o resources.o ipcommon.o proc.o
 
+# 此处写错了，应该是 list-multi
 multi-list = mpoa.o
 mpoa-objs = mpc.o mpoa_caches.o mpoa_proc.o
 

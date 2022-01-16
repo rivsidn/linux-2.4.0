@@ -153,11 +153,14 @@ endif
 #
 # A rule to make modules
 #
+
+# 通过隐式规则编译模块
 ALL_MOBJS = $(filter-out $(obj-y), $(obj-m))
 ifneq "$(strip $(ALL_MOBJS))" ""
 PDWN=$(shell $(CONFIG_SHELL) $(TOPDIR)/scripts/pathdown.sh)
 endif
 
+# 编译包含模块的文件
 unexport MOD_DIRS
 MOD_DIRS := $(MOD_SUB_DIRS) $(MOD_IN_SUB_DIRS)
 ifneq "$(strip $(MOD_DIRS))" ""
@@ -170,6 +173,7 @@ $(patsubst %,_modinst_%,$(MOD_DIRS)) : dummy
 	$(MAKE) -C $(patsubst _modinst_%,%,$@) modules_install
 endif
 
+# 编译模块时执行的target
 .PHONY: modules
 modules: $(ALL_MOBJS) dummy \
 	 $(patsubst %,_modsubdir_%,$(MOD_DIRS))
