@@ -86,6 +86,7 @@ endif
 # makefile but the arguement can be passed to make if needed.
 #
 
+# 命令行传递参数到makefile，作为模块的安装路径
 MODLIB	:= $(INSTALL_MOD_PATH)/lib/modules/$(KERNELRELEASE)
 export MODLIB
 
@@ -253,6 +254,7 @@ boot: vmlinux
 	@$(MAKE) CFLAGS="$(CFLAGS) $(CFLAGS_KERNEL)" -C arch/$(ARCH)/boot
 
 # 生成vmlinux文件
+# HEAD 在 arch/$(ARCH)/Makefile 中定义
 vmlinux: $(CONFIGURATION) init/main.o init/version.o linuxsubdirs
 	$(LD) $(LINKFLAGS) $(HEAD) init/main.o init/version.o \
 		--start-group \
@@ -373,6 +375,7 @@ $(patsubst %, _mod_%, $(SUBDIRS)) : include/linux/version.h include/config/MARKE
 .PHONY: modules_install
 modules_install: _modinst_ $(patsubst %, _modinst_%, $(SUBDIRS)) _modinst_post
 
+# 删除之前安装的文件，重新生成必要的文件
 .PHONY: _modinst_
 _modinst_:
 	@rm -rf $(MODLIB)/kernel
@@ -403,13 +406,14 @@ _modinst_post_pcmcia:
 	mkdir -p pcmcia; \
 	find kernel -path '*/pcmcia/*' -name '*.o' | xargs -i -r ln -sf ../{} pcmcia
 
+# 进入到各个子目录中执行安装动作
 .PHONY: $(patsubst %, _modinst_%, $(SUBDIRS))
 $(patsubst %, _modinst_%, $(SUBDIRS)) :
 	$(MAKE) -C $(patsubst _modinst_%, %, $@) modules_install
 
 # modules disabled....
 
-else
+else	# CONFIG_MODULES
 modules modules_install: dummy
 	@echo
 	@echo "The present kernel configuration has modules disabled."
@@ -417,7 +421,7 @@ modules modules_install: dummy
 	@echo "Then build a kernel with module support enabled."
 	@echo
 	@exit 1
-endif
+endif	# CONFIG_MODULES
 
 clean:	archclean
 	find . \( -name '*.[oas]' -o -name core -o -name '.*.flags' \) -type f -print \

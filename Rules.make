@@ -34,6 +34,7 @@ unexport subdir-
 #
 # Get things started.
 #
+
 # 首先进入到子目录中执行，所有子目录执行结束之后，执行all_targets
 first_rule: sub_dirs
 	$(MAKE) all_targets
@@ -91,6 +92,7 @@ all_targets: $(O_TARGET) $(L_TARGET)
 #
 # Rule to compile a set of .o files into one .o file
 #
+
 # O_TARGET 依赖于 $(obj-y)，$(obj-y) 通过隐式规则生成
 ifdef O_TARGET
 $(O_TARGET): $(obj-y)
@@ -125,14 +127,16 @@ endif
 #
 # This make dependencies quickly
 #
+
 # 递归调用，创建所有目录的.depend 文件
-#
 fastdep: dummy
 	$(TOPDIR)/scripts/mkdep $(wildcard *.[chS] local.h.master) > .depend
 ifdef ALL_SUB_DIRS
+	# 如果此时有子目录，继续进入子目录中生成 .depend 文件
 	$(MAKE) $(patsubst %,_sfdep_%,$(ALL_SUB_DIRS)) _FASTDEP_ALL_SUB_DIRS="$(ALL_SUB_DIRS)"
 endif
 
+# _FASTDEP_ALL_SUB_DIRS 是通过命令行传递的参数
 ifdef _FASTDEP_ALL_SUB_DIRS
 $(patsubst %,_sfdep_%,$(_FASTDEP_ALL_SUB_DIRS)):
 	$(MAKE) -C $(patsubst _sfdep_%,%,$@) fastdep
@@ -142,6 +146,8 @@ endif
 #
 # A rule to make subdirectories
 #
+
+# 编译子目录的规则
 subdir-list = $(sort $(patsubst %,_subdir_%,$(SUB_DIRS)))
 sub_dirs: dummy $(subdir-list)
 
@@ -175,8 +181,7 @@ endif
 
 # 编译模块时执行的target
 .PHONY: modules
-modules: $(ALL_MOBJS) dummy \
-	 $(patsubst %,_modsubdir_%,$(MOD_DIRS))
+modules: $(ALL_MOBJS) dummy $(patsubst %,_modsubdir_%,$(MOD_DIRS))
 
 .PHONY: _modinst__
 _modinst__: dummy
@@ -186,8 +191,7 @@ ifneq "$(strip $(ALL_MOBJS))" ""
 endif
 
 .PHONY: modules_install
-modules_install: _modinst__ \
-	 $(patsubst %,_modinst_%,$(MOD_DIRS))
+modules_install: _modinst__ $(patsubst %,_modinst_%,$(MOD_DIRS))
 
 #
 # A rule to do nothing
@@ -205,6 +209,8 @@ script:
 # Separate the object into "normal" objects and "exporting" objects
 # Exporting objects are: all objects that define symbol tables
 #
+
+# TODO: 读到这里...
 ifdef CONFIG_MODULES
 
 multi-used	:= $(filter $(list-multi), $(obj-y) $(obj-m))

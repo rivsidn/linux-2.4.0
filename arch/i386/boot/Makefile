@@ -17,7 +17,6 @@ zImage: $(CONFIGURE) bootsect setup compressed/vmlinux tools/build
 	tools/build bootsect setup compressed/vmlinux.out $(ROOT_DEV) > zImage
 
 # 通过build 程序生成bzImage，bzImage 此处的 b 是big的意思
-# TODO: $(CONFIGURE) 什么地方定义的？
 bzImage: $(CONFIGURE) bbootsect bsetup compressed/bvmlinux tools/build
 	$(OBJCOPY) compressed/bvmlinux compressed/bvmlinux.out
 	tools/build -b bbootsect bsetup compressed/bvmlinux.out $(ROOT_DEV) > bzImage

@@ -82,6 +82,7 @@ ifdef CONFIG_MWINCHIP3D
 CFLAGS += -march=i586
 endif
 
+# 链接生成 vmlinux
 HEAD := arch/i386/kernel/head.o arch/i386/kernel/init_task.o
 
 SUBDIRS += arch/i386/kernel arch/i386/mm arch/i386/lib
