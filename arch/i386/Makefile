@@ -63,7 +63,7 @@ CFLAGS += $(shell if $(CC) -march=k6 -S -o /dev/null -xc /dev/null >/dev/null 2>
 endif
 
 ifdef CONFIG_MK7
-CFLAGS += $(shell if $(CC) -march=athlon -S -o /dev/null -xc /dev/null >/dev/null 2>&1; then echo "-march=athlon"; else echo "-march=i686 -malign-functions=4"; fi) 
+CFLAGS += $(shell if $(CC) -march=athlon -S -o /dev/null -xc /dev/null >/dev/null 2>&1; then echo "-march=athlon"; else echo "-march=i686 -malign-functions=4"; fi)
 endif
 
 ifdef CONFIG_MCRUSOE
@@ -84,7 +84,7 @@ endif
 
 # 链接生成 vmlinux
 HEAD := arch/i386/kernel/head.o arch/i386/kernel/init_task.o
-
+# 添加子目录
 SUBDIRS += arch/i386/kernel arch/i386/mm arch/i386/lib
 
 CORE_FILES := arch/i386/kernel/kernel.o arch/i386/mm/mm.o $(CORE_FILES)

@@ -35,14 +35,16 @@ unexport subdir-
 # Get things started.
 #
 
-# 首先进入到子目录中执行，所有子目录执行结束之后，执行all_targets
+# 首先进入到子目录中执行，所有子目录编译结束之后，执行all_targets
 first_rule: sub_dirs
 	$(MAKE) all_targets
 
 both-m          := $(filter $(mod-subdirs), $(subdir-y))
+# 编译vmlinux时进入的子目录
 SUB_DIRS	:= $(subdir-y)
-# sort 排序并删除掉重复项
+# 编译模块时进入的子目录
 MOD_SUB_DIRS	:= $(sort $(subdir-m) $(both-m))
+# 所有目录，生成依赖文件的时候进入
 ALL_SUB_DIRS	:= $(sort $(subdir-y) $(subdir-m) $(subdir-n) $(subdir-))
 
 
@@ -279,9 +281,10 @@ update-modverfile:
 		mv -f $(TOPDIR)/include/linux/modversions.h.tmp $(TOPDIR)/include/linux/modversions.h; \
 	fi
 
+# 如果表示版本信息的文件改变了，需要重新编译
 $(active-objs): $(TOPDIR)/include/linux/modversions.h
 
-else
+else  # CONFIG_MODVERSIONS
 
 $(TOPDIR)/include/linux/modversions.h:
 	@echo "#include <linux/modsetver.h>" > $@
@@ -304,6 +307,8 @@ endif # CONFIG_MODULES
 #
 # include dependency files if they exist
 #
+
+# wildcard 函数可以用来判断文件是否存在
 ifneq ($(wildcard .depend),)
 include .depend
 endif
@@ -317,6 +322,8 @@ endif
 # For safety, this works in the converse direction:
 #   every file is forced, except those whose flags are positively up-to-date.
 #
+
+# 修改了编译选项之后文件需要重新编译
 FILES_FLAGS_UP_TO_DATE :=
 
 # For use in expunging commas from flags, which mung our checking.
@@ -327,6 +334,7 @@ ifneq ($(FILES_FLAGS_EXIST),)
 include $(FILES_FLAGS_EXIST)
 endif
 
+# 需要编译的文件中剔除掉当前已经最新的文件
 FILES_FLAGS_CHANGED := $(strip \
     $(filter-out $(FILES_FLAGS_UP_TO_DATE), \
 	$(O_TARGET) $(L_TARGET) $(active-objs) \
@@ -341,6 +349,7 @@ FILES_FLAGS_CHANGED := $(strip \
     $(filter-out $(patsubst %.S, %.o, $(wildcard *.S) $(IGNORE_FLAGS_OBJS)), \
     $(FILES_FLAGS_CHANGED)))
 
+# 如果存在改变的文件，改变的文件需要重新生成
 ifneq ($(FILES_FLAGS_CHANGED),)
 $(FILES_FLAGS_CHANGED): dummy
 endif

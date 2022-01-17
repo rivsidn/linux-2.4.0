@@ -5,7 +5,7 @@
 # Rewritten to use lists instead of if-statements.
 #
 
-
+# mod-subdirs 下的目录，如果加入到了$(subdir-y)，同时也该加入到$(subdir-m)
 mod-subdirs :=	dio mtd sbus video macintosh usb input telephony sgi i2o ide \
 		scsi md ieee1394 pnp isdn atm fc4 net/hamradio i2c acpi
 

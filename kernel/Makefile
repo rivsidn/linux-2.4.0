@@ -7,7 +7,7 @@
 #
 # Note 2! The CFLAGS definitions are now in the main makefile...
 
-# Rules.make 中使用，将该文件作为
+# Rules.make 中使用，将该文件作为目标文件
 O_TARGET := kernel.o
 
 # 此处的 export-objs 意思是有导出符号表的文件
