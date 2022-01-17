@@ -15,6 +15,7 @@ obj-y    := inode.o file.o read.o write.o dir.o symlink.o proc.o \
 obj-$(CONFIG_ROOT_NFS) += nfsroot.o mount_clnt.o      
 obj-$(CONFIG_NFS_V3) += nfs3proc.o nfs3xdr.o
 
+# 编译模块和编译vmlinux 都是编译相同的文件，规则相同
 obj-m   := $(O_TARGET)
 
 include $(TOPDIR)/Rules.make

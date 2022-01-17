@@ -39,7 +39,7 @@ head.o: head.S
 misc.o: misc.c
 	$(CC) $(CFLAGS) -c misc.c
 
-# 此处用到了最上层的vmlinux
+# $$ 会被展开，变成当前进程的pid
 piggy.o:	$(SYSTEM)
 	tmppiggy=_tmp_$$$$piggy; \
 	rm -f $$tmppiggy $$tmppiggy.gz $$tmppiggy.lnk; \

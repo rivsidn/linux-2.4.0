@@ -38,7 +38,6 @@ zlilo: $(CONFIGURE) $(BOOTIMAGE)
 	cp $(TOPDIR)/System.map $(INSTALL_PATH)/
 	if [ -x /sbin/lilo ]; then /sbin/lilo; else /etc/lilo/install; fi
 
-# TODO: 此处的$(INSTALL_PATH) 为什么要加引号
 install: $(CONFIGURE) $(BOOTIMAGE)
 	sh -x ./install.sh $(KERNELRELEASE) $(BOOTIMAGE) $(TOPDIR)/System.map "$(INSTALL_PATH)"
 
